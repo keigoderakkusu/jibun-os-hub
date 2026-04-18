@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Engine — 自分株式会社</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=Noto+Sans+JP:wght@300;400;500;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --ink: #1a1614;
+  --paper: #f5f0e8;
+  --cream: #ede6d6;
+  --rust: #c4541a;
+  --rust-light: #e8754a;
+  --olive: #5a6b3a;
+  --steel: #3d4b5c;
+  --mist: #9ba8b5;
+  --border: #d4c9b5;
+  --surface: #ffffff;
+  --shadow: rgba(26,22,20,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Grain texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Layout */
+.app {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+/* Header */
+.topbar {
+  grid-column: 1 / -1;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--rust);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.topbar h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.3px;
+}
+
+.topbar h1 span { color: var(--rust-light); }
+
+.topbar-tag {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--mist);
+  font-family: 'Courier Prime', monospace;
+}
+
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 11px;
+  color: var(--mist);
+}
+
+.status-led {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--olive);
+  box-shadow: 0 0 8px var(--olive);
+  animation: blink 3s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--cream);
+  border-right: 1px solid var(--border);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  overflow-y: auto;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--steel);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+input[type="text"], input[type="url"], select, textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  transition: border-color 0.2s;
+  outline: none;
+  resize: none;
+}
+
+input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus {
+  border-color: var(--rust);
+  box-shadow: 0 0 0 3px rgba(196,84,26,0.1);
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ba8b5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+  cursor: pointer;
+}
+
+.tag-input-area {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+  min-height: 80px;
+  cursor: text;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.tag-pill {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: 'Courier Prime', monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-pill button {
+  background: none;
+  border: none;
+  color: var(--mist);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+}
+
+.tag-pill button:hover { color: var(--rust-light); }
+
+.tag-input {
+  border: none;
+  outline: none;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--ink);
+  background: transparent;
+  width: 100%;
+  padding: 2px 4px;
+}
+
+/* Output format toggles */
+.output-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.toggle-row:hover { border-color: var(--rust); }
+.toggle-row.active { border-color: var(--rust); background: rgba(196,84,26,0.04); }
+
+.toggle-name {
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-icon { font-size: 14px; }
+
+.toggle-switch {
+  width: 32px; height: 18px;
+  border-radius: 9px;
+  background: var(--border);
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-row.active .toggle-switch { background: var(--rust); }
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-row.active .toggle-switch::after { transform: translateX(14px); }
+
+/* Generate button */
+.gen-btn {
+  background: var(--rust);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 14px 20px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.gen-btn:hover { background: #a84216; }
+.gen-btn:active { transform: scale(0.98); }
+.gen-btn:disabled { background: var(--border); color: var(--mist); cursor: not-allowed; transform: none; }
+
+/* Main content area */
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Tab bar */
+.tab-bar {
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  padding: 0 24px;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 13px 18px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--mist);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--rust); border-bottom-color: var(--rust); }
+
+.tab-badge {
+  background: var(--rust);
+  color: white;
+  border-radius: 8px;
+  padding: 1px 5px;
+  font-size: 9px;
+}
+
+/* Output pane */
+.output-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  gap: 16px;
+  text-align: center;
+}
+
+.empty-glyph {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.empty-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--steel);
+}
+
+.empty-sub {
+  font-size: 13px;
+  color: var(--mist);
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+/* Content blocks */
+.content-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+}
+
+.block-title {
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--steel);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.block-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.block-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  color: var(--steel);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.block-btn:hover { border-color: var(--rust); color: var(--rust); }
+.block-btn.copied { background: var(--olive); color: white; border-color: var(--olive); }
+
+.block-body {
+  padding: 20px;
+  font-size: 13px;
+  line-height: 1.8;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 300;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.block-body.code {
+  font-family: 'Courier Prime', monospace;
+  font-size: 12px;
+  background: var(--ink);
+  color: #c8d0da;
+  line-height: 1.7;
+}
+
+/* Loading animation */
+.loading-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px 20px;
+  margin-bottom: 20px;
+}
+
+.loading-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 11px;
+  color: var(--rust);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--rust);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-bar {
+  height: 3px;
+  background: var(--cream);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  background: var(--rust);
+  border-radius: 2px;
+  animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% { width: 0%; margin-left: 0; }
+  50% { width: 70%; margin-left: 0; }
+  100% { width: 0%; margin-left: 100%; }
+}
+
+.loading-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.loading-line {
+  height: 10px;
+  background: var(--cream);
+  border-radius: 3px;
+  animation: shimmer 1.5s ease infinite;
+}
+
+@keyframes shimmer {
+  0%,100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Char counter */
+.char-count {
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  color: var(--mist);
+  text-align: right;
+  padding: 6px 16px 10px;
+  border-top: 1px solid var(--cream);
+}
+
+/* History list */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-item:hover { border-color: var(--rust); }
+
+.history-info h4 {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.history-meta {
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  color: var(--mist);
+  display: flex;
+  gap: 12px;
+}
+
+.history-restore {
+  font-family: 'Courier Prime', monospace;
+  font-size: 10px;
+  color: var(--rust);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 12px;
+  z-index: 200;
+  transform: translateY(60px);
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .topbar { padding: 12px 16px; }
+  .output-pane { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Content<span>Engine</span></h1>
+      <span class="topbar-tag">自分株式会社 / Affiliate System</span>
+    </div>
+    <div class="topbar-status">
+      <div class="status-led"></div>
+      <span>Claude API — Active</span>
+    </div>
+  </div>
+
+  <!-- Sidebar: Controls -->
+  <div class="sidebar">
+
+    <div class="field-group">
+      <div class="field-label">キーワード</div>
+      <input type="text" id="keyword" placeholder="例: 三重県 おすすめ カフェ" />
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">ジャンル</div>
+      <select id="genre">
+        <option value="affiliate">アフィリエイト（物販・サービス）</option>
+        <option value="review">レビュー記事</option>
+        <option value="comparison">比較記事</option>
+        <option value="howto">ハウツー・解説</option>
+        <option value="local">地域情報（三重・伊勢）</option>
+        <option value="finance">投資・資産運用</option>
+        <option value="vintage">ヴィンテージ・骨董</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">ターゲット媒体</div>
+      <select id="platform">
+        <option value="note">Note（長文）</option>
+        <option value="threads">Threads（短文SNS）</option>
+        <option value="both">Note + Threads セット</option>
+        <option value="blog">ブログ記事（SEO重視）</option>
+        <option value="x">X（旧Twitter）</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">トーン</div>
+      <select id="tone">
+        <option value="friendly">親しみやすい・話し言葉</option>
+        <option value="expert">専門的・信頼感</option>
+        <option value="casual">カジュアル・若者向け</option>
+        <option value="luxury">上質・落ち着いた</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">アフィリリンク（任意）</div>
+      <input type="url" id="afflink" placeholder="https://..." />
+      <input type="text" id="affname" placeholder="商品・サービス名（例: Amazon プライム）" style="margin-top:6px;" />
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">追加ハッシュタグ</div>
+      <div class="tag-input-area" id="tagArea">
+        <div class="tags-list" id="tagsList"></div>
+        <input class="tag-input" id="tagInput" placeholder="入力してEnter..." />
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">出力セット</div>
+      <div class="output-toggles">
+        <div class="toggle-row active" data-key="article" onclick="toggleOutput(this)">
+          <div class="toggle-name"><span class="toggle-icon">📝</span>本文記事</div>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="toggle-row active" data-key="title" onclick="toggleOutput(this)">
+          <div class="toggle-name"><span class="toggle-icon">🏷️</span>タイトル候補 ×3</div>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="toggle-row active" data-key="sns" onclick="toggleOutput(this)">
+          <div class="toggle-name"><span class="toggle-icon">📱</span>SNS投稿文</div>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="toggle-row" data-key="meta" onclick="toggleOutput(this)">
+          <div class="toggle-name"><span class="toggle-icon">🔍</span>SEOメタ情報</div>
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      <span id="genBtnIcon">⚡</span>
+      <span id="genBtnText">コンテンツを生成</span>
+    </button>
+
+  </div>
+
+  <!-- Main: Output -->
+  <div class="main">
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('output', this)">📄 生成結果 <span class="tab-badge" id="outputBadge" style="display:none">0</span></div>
+      <div class="tab" onclick="switchTab('history', this)">🗂️ 履歴 <span class="tab-badge" id="historyBadge" style="display:none">0</span></div>
+    </div>
+
+    <div class="output-pane" id="outputPane">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-glyph">✍️</div>
+        <div class="empty-title">記事を生成しよう</div>
+        <div class="empty-sub">左パネルでキーワードと設定を入力し、「コンテンツを生成」ボタンを押してください。Claude APIがリアルタイムで記事・SNS文・タイトルを生成します。</div>
+      </div>
+    </div>
+
+    <div class="output-pane" id="historyPane" style="display:none">
+      <div class="empty-state" id="histEmptyState">
+        <div class="empty-glyph">🗂️</div>
+        <div class="empty-title">履歴はまだありません</div>
+        <div class="empty-sub">生成した記事は自動的にここに保存されます。</div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let outputToggles = { article: true, title: true, sns: true, meta: false };
+let tags = [];
+let history = JSON.parse(localStorage.getItem('ce_history') || '[]');
+let isGenerating = false;
+let outputCount = 0;
+
+// ─── Tag input ───────────────────────────────────────────
+document.getElementById('tagInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.value.trim()) {
+    e.preventDefault();
+    addTag(e.target.value.trim());
+    e.target.value = '';
+  }
+});
+
+function addTag(val) {
+  if (tags.includes(val) || tags.length >= 8) return;
+  tags.push(val);
+  renderTags();
+}
+
+function removeTag(i) {
+  tags.splice(i, 1);
+  renderTags();
+}
+
+function renderTags() {
+  const list = document.getElementById('tagsList');
+  list.innerHTML = tags.map((t, i) => `
+    <div class="tag-pill">#${t}<button onclick="removeTag(${i})">×</button></div>
+  `).join('');
+}
+
+// ─── Toggle outputs ───────────────────────────────────────
+function toggleOutput(el) {
+  const key = el.dataset.key;
+  outputToggles[key] = !outputToggles[key];
+  el.classList.toggle('active');
+}
+
+// ─── Tab switching ────────────────────────────────────────
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('outputPane').style.display = tab === 'output' ? 'block' : 'none';
+  document.getElementById('historyPane').style.display = tab === 'history' ? 'block' : 'none';
+}
+
+// ─── Toast ────────────────────────────────────────────────
+function showToast(msg, icon = '✓') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span>${icon}</span> ${msg}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── Copy ─────────────────────────────────────────────────
+function copyBlock(btn, id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    btn.textContent = '✓ コピー済';
+    btn.classList.add('copied');
+    showToast('クリップボードにコピーしました');
+    setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ─── Build prompt ─────────────────────────────────────────
+function buildPrompt() {
+  const kw = document.getElementById('keyword').value.trim();
+  const genre = document.getElementById('genre').value;
+  const platform = document.getElementById('platform').value;
+  const tone = document.getElementById('tone').value;
+  const affLink = document.getElementById('afflink').value.trim();
+  const affName = document.getElementById('affname').value.trim();
+  const hashtagStr = tags.length ? tags.map(t => '#' + t).join(' ') : '';
+
+  const genreMap = {
+    affiliate: 'アフィリエイト記事（読者が購入・申込みしたくなる）',
+    review: '詳細レビュー記事（体験談・メリデメ・星評価付き）',
+    comparison: '比較記事（テーブル形式で複数サービスを比較）',
+    howto: 'ハウツー解説記事（ステップ形式で初心者向け）',
+    local: '地域情報記事（三重県・伊勢・松阪エリア特化）',
+    finance: '投資・資産運用記事（分かりやすく実践的な内容）',
+    vintage: 'ヴィンテージ・骨董品の解説・査定記事',
+  };
+
+  const platformMap = {
+    note: 'Note向け（1500〜2000文字、見出しあり、親近感ある文体）',
+    threads: 'Threads向け（300文字以内、インパクト重視、絵文字あり）',
+    both: 'Note記事（1500字）とThreads投稿文（300字）の両方',
+    blog: 'SEOブログ記事（2000〜3000文字、見出しH2/H3構造、検索意図を満たす）',
+    x: 'X（Twitter）投稿文（140字以内 ×3バリエーション、ハッシュタグ込み）',
+  };
+
+  const toneMap = {
+    friendly: '友達に話しかけるような親しみやすいトーン',
+    expert: '専門家として信頼感を与える丁寧なトーン',
+    casual: 'Z世代に刺さるカジュアルで率直なトーン',
+    luxury: '上質で落ち着いた、こだわりのある読者向けのトーン',
+  };
+
+  const tasks = [];
+  if (outputToggles.article) tasks.push('【本文】上記の形式で記事本文');
+  if (outputToggles.title) tasks.push('【タイトル候補】クリックしたくなるタイトルを3案（各30文字以内、数字や具体性を含める）');
+  if (outputToggles.sns) {
+    if (platform === 'threads' || platform === 'both') tasks.push('【Threads投稿文】300文字以内、絵文字あり、最後にハッシュタグ');
+    else if (platform === 'x') tasks.push('【X投稿文】140字以内 ×3バリエーション');
+    else tasks.push('【SNS投稿文（Threads/X）】300字以内のSNS用ショート版');
+  }
+  if (outputToggles.meta) tasks.push('【SEOメタ情報】メタタイトル（32文字以内）、メタディスクリプション（120文字以内）、推奨キーワード ×5');
+
+  let prompt = `以下の条件でコンテンツを作成してください。AIっぽいテンプレート感を排除し、実際に役立つ自然な文体で書いてください。
+
+## 条件
+- キーワード: ${kw || '（未指定）'}
+- 記事ジャンル: ${genreMap[genre]}
+- ターゲット媒体: ${platformMap[platform]}
+- 文体トーン: ${toneMap[tone]}
+${affLink ? `- アフィリエイトリンク: ${affLink}（自然な形で記事内に組み込む）` : ''}
+${affName ? `- 紹介商品・サービス: ${affName}` : ''}
+${hashtagStr ? `- 指定ハッシュタグ: ${hashtagStr}` : ''}
+
+## 出力内容（以下をすべて出力してください）
+${tasks.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+## 重要な指示
+- 「〜でしょう」「〜と思います」「AIが生成した」感のある表現は使わない
+- 読者が実際に行動・購入・申込みしたくなるCTA（行動喚起）を自然に入れる
+- 三重県・伊勢エリアの情報は地域の特色を活かす
+- ハッシュタグは記事内容と完全一致するものを選ぶ`;
+
+  return prompt;
+}
+
+// ─── Render block ─────────────────────────────────────────
+function renderBlock(title, content, blockId, isCode = false) {
+  const pane = document.getElementById('outputPane');
+  const block = document.createElement('div');
+  block.className = 'content-block';
+  const charCount = content.length;
+  block.innerHTML = `
+    <div class="block-header">
+      <div class="block-title">${title}</div>
+      <div class="block-actions">
+        <button class="block-btn" onclick="copyBlock(this, '${blockId}')">コピー</button>
+      </div>
+    </div>
+    <div class="block-body ${isCode ? 'code' : ''}" id="${blockId}">${escapeHtml(content)}</div>
+    <div class="char-count">${charCount.toLocaleString()} 文字</div>
+  `;
+  pane.appendChild(block);
+  outputCount++;
+  const badge = document.getElementById('outputBadge');
+  badge.style.display = 'inline';
+  badge.textContent = outputCount;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ─── Loading block ────────────────────────────────────────
+function addLoadingBlock(label) {
+  const pane = document.getElementById('outputPane');
+  const el = document.createElement('div');
+  el.className = 'loading-block';
+  el.id = 'loadingBlock';
+  el.innerHTML = `
+    <div class="loading-label"><div class="spinner"></div>${label}</div>
+    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+    <div class="loading-lines">
+      <div class="loading-line" style="width:80%"></div>
+      <div class="loading-line" style="width:65%"></div>
+      <div class="loading-line" style="width:90%"></div>
+      <div class="loading-line" style="width:55%"></div>
+    </div>
+  `;
+  pane.appendChild(el);
+  return el;
+}
+
+// ─── Save history ─────────────────────────────────────────
+function saveHistory(keyword, platform, genre, content) {
+  const item = {
+    id: Date.now(),
+    keyword,
+    platform,
+    genre,
+    content,
+    ts: new Date().toLocaleString('ja-JP'),
+  };
+  history.unshift(item);
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem('ce_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('histEmptyState');
+  const badge = document.getElementById('historyBadge');
+  if (history.length === 0) {
+    empty.style.display = 'flex';
+    list.style.display = 'none';
+    badge.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  list.style.display = 'flex';
+  badge.style.display = 'inline';
+  badge.textContent = history.length;
+  list.innerHTML = history.map(h => `
+    <div class="history-item" onclick="loadHistory(${h.id})">
+      <div class="history-info">
+        <h4>${h.keyword || '（キーワードなし）'}</h4>
+        <div class="history-meta">
+          <span>${h.platform}</span>
+          <span>${h.genre}</span>
+          <span>${h.ts}</span>
+        </div>
+      </div>
+      <div class="history-restore">復元 →</div>
+    </div>
+  `).join('');
+}
+
+function loadHistory(id) {
+  const item = history.find(h => h.id === id);
+  if (!item) return;
+  // Switch to output tab and show content
+  document.querySelectorAll('.tab')[0].click();
+  const pane = document.getElementById('outputPane');
+  document.getElementById('emptyState').style.display = 'none';
+  pane.innerHTML = '';
+  const ts = new Date(id).toLocaleString('ja-JP');
+  renderBlock(`📁 復元: ${item.keyword} (${ts})`, item.content, 'restored_' + id);
+  showToast('履歴を復元しました', '📁');
+}
+
+// ─── Main generate ────────────────────────────────────────
+async function generate() {
+  if (isGenerating) return;
+  const kw = document.getElementById('keyword').value.trim();
+  if (!kw) {
+    showToast('キーワードを入力してください', '⚠️');
+    document.getElementById('keyword').focus();
+    return;
+  }
+
+  const anyToggle = Object.values(outputToggles).some(v => v);
+  if (!anyToggle) {
+    showToast('出力セットを最低1つ選択してください', '⚠️');
+    return;
+  }
+
+  isGenerating = true;
+  outputCount = 0;
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  document.getElementById('genBtnText').textContent = '生成中...';
+  document.getElementById('genBtnIcon').textContent = '⏳';
+
+  // Clear pane
+  const pane = document.getElementById('outputPane');
+  pane.innerHTML = '';
+  document.getElementById('outputBadge').style.display = 'none';
+
+  const loading = addLoadingBlock('Claude が記事を生成しています...');
+
+  const prompt = buildPrompt();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'あなたは日本語のコンテンツマーケター兼ライターです。アフィリエイト記事・SNS投稿・SEO記事を自然な日本語で作成します。AIっぽい表現・定型文・過度な絵文字を避け、実際に読者の行動を引き出すコンテンツを書いてください。',
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `API Error ${res.status}`);
+    }
+
+    const data = await res.json();
+    const raw = data.content?.map(c => c.text || '').join('') || '';
+
+    loading.remove();
+
+    if (!raw.trim()) throw new Error('レスポンスが空でした');
+
+    // Split into sections by 【...】 markers
+    const sections = [];
+    const markerRegex = /【([^】]+)】/g;
+    const markers = [];
+    let m;
+    while ((m = markerRegex.exec(raw)) !== null) {
+      markers.push({ title: m[1], index: m.index });
+    }
+
+    if (markers.length === 0) {
+      // No markers — show as single block
+      renderBlock('📝 生成コンテンツ', raw.trim(), 'block_all');
+    } else {
+      markers.forEach((marker, i) => {
+        const start = marker.index;
+        const end = i + 1 < markers.length ? markers[i + 1].index : raw.length;
+        const sectionRaw = raw.slice(start, end);
+        const bodyStart = sectionRaw.indexOf('】') + 1;
+        const body = sectionRaw.slice(bodyStart).trim();
+
+        const iconMap = {
+          '本文': '📝', 'タイトル候補': '🏷️', 'SNS投稿文': '📱',
+          'Threads投稿文': '📱', 'X投稿文': '🐦', 'SEOメタ情報': '🔍',
+        };
+        const icon = Object.entries(iconMap).find(([k]) => marker.title.includes(k))?.[1] || '📄';
+        const blockId = 'block_' + i + '_' + Date.now();
+        renderBlock(`${icon} ${marker.title}`, body, blockId);
+      });
+    }
+
+    // Save to history
+    const genre = document.getElementById('genre').value;
+    const platform = document.getElementById('platform').value;
+    saveHistory(kw, platform, genre, raw);
+    showToast('コンテンツを生成しました ✨', '✨');
+
+  } catch (err) {
+    loading.remove();
+    const errBlock = document.createElement('div');
+    errBlock.className = 'content-block';
+    errBlock.innerHTML = `
+      <div class="block-header">
+        <div class="block-title" style="color:var(--rust)">⚠️ エラー</div>
+      </div>
+      <div class="block-body">${escapeHtml(err.message)}</div>
+    `;
+    pane.appendChild(errBlock);
+    showToast('エラーが発生しました', '⚠️');
+  } finally {
+    isGenerating = false;
+    btn.disabled = false;
+    document.getElementById('genBtnText').textContent = 'コンテンツを生成';
+    document.getElementById('genBtnIcon').textContent = '⚡';
+  }
+}
+
+// ─── Enter shortcut ───────────────────────────────────────
+document.getElementById('keyword').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) generate();
+});
+
+// ─── Init ─────────────────────────────────────────────────
+renderHistory();
+</script>
+</body>
+</html>

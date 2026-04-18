@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ブログ自動生成</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:380px;font-family:-apple-system,"Hiragino Sans",sans-serif;font-size:13px;background:#f7f7f5;color:#1a1a1a}
+
+header{background:#18182e;color:#fff;padding:14px 16px 10px;display:flex;align-items:center;gap:10px}
+header h1{font-size:15px;font-weight:600;flex:1}
+header span{font-size:11px;color:#8080c0;background:#ffffff18;padding:2px 8px;border-radius:10px}
+
+/* タブ */
+.tabs{display:flex;background:#f0efe8;border-bottom:1px solid #ddd}
+.tab{flex:1;padding:8px 0;font-size:12px;font-weight:500;text-align:center;cursor:pointer;color:#666;border:none;background:none;transition:background .15s}
+.tab.active{background:#fff;color:#18182e;border-bottom:2px solid #7c6fcd}
+.tab:hover:not(.active){background:#e8e6e0}
+
+/* パネル */
+.panel{display:none;padding:12px 16px}
+.panel.active{display:block}
+
+label{display:block;font-size:11px;color:#555;margin-bottom:4px;font-weight:600;margin-top:10px}
+label:first-child{margin-top:0}
+input[type=text],input[type=datetime-local],select,textarea{
+  width:100%;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;
+  background:#fff;color:#1a1a1a;font-family:inherit
+}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#7c6fcd}
+
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+.btn{
+  display:block;width:100%;padding:9px 0;border:none;border-radius:7px;
+  font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s
+}
+.btn:hover{opacity:.88}
+.btn:disabled{opacity:.45;cursor:default}
+.btn-primary{background:#7c6fcd;color:#fff;margin-top:12px}
+.btn-sm{
+  padding:5px 12px;font-size:12px;border-radius:5px;cursor:pointer;border:none;
+  background:#e8e4ff;color:#5044a8;font-weight:500
+}
+.btn-sm:hover{background:#d4cefc}
+.btn-danger-sm{background:#ffe8e8;color:#a02020}
+.btn-danger-sm:hover{background:#ffd0d0}
+
+.result{
+  display:none;margin-top:10px;padding:9px 12px;border-radius:7px;
+  font-size:12px;white-space:pre-wrap;line-height:1.6
+}
+.result.success{background:#eafaf1;color:#1a6b3c;border:1px solid #b8e8cc}
+.result.error  {background:#fff0f0;color:#a02020;border:1px solid #f5c0c0}
+.result.info   {background:#f0f0ff;color:#3a3a8a;border:1px solid #ccc8ff}
+
+.server-row{display:flex;gap:6px;align-items:flex-end}
+.server-row input{flex:1}
+
+.tmpl-card{
+  background:#fff;border:1px solid #e0e0e0;border-radius:7px;
+  padding:8px 10px;margin-top:6px;display:flex;align-items:center;gap:8px
+}
+.tmpl-card-info{flex:1}
+.tmpl-card-name{font-weight:600;font-size:12px}
+.tmpl-card-persona{font-size:11px;color:#777;margin-top:1px}
+
+.job-card{
+  background:#fff;border:1px solid #e0e0e0;border-radius:7px;
+  padding:8px 10px;margin-top:6px
+}
+.job-card-header{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.job-card-id{font-size:10px;color:#999;font-family:monospace}
+.badge{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:500}
+.badge.pending  {background:#fff3cd;color:#856404}
+.badge.published{background:#d1f0de;color:#155724}
+.badge.rejected {background:#fde0e0;color:#7c1010}
+.badge.approved {background:#cce5ff;color:#004085}
+.badge.scheduled{background:#e8d5ff;color:#4a1080}
+.badge.error    {background:#fde0e0;color:#7c1010}
+.job-card-title{font-size:12px;font-weight:500;margin-bottom:5px}
+.job-actions{display:flex;gap:5px}
+
+.hint{font-size:10px;color:#aaa;margin-top:8px;line-height:1.5}
+.divider{height:1px;background:#e8e8e8;margin:10px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🚀 ブログ自動生成</h1>
+  <span>v2.0</span>
+</header>
+
+<!-- タブ -->
+<div class="tabs">
+  <button class="tab active" data-tab="generate">生成</button>
+  <button class="tab" data-tab="jobs">ジョブ</button>
+  <button class="tab" data-tab="templates">テンプレ</button>
+  <button class="tab" data-tab="settings">設定</button>
+</div>
+
+<!-- ① 生成パネル -->
+<div class="panel active" id="tab-generate">
+  <label>キーワード</label>
+  <input type="text" id="keyword" placeholder="例: 副業 始め方 会社員">
+
+  <label>テンプレート（ペルソナ）</label>
+  <select id="template-select">
+    <option value="default">default — WEBライター</option>
+    <option value="tech">tech — テクニカル</option>
+    <option value="finance">finance — 投資・金融</option>
+    <option value="travel">travel — 旅行</option>
+  </select>
+
+  <div class="row" style="margin-top:10px">
+    <div>
+      <label>投稿ステータス</label>
+      <select id="post-status">
+        <option value="approval">承認フロー（Telegram通知）</option>
+        <option value="publish">即公開（承認スキップ）</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="schedule-area" style="display:none">
+    <label>スケジュール日時</label>
+    <input type="datetime-local" id="schedule-dt">
+  </div>
+
+  <label style="display:flex;align-items:center;gap:6px;margin-top:10px;cursor:pointer">
+    <input type="checkbox" id="use-schedule">
+    <span style="font-size:12px;font-weight:500">スケジュール投稿にする</span>
+  </label>
+
+  <button class="btn btn-primary" id="generate-btn">🚀 記事を生成する</button>
+  <div class="result" id="result"></div>
+  <p class="hint">💡 承認フローでは生成完了後にTelegramへ通知が届きます</p>
+</div>
+
+<!-- ② ジョブパネル -->
+<div class="panel" id="tab-jobs">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:12px;font-weight:600">直近のジョブ</span>
+    <button class="btn-sm" id="refresh-jobs-btn">更新</button>
+  </div>
+  <div id="jobs-list"><p class="hint" style="margin-top:8px">「更新」を押してジョブを読み込む</p></div>
+</div>
+
+<!-- ③ テンプレパネル -->
+<div class="panel" id="tab-templates">
+  <div id="templates-list"></div>
+  <div class="divider"></div>
+  <label>テンプレート名</label>
+  <input type="text" id="new-tmpl-name" placeholder="例: medical">
+  <label>ペルソナ（役割）</label>
+  <input type="text" id="new-tmpl-persona" placeholder="例: 医療専門のヘルスライター">
+  <label>トーン</label>
+  <input type="text" id="new-tmpl-tone" placeholder="例: 専門的で信頼感のある">
+  <label>文字数</label>
+  <input type="text" id="new-tmpl-wc" placeholder="例: 1500〜2000">
+  <button class="btn btn-primary" id="add-tmpl-btn">＋ テンプレートを追加</button>
+  <div class="result" id="tmpl-result"></div>
+</div>
+
+<!-- ④ 設定パネル -->
+<div class="panel" id="tab-settings">
+  <label>サーバーURL</label>
+  <div class="server-row">
+    <input type="text" id="server-url" placeholder="https://your-server.com">
+    <button class="btn-sm" id="test-conn-btn">接続確認</button>
+  </div>
+
+  <label>Telegram Chat ID（自動通知先）</label>
+  <input type="text" id="tg-chat-id" placeholder="例: 123456789">
+
+  <div class="divider"></div>
+  <label>Telegram Bot トークン（参考表示）</label>
+  <input type="text" id="tg-token-display" placeholder="サーバー .env に設定してください" disabled style="background:#f5f5f5;color:#999">
+
+  <button class="btn btn-primary" id="save-settings-btn">設定を保存</button>
+  <div class="result" id="settings-result"></div>
+  <p class="hint">サーバーURL例: https://your-server.com<br>ポート番号が必要な場合は末尾に :3000 を付けてください</p>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

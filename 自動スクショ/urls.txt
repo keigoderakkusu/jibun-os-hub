@@ -1,0 +1,8 @@
+# 自動スクショ URLリスト
+# フォーマット: URL スクロールモード ファイル名(任意)
+# 例:
+# https://example.com/article viewport article_report
+# https://shop.com/products paginated products_list
+# https://twitter.com/home infinite-scroll twitter_feed
+
+https://www.google.com viewport google_homepage

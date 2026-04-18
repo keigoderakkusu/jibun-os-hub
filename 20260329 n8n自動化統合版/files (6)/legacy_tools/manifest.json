@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "自分株式会社 ブログ自動生成",
+  "version": "2.0",
+  "description": "AI記事生成・承認フロー・スケジュール投稿・テンプレ管理",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage"],
+  "host_permissions": ["https://*/*", "http://*/*"]
+}

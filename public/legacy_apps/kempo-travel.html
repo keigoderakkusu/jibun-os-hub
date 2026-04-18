@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健保 旅行アシスタント</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f5f0e8;
+    --gold: #c4933f;
+    --gold-light: #e8c97a;
+    --teal: #2a7c76;
+    --teal-light: #4ab5ae;
+    --red: #c0392b;
+    --card-bg: #fffdf7;
+    --border: #d4c9a8;
+    --shadow: rgba(26,26,46,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(196,147,63,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(42,124,118,0.08) 0%, transparent 60%);
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--teal-light), var(--gold));
+  }
+  .header-icon {
+    font-size: 28px;
+  }
+  .header-text h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 0.05em;
+  }
+  .header-text p {
+    font-size: 11px;
+    color: var(--gold-light);
+    margin-top: 2px;
+    letter-spacing: 0.08em;
+  }
+  .header-badge {
+    margin-left: auto;
+    background: rgba(196,147,63,0.2);
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* SECTION CARD */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .card-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* FORM */
+  .form-group {
+    margin-bottom: 14px;
+  }
+  label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+  label .hint {
+    font-weight: 300;
+    color: #888;
+    margin-left: 4px;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    outline: none;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(42,124,118,0.1);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* NIGHTS STEPPER */
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .stepper button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f5f0e8;
+    color: var(--ink);
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .stepper button:active { background: var(--border); }
+  .stepper span {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* SEARCH BUTTON */
+  .btn-search {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--teal), #1e5c58);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(42,124,118,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-search:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(42,124,118,0.4);
+  }
+  .btn-search:active { transform: translateY(0); }
+  .btn-search::before {
+    content: '🏯 ';
+  }
+
+  /* RESULTS */
+  #results { display: none; }
+
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .result-count {
+    font-size: 12px;
+    color: #888;
+  }
+  .best-badge {
+    background: var(--gold);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* PLAN CARD */
+  .plan-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .plan-card:hover {
+    border-color: var(--teal);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow);
+  }
+  .plan-card.best {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #fffdf7, #fff9ec);
+  }
+  .plan-card.best::before {
+    content: '最お得';
+    position: absolute;
+    top: 0; right: 0;
+    background: var(--gold);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px 3px 14px;
+    clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+    letter-spacing: 0.05em;
+  }
+
+  .plan-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .plan-name {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .plan-type {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    margin-left: 8px;
+    margin-top: 2px;
+  }
+  .type-direct { background: rgba(42,124,118,0.12); color: var(--teal); }
+  .type-member { background: rgba(196,147,63,0.12); color: var(--gold); }
+  .type-agency { background: rgba(26,26,46,0.08); color: #666; }
+
+  .plan-location {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .cost-breakdown {
+    background: rgba(0,0,0,0.03);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+  .cost-row:last-child { margin-bottom: 0; }
+  .cost-row.subsidy { color: var(--teal); }
+  .cost-row.total {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    border-top: 1px solid var(--border);
+    padding-top: 6px;
+    margin-top: 4px;
+  }
+  .cost-row.total .amount {
+    color: var(--red);
+    font-size: 18px;
+  }
+
+  .plan-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .feature-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(42,124,118,0.08);
+    color: var(--teal);
+  }
+
+  .plan-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-reserve {
+    flex: 1;
+    padding: 10px;
+    background: var(--teal);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+  }
+  .btn-reserve:hover { background: #1e5c58; }
+  .btn-detail {
+    padding: 10px 14px;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-detail:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* SUMMARY BOX */
+  .summary-box {
+    background: linear-gradient(135deg, rgba(42,124,118,0.08), rgba(196,147,63,0.06));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .summary-title {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+  }
+  .summary-stats {
+    display: flex;
+    gap: 20px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  /* INFO BAR */
+  .info-bar {
+    background: rgba(196,147,63,0.08);
+    border: 1px solid rgba(196,147,63,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #7a6020;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  /* EMPTY / LOADING */
+  .loading {
+    text-align: center;
+    padding: 30px;
+    color: #888;
+    font-size: 13px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.5);
+    z-index: 100;
+    backdrop-filter: blur(3px);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card-bg);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 24px 20px 40px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: #888;
+    margin-top: -4px;
+  }
+  .modal h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 17px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .modal-section {
+    margin-bottom: 14px;
+  }
+  .modal-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .modal-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #444;
+  }
+  .step-list {
+    counter-reset: steps;
+    list-style: none;
+  }
+  .step-list li {
+    counter-increment: steps;
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    color: #444;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+  .step-list li::before {
+    content: counter(steps);
+    min-width: 22px;
+    height: 22px;
+    background: var(--teal);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .external-link {
+    display: block;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--teal);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">⛩️</div>
+  <div class="header-text">
+    <h1>健保 旅行アシスタント</h1>
+    <p>東京電子機械工業健康保険組合 組合員専用</p>
+  </div>
+  <div class="header-badge">助成金対応</div>
+</header>
+
+<main>
+
+  <!-- 検索フォーム -->
+  <div class="card">
+    <div class="card-title">🗺️ 旅のご希望を入力</div>
+
+    <div class="form-group">
+      <label>行き先エリア <span class="hint">（複数選択可）</span></label>
+      <select id="area">
+        <option value="">エリアを選んでください</option>
+        <option value="kanto">関東（千葉・神奈川など）</option>
+        <option value="shizuoka">静岡・熱海・伊豆</option>
+        <option value="kansai">関西（大阪・京都など）</option>
+        <option value="chubu">中部（名古屋・軽井沢など）</option>
+        <option value="tohoku">東北・北海道</option>
+        <option value="kyushu">九州・沖縄</option>
+        <option value="hawaii">ハワイ（海外）</option>
+        <option value="any">どこでも（最安優先）</option>
+      </select>
+    </div>
+
+    <div class="row2">
+      <div class="form-group">
+        <label>利用人数</label>
+        <select id="people">
+          <option value="1">1名</option>
+          <option value="2" selected>2名</option>
+          <option value="3">3名</option>
+          <option value="4">4名</option>
+          <option value="5">5名以上</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>宿泊数</label>
+        <div class="stepper">
+          <button onclick="changeNights(-1)">−</button>
+          <span id="nights-val">2</span>
+          <button onclick="changeNights(1)">＋</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>1人あたり予算 <span class="hint">（1泊2食込み目安）</span></label>
+      <select id="budget">
+        <option value="5000">〜 5,000円</option>
+        <option value="10000" selected>〜 10,000円</option>
+        <option value="15000">〜 15,000円</option>
+        <option value="20000">〜 20,000円</option>
+        <option value="30000">〜 30,000円</option>
+        <option value="99999">上限なし</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>重視すること</label>
+      <select id="priority">
+        <option value="cost">とにかく安く（コスト最優先）</option>
+        <option value="comfort">快適さ重視（温泉・設備）</option>
+        <option value="access">アクセス重視（近場）</option>
+        <option value="food">食事重視</option>
+        <option value="activity">アクティビティ重視</option>
+      </select>
+    </div>
+
+    <button class="btn-search" onclick="searchPlans()">最適プランを探す</button>
+  </div>
+
+  <!-- 検索結果 -->
+  <div id="results">
+    <div class="summary-box" id="summary-box"></div>
+    <div class="info-bar">
+      💡 <span>宿泊助成は年度内<strong>2泊まで</strong>（1泊5,000円）、または2泊分10,000円を1泊でまとめて使用可能。MyKempoで事前申込が必要です。</span>
+    </div>
+    <div id="plans-container"></div>
+  </div>
+
+</main>
+
+<!-- モーダル -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+let nights = 2;
+
+function changeNights(d) {
+  nights = Math.max(1, Math.min(5, nights + d));
+  document.getElementById('nights-val').textContent = nights;
+}
+
+// ===== データ =====
+const facilities = [
+  {
+    id: 'kazusa',
+    name: '上総一宮 海浜保養所',
+    type: 'direct',
+    typeLabel: '直営保養所',
+    location: '千葉県長生郡一宮町',
+    area: ['kanto', 'any'],
+    basePrice: 7150,
+    features: ['1泊2食付き', 'テニスコート', 'フットサル', '屋外プール（7・8月）', '大浴場', '駐車場50台'],
+    description: '九十九里浜の南端。夏はマリンレジャー、冬はいちご狩りや花摘みも楽しめます。',
+    howToBook: 'MyKempoからのみ予約可能。抽選または空室利用申込。',
+    url: 'https://www2.tokyo-denshikempo.or.jp/hcs/HCSWMK0010/loginform.aspx',
+    steps: ['MyKempoにログイン', '【直営保養所】→【空室状況・空室利用申込】を選択', '必要事項を入力・送信', '受付メールを受信', '利用通知書を印刷してチェックイン'],
+    cancelPolicy: '3日前〜2日前：50%、前日・当日：全額',
+    subsidy: false, // 直営は助成対象外
+    priority: { cost: 1, comfort: 2, access: 2, food: 2, activity: 2 }
+  },
+  {
+    id: 'izuyama',
+    name: '伊豆山 温泉保養所',
+    type: 'direct',
+    typeLabel: '直営保養所',
+    location: '静岡県熱海市伊豆山',
+    area: ['shizuoka', 'any'],
+    basePrice: 8360,
+    features: ['1泊2食付き', '相模湾一望', '露天風呂', 'テニスコート', '屋内温水プール', 'カラオケ'],
+    description: '相模湾を見渡す絶景の温泉保養所。熱海梅園・サンビーチも近い。',
+    howToBook: 'MyKempoからのみ予約可能。GW・年末年始・夏期は抽選制。',
+    url: 'https://www2.tokyo-denshikempo.or.jp/hcs/HCSWMK0010/loginform.aspx',
+    steps: ['MyKempoにログイン', '【直営保養所】→申込種別を選択', '必要事項を入力・送信', '夏期（7/18〜8/31）は4/1〜5/7に抽選申込、結果は5/25メール通知', '利用通知書を印刷してチェックイン'],
+    cancelPolicy: '3日前〜2日前：50%、前日・当日：全額',
+    subsidy: false,
+    priority: { cost: 2, comfort: 1, access: 2, food: 2, activity: 3 }
+  },
+  {
+    id: 'resort_trust',
+    name: 'リゾートトラスト（エクシブ等）',
+    type: 'member',
+    typeLabel: '会員保養施設',
+    location: '全国各地',
+    area: ['kanto', 'shizuoka', 'kansai', 'chubu', 'tohoku', 'kyushu', 'any'],
+    basePrice: 15000,
+    features: ['宿泊助成5,000円/泊', '温泉・スパ', 'ゴルフ', 'レストラン多数', 'ハイクラス施設'],
+    description: '会員制リゾートホテル「エクシブ」が優待価格で利用可能。宿泊助成も適用。',
+    howToBook: '健保HPの予約方法を確認後、予約。MyKempoから宿泊助成を申込む。',
+    url: 'https://www.tokyo-denshikempo.or.jp/member/resort/index.html',
+    steps: ['健保HPで予約方法を確認', '施設に直接予約（組合員である旨を伝える）', 'MyKempoにログイン→【宿泊助成】ページから申込（利用日10日前まで）', 'チェックイン時に「宿泊助成承認通知書」を提出'],
+    cancelPolicy: '施設ごとに異なる',
+    subsidy: true,
+    priority: { cost: 3, comfort: 1, access: 2, food: 1, activity: 1 }
+  },
+  {
+    id: 'risolnomori',
+    name: 'リソルの森',
+    type: 'member',
+    typeLabel: '会員保養施設',
+    location: '千葉県長柄町（関東近郊）',
+    area: ['kanto', 'any'],
+    basePrice: 10000,
+    features: ['宿泊助成5,000円/泊', 'フォレストアドベンチャー', '130mプール', 'BBQ', 'サウナ体験', 'ヨガ'],
+    description: '都会から2〜3時間の森のリゾート。アクティビティ豊富で家族・グループに最適。',
+    howToBook: '健保HPで確認後、施設に予約。MyKempoで宿泊助成申込。',
+    url: 'https://www.tokyo-denshikempo.or.jp/member/resort/index.html',
+    steps: ['健保HPでリソルの森の予約方法を確認', '施設またはWebで予約', 'MyKempoで宿泊助成を申込（利用日10日前まで）', 'チェックイン時に承認通知書を提示'],
+    cancelPolicy: '施設ごとに異なる',
+    subsidy: true,
+    priority: { cost: 2, comfort: 3, access: 1, food: 2, activity: 1 }
+  },
+  {
+    id: 'ilikAI',
+    name: 'ハワイ保養施設 イリカイ',
+    type: 'member',
+    typeLabel: '借上げ保養施設',
+    location: 'ハワイ州オアフ島',
+    area: ['hawaii', 'any'],
+    basePrice: 6000,
+    features: ['1人1泊6,000円〜', 'コンドミニアム', 'プール', 'レストラン', '日本人スタッフ常駐'],
+    description: 'ハワイのコンドミニアム。通常の1/3〜1/5の料金で宿泊可能。日本人スタッフ常駐で安心。',
+    howToBook: '施設へ直接予約。別途ハワイ州税・ホテル税がかかります。',
+    url: 'https://www.tokyo-denshikempo.or.jp/member/resort/ilikAI-guide.html',
+    steps: ['インケアハワイ㈱（TEL 03-5733-0881）に連絡', '利用案内を確認後予約'],
+    cancelPolicy: '施設ごとに異なる',
+    subsidy: false,
+    priority: { cost: 1, comfort: 2, access: 3, food: 2, activity: 2 }
+  },
+  {
+    id: 'jal_jtb',
+    name: 'JTB協定宿泊施設（全国約17,000施設）',
+    type: 'agency',
+    typeLabel: '旅行会社協定',
+    location: '全国・海外',
+    area: ['kanto', 'shizuoka', 'kansai', 'chubu', 'tohoku', 'kyushu', 'any'],
+    basePrice: 12000,
+    features: ['宿泊助成5,000円/泊', '約17,000施設から選択', 'クーポンコード割引', 'JTBトラベルメンバー要登録'],
+    description: '令和8年度よりJTBが新たに対象旅行会社に追加。膨大な選択肢から好きな宿を選べる。',
+    howToBook: 'JTB専用サイトで旅行選択→MyKempoでクーポンコード申請→予約時に入力。',
+    url: 'https://www.jtb.co.jp/',
+    steps: ['JTBトラベルメンバーに会員登録（初回のみ）', 'JTB専用サイト（jtb.co.jp）で宿泊施設を選択', 'MyKempoにログイン→【宿泊助成】→「クーポンコード」を申請', '当健保からメールでクーポンコードが届く', '決済画面でクーポンコードを入力して割引適用'],
+    cancelPolicy: '施設ごとに異なる',
+    subsidy: true,
+    priority: { cost: 2, comfort: 2, access: 1, food: 2, activity: 2 }
+  },
+  {
+    id: 'hisenis',
+    name: '近畿日本ツーリスト・日本旅行・H.I.S.',
+    type: 'agency',
+    typeLabel: '旅行会社協定',
+    location: '全国各地',
+    area: ['kanto', 'shizuoka', 'kansai', 'chubu', 'tohoku', 'kyushu', 'any'],
+    basePrice: 10000,
+    features: ['宿泊助成5,000円/泊', '協定宿泊施設が対象', '窓口で割引後精算'],
+    description: '近ツリ・日本旅行は窓口で申し出て予約。H.I.Sは特典予約専用ダイヤルのみ対象。',
+    howToBook: '旅行会社で組合員と申し出て予約→MyKempoで助成申込→承認通知書を持参。',
+    url: 'https://www.tokyo-denshikempo.or.jp/member/resort/keiyaku-guide.html',
+    steps: ['旅行会社に「東京電子機械工業健保の組合員」と申し出て予約', 'MyKempoにログイン→【宿泊助成】から申込（利用日10日前まで）', 'MyKempoから「宿泊助成承認通知書」を印刷', '予約店に通知書を持参、助成額差引後の料金を支払い'],
+    cancelPolicy: '旅行会社・施設ごとに異なる',
+    subsidy: true,
+    priority: { cost: 2, comfort: 2, access: 1, food: 2, activity: 2 }
+  }
+];
+
+function searchPlans() {
+  const area = document.getElementById('area').value;
+  const people = parseInt(document.getElementById('people').value);
+  const budget = parseInt(document.getElementById('budget').value);
+  const priority = document.getElementById('priority').value;
+
+  if (!area) {
+    alert('行き先エリアを選んでください');
+    return;
+  }
+
+  // ローディング表示
+  const resultsDiv = document.getElementById('results');
+  const container = document.getElementById('plans-container');
+  resultsDiv.style.display = 'block';
+  container.innerHTML = '<div class="loading"><div class="spinner"></div><br>最適プランを計算中...</div>';
+
+  setTimeout(() => {
+    // フィルタリング
+    let plans = facilities.filter(f => f.area.includes(area));
+    if (plans.length === 0) plans = facilities.filter(f => f.area.includes('any'));
+
+    // コスト計算
+    plans = plans.map(f => {
+      const baseCostTotal = f.basePrice * nights * people;
+      let subsidyTotal = 0;
+      if (f.subsidy) {
+        // 助成は1人あたりではなく全体で最大2泊分（1泊5000円）
+        // 2泊分を1泊でまとめて使う事もできる
+        const subsidyNights = Math.min(nights, 2);
+        subsidyTotal = 5000 * subsidyNights;
+      }
+      const netTotal = baseCostTotal - subsidyTotal;
+      const netPerPerson = Math.round(netTotal / people);
+
+      // 予算チェック
+      const withinBudget = netPerPerson <= budget;
+
+      // スコア（低いほど良い）
+      const priorityScore = f.priority[priority] || 3;
+      const costScore = netPerPerson;
+
+      return {
+        ...f,
+        baseCostTotal,
+        subsidyTotal,
+        netTotal,
+        netPerPerson,
+        withinBudget,
+        score: priorityScore * 10000 + costScore
+      };
+    });
+
+    // ソート
+    plans.sort((a, b) => {
+      // 予算内を優先
+      if (a.withinBudget && !b.withinBudget) return -1;
+      if (!a.withinBudget && b.withinBudget) return 1;
+      return a.score - b.score;
+    });
+
+    // サマリー
+    const cheapest = plans[0];
+    const maxSaving = Math.max(...plans.filter(p=>p.subsidyTotal>0).map(p=>p.subsidyTotal), 0);
+    renderSummary(plans.length, cheapest, maxSaving, people);
+
+    // プラン描画
+    container.innerHTML = plans.map((p, i) => renderPlan(p, i === 0)).join('');
+
+  }, 600);
+}
+
+function renderSummary(count, cheapest, maxSaving, people) {
+  document.getElementById('summary-box').innerHTML = `
+    <div class="summary-title">検索結果サマリー</div>
+    <div class="summary-stats">
+      <div class="stat">
+        <div class="stat-num">${count}</div>
+        <div class="stat-label">プラン見つかりました</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color:var(--red)">¥${cheapest.netPerPerson.toLocaleString()}</div>
+        <div class="stat-label">最安 1人あたり</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color:var(--gold)">¥${maxSaving.toLocaleString()}</div>
+        <div class="stat-label">最大助成額</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPlan(p, isBest) {
+  const typeClass = p.type === 'direct' ? 'type-direct' : p.type === 'member' ? 'type-member' : 'type-agency';
+
+  return `
+  <div class="plan-card ${isBest ? 'best' : ''}" onclick="showDetail('${p.id}')">
+    <div class="plan-top">
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-type ${typeClass}">${p.typeLabel}</div>
+    </div>
+    <div class="plan-location">📍 ${p.location}</div>
+
+    <div class="cost-breakdown">
+      <div class="cost-row">
+        <span>宿泊代（${p.basePrice.toLocaleString()}円 × ${nights}泊 × ${document.getElementById('people').value}名）</span>
+        <span>¥${p.baseCostTotal.toLocaleString()}</span>
+      </div>
+      ${p.subsidyTotal > 0 ? `
+      <div class="cost-row subsidy">
+        <span>🎁 宿泊助成（−${p.subsidyTotal.toLocaleString()}円）</span>
+        <span>−¥${p.subsidyTotal.toLocaleString()}</span>
+      </div>
+      ` : ''}
+      <div class="cost-row total">
+        <span>実質負担 合計</span>
+        <span class="amount">¥${p.netTotal.toLocaleString()}</span>
+      </div>
+      <div class="cost-row" style="font-size:11px;color:#888;">
+        <span>1人あたり</span>
+        <span>¥${p.netPerPerson.toLocaleString()}/人</span>
+      </div>
+    </div>
+
+    <div class="plan-features">
+      ${p.features.slice(0,4).map(f => `<span class="feature-tag">${f}</span>`).join('')}
+    </div>
+
+    <div class="plan-actions">
+      <a href="${p.url}" target="_blank" class="btn-reserve" onclick="event.stopPropagation()">🔗 予約・申込ページへ</a>
+      <button class="btn-detail" onclick="event.stopPropagation();showDetail('${p.id}')">詳細</button>
+    </div>
+  </div>
+  `;
+}
+
+function showDetail(id) {
+  const p = facilities.find(f => f.id === id);
+  if (!p) return;
+
+  document.getElementById('modal-body').innerHTML = `
+    <h3>${p.name}</h3>
+    <div class="modal-section">
+      <div class="modal-label">📖 施設概要</div>
+      <div class="modal-text">${p.description}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-label">📋 予約手順</div>
+      <ol class="step-list">
+        ${p.steps.map(s => `<li>${s}</li>`).join('')}
+      </ol>
+    </div>
+    ${p.cancelPolicy ? `
+    <div class="modal-section">
+      <div class="modal-label">❗ キャンセルポリシー</div>
+      <div class="modal-text">${p.cancelPolicy}</div>
+    </div>
+    ` : ''}
+    ${p.subsidy ? `
+    <div class="info-bar" style="margin:0 0 14px 0;">
+      💡 <span>宿泊助成（1泊5,000円・年度内2泊まで）が適用されます。<strong>利用日の10日前まで</strong>にMyKempoから申込が必要です。</span>
+    </div>
+    ` : ''}
+    <a href="${p.url}" target="_blank" class="external-link">🔗 予約・申込ページを開く</a>
+  `;
+
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'modal') {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Screenshot to PDF</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 360px;
+      min-height: 480px;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header .icon {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8));
+    }
+
+    .header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 4px;
+    }
+
+    .section {
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .section label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"], input[type="url"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="url"]:focus {
+      border-color: #a78bfa;
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.3);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .radio-option {
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-option label {
+      display: block;
+      text-align: center;
+      padding: 8px 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.72rem;
+      transition: all 0.2s;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .radio-option input[type="radio"]:checked + label {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      border-color: #a78bfa;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .radio-option label:hover {
+      border-color: rgba(167,139,250,0.5);
+      background: rgba(167,139,250,0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 25px rgba(124,58,237,0.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-settings {
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 8px;
+      font-size: 0.8rem;
+    }
+
+    .btn-settings:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    .status-box {
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      display: none;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .status-box.visible {
+      display: block;
+    }
+
+    .status-line {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.85);
+      padding: 3px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-line.success {
+      color: #34d399;
+    }
+
+    .status-line.error {
+      color: #f87171;
+    }
+
+    .status-line.info {
+      color: #60a5fa;
+    }
+
+    .link-btn {
+      display: block;
+      text-align: center;
+      padding: 8px;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: 8px;
+      color: #34d399;
+      font-size: 0.78rem;
+      text-decoration: none;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .link-btn:hover {
+      background: rgba(52, 211, 153, 0.2);
+    }
+
+    .gas-url-notice {
+      font-size: 0.7rem;
+      color: #fbbf24;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(251, 191, 36, 0.1);
+      border-radius: 6px;
+      border-left: 3px solid #fbbf24;
+      display: none;
+    }
+
+    .gas-url-notice.show {
+      display: block;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #a78bfa;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="icon">📸</span>
+    <h1>Auto Screenshot → PDF</h1>
+    <p>Google Drive に自動保存</p>
+  </div>
+
+  <!-- ファイル名 -->
+  <div class="section">
+    <label>📝 ファイル名</label>
+    <input type="text" id="filename" placeholder="例: 営業資料_2024" value="">
+  </div>
+
+  <!-- スクロールモード -->
+  <div class="section">
+    <label>📜 スクロールモード</label>
+    <div class="radio-group">
+      <div class="radio-option">
+        <input type="radio" name="scrollMode" id="mode-full" value="full">
+        <label for="mode-full">🖼 Full<br><small>1枚全体</small></label>
+      </div>
+      <div class="radio-option">
+        <input type="radio" name="scrollMode" id="mode-viewport" value="viewport" checked>
+        <label for="mode-viewport">📄 Viewport<br><small>分割PDF</small></label>
+      </div>
+      <div class="radio-option">
+        <input type="radio" name="scrollMode" id="mode-paginated" value="paginated">
+        <label for="mode-paginated">➡ Paginated<br><small>次ページ</small></label>
+      </div>
+      <div class="radio-option">
+        <input type="radio" name="scrollMode" id="mode-infinite" value="infinite-scroll">
+        <label for="mode-infinite">♾ Infinite<br><small>無限スクロール</small></label>
+      </div>
+      <div class="radio-option">
+        <input type="radio" name="scrollMode" id="mode-kindle" value="kindle">
+        <label for="mode-kindle">📖 Kindle<br><small>ページめくり</small></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 撮影枚数（Kindle/Viewport用） -->
+  <div class="section" id="pages-section">
+    <label>🔢 撮影枚数 (ページ数)</label>
+    <input type="number" id="pageCount" value="10" min="1" max="500" style="width:100%; padding:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; outline:none;">
+    <p style="font-size:0.65rem; color:rgba(255,255,255,0.4); margin-top:4px;">Kindleモード等で使用します</p>
+  </div>
+
+  <!-- PDF形式 -->
+  <div class="section">
+    <label>📑 PDF形式</label>
+    <div class="radio-group">
+      <div class="radio-option">
+        <input type="radio" name="pdfMode" id="pdf-combined" value="combined" checked>
+        <label for="pdf-combined">📚 Combined<br><small>1つのPDF</small></label>
+      </div>
+      <div class="radio-option">
+        <input type="radio" name="pdfMode" id="pdf-split" value="split">
+        <label for="pdf-split">📄 Split<br><small>ページ分割</small></label>
+      </div>
+    </div>
+  </div>
+
+  <div id="gasUrlNotice" class="gas-url-notice">
+    ⚠️ GAS URL が未設定です。設定ボタンから GAS デプロイ URL を入力してください。
+  </div>
+
+  <!-- 実行ボタン -->
+  <button id="captureBtn" class="btn btn-primary">
+    📸 スクリーンショット撮影
+  </button>
+
+  <button id="settingsBtn" class="btn btn-settings">
+    ⚙️ GAS URL 設定
+  </button>
+
+  <!-- ステータス表示 -->
+  <div id="statusBox" class="status-box">
+    <div id="statusLines"></div>
+    <a id="driveLink" class="link-btn" href="#" target="_blank" style="display:none">
+      🔗 Google Drive で開く
+    </a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

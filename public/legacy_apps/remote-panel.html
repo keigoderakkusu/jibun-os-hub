@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>JK Remote — 自分株式会社</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg: #0d0d14;
+  --surface: #14141f;
+  --card: #1a1a28;
+  --border: #252538;
+  --accent: #7c6af5;
+  --accent2: #f5a623;
+  --green: #3dd68c;
+  --red: #f5464a;
+  --text: #e8e8f5;
+  --muted: #6b6b90;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+/* Header */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 20px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.3px;
+}
+
+.header h1 span { color: var(--accent); }
+
+.conn-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.conn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2.5s ease infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+/* Sections */
+.section {
+  padding: 20px 16px 0;
+}
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  padding-left: 2px;
+}
+
+/* Config card */
+.config-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.field:last-child { margin-bottom: 0; }
+
+.field label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.field input, .field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  outline: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+
+.field input:focus, .field select:focus {
+  border-color: var(--accent);
+}
+
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b90'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* Token (secret) */
+.token-row {
+  display: flex;
+  gap: 8px;
+}
+
+.token-row input { flex: 1; }
+
+.token-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 14px;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Dry run toggle */
+.dryrun-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.dryrun-info h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.dryrun-info p {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.switch {
+  width: 48px; height: 26px;
+  border-radius: 13px;
+  background: var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.switch.on { background: var(--accent); }
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.switch.on::after { transform: translateX(22px); }
+
+/* Presets */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.preset-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+  color: var(--text);
+}
+
+.preset-btn:active { transform: scale(0.97); }
+
+.preset-btn.active {
+  border-color: var(--accent);
+  background: rgba(124,106,245,0.1);
+}
+
+.preset-icon { font-size: 20px; margin-bottom: 6px; }
+.preset-name { font-size: 12px; font-weight: 700; display: block; }
+.preset-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* Fire button */
+.fire-section {
+  padding: 16px;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(to top, var(--bg) 80%, transparent);
+  padding-top: 30px;
+}
+
+.fire-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), #9b6af5);
+  border: none;
+  border-radius: 16px;
+  padding: 18px;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(124,106,245,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.fire-btn:active { transform: scale(0.97); box-shadow: 0 4px 12px rgba(124,106,245,0.2); }
+.fire-btn:disabled { background: var(--border); box-shadow: none; color: var(--muted); }
+
+/* Result card */
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 0 16px;
+  animation: slideUp 0.3s ease;
+  display: none;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card.show { display: block; }
+
+.result-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-status.ok { color: var(--green); }
+.result-status.error { color: var(--red); }
+
+.result-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.result-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.result-value {
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.result-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copy-all-btn {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px;
+  color: var(--muted);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.copy-all-btn:active { color: var(--green); border-color: var(--green); }
+
+/* Loading overlay */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13,13,20,0.85);
+  z-index: 200;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.loading-overlay.show { display: flex; }
+
+.loader-ring {
+  width: 56px; height: 56px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.loader-step {
+  font-size: 11px;
+  color: var(--accent);
+  font-family: monospace;
+  animation: blink 1.2s ease infinite;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <h1>JK <span>Remote</span></h1>
+    <div class="conn-badge">
+      <div class="conn-dot"></div>
+      <span id="connLabel">待機中</span>
+    </div>
+  </div>
+</div>
+
+<!-- Webhook設定 -->
+<div class="section">
+  <div class="section-label">Webhook 設定</div>
+  <div class="config-card">
+    <div class="field">
+      <label>Webhook URL</label>
+      <input type="url" id="webhookUrl" placeholder="https://yourdomain.com/webhook/" />
+    </div>
+    <div class="field">
+      <label>シークレットトークン</label>
+      <div class="token-row">
+        <input type="password" id="secretToken" placeholder="YOUR_SECRET_TOKEN" />
+        <button class="token-toggle" onclick="toggleToken()">👁</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 記事設定 -->
+<div class="section">
+  <div class="section-label">記事設定</div>
+  <div class="config-card">
+    <div class="field">
+      <label>キーワード ★必須</label>
+      <input type="text" id="keyword" placeholder="例: 三重県 伊勢 おすすめ グルメ" />
+    </div>
+    <div class="field">
+      <label>ジャンル</label>
+      <select id="genre">
+        <option value="affiliate">アフィリエイト（物販・サービス）</option>
+        <option value="local">地域情報（三重・伊勢）</option>
+        <option value="review">レビュー記事</option>
+        <option value="vintage">ヴィンテージ・骨董品</option>
+        <option value="finance">投資・資産運用</option>
+        <option value="howto">ハウツー解説</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>アフィリリンク（任意）</label>
+      <input type="url" id="affLink" placeholder="https://..." />
+    </div>
+    <div class="field">
+      <label>商品・サービス名（任意）</label>
+      <input type="text" id="affName" placeholder="例: Amazon プライム" />
+    </div>
+  </div>
+</div>
+
+<!-- プリセット -->
+<div class="section">
+  <div class="section-label">クイックプリセット</div>
+  <div class="preset-grid">
+    <button class="preset-btn" onclick="applyPreset('ise')">
+      <div class="preset-icon">⛩️</div>
+      <span class="preset-name">伊勢観光</span>
+      <span class="preset-desc">地域アフィリ</span>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('vintage')">
+      <div class="preset-icon">🏺</div>
+      <span class="preset-name">ヴィンテージ</span>
+      <span class="preset-desc">査定・解説</span>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('market')">
+      <div class="preset-icon">📈</div>
+      <span class="preset-name">市況レポート</span>
+      <span class="preset-desc">投資情報</span>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('gas')">
+      <div class="preset-icon">⚙️</div>
+      <span class="preset-name">GAS自動化</span>
+      <span class="preset-desc">副業ノウハウ</span>
+    </button>
+  </div>
+</div>
+
+<!-- Dry run -->
+<div class="section">
+  <div class="dryrun-row">
+    <div class="dryrun-info">
+      <h4>🔬 プレビューモード</h4>
+      <p>ONなら生成のみ・WP投稿しない</p>
+    </div>
+    <div class="switch on" id="drySwitch" onclick="toggleDry()"></div>
+  </div>
+</div>
+
+<!-- 結果カード -->
+<div class="result-card" id="resultCard">
+  <div class="result-status" id="resultStatus"></div>
+  <div id="resultBody"></div>
+  <button class="copy-all-btn" onclick="copyResult()">📋 結果をコピー</button>
+</div>
+
+<!-- Fire button -->
+<div class="fire-section">
+  <button class="fire-btn" id="fireBtn" onclick="fire()">
+    <span>⚡</span> Webhook を叩く
+  </button>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader-ring"></div>
+  <div class="loader-text">Claude が記事を生成中...</div>
+  <div class="loader-step" id="loaderStep">▶ Calling API...</div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+let isDry = true;
+let resultData = null;
+
+const presets = {
+  ise:     { keyword: '三重県 伊勢 おすすめ 観光スポット', genre: 'local' },
+  vintage: { keyword: 'ヴィンテージ 買取 おすすめ 高額査定', genre: 'vintage' },
+  market:  { keyword: '米国株 今週の相場まとめ NVDA AAPL', genre: 'finance' },
+  gas:     { keyword: 'Google Apps Script 自動化 副業 稼ぐ', genre: 'howto' },
+};
+
+// ── Load saved config ───────────────────────────────────────
+window.addEventListener('load', () => {
+  document.getElementById('webhookUrl').value   = localStorage.getItem('jk_url')   || '';
+  document.getElementById('secretToken').value  = localStorage.getItem('jk_token') || '';
+});
+
+// ── Save on blur ────────────────────────────────────────────
+['webhookUrl', 'secretToken'].forEach(id => {
+  document.getElementById(id).addEventListener('blur', () => {
+    localStorage.setItem('jk_url',   document.getElementById('webhookUrl').value);
+    localStorage.setItem('jk_token', document.getElementById('secretToken').value);
+  });
+});
+
+// ── Toggle ──────────────────────────────────────────────────
+function toggleToken() {
+  const el = document.getElementById('secretToken');
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function toggleDry() {
+  isDry = !isDry;
+  document.getElementById('drySwitch').classList.toggle('on', isDry);
+}
+
+// ── Presets ─────────────────────────────────────────────────
+function applyPreset(key) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const p = presets[key];
+  if (!p) return;
+  document.getElementById('keyword').value = p.keyword;
+  document.getElementById('genre').value   = p.genre;
+}
+
+// ── Step labels ─────────────────────────────────────────────
+const steps = [
+  '▶ Webhook に接続中...',
+  '▶ Claude API へリクエスト送信...',
+  '▶ 記事を生成中（30〜60秒）...',
+  '▶ WordPress に投稿中...',
+  '▶ 完了処理...',
+];
+let stepIdx = 0;
+let stepTimer = null;
+
+function startStepCycle() {
+  stepIdx = 0;
+  document.getElementById('loaderStep').textContent = steps[0];
+  stepTimer = setInterval(() => {
+    stepIdx = (stepIdx + 1) % steps.length;
+    document.getElementById('loaderStep').textContent = steps[stepIdx];
+  }, 3500);
+}
+
+function stopStepCycle() {
+  clearInterval(stepTimer);
+}
+
+// ── Fire ────────────────────────────────────────────────────
+async function fire() {
+  const url     = document.getElementById('webhookUrl').value.trim();
+  const token   = document.getElementById('secretToken').value.trim();
+  const keyword = document.getElementById('keyword').value.trim();
+  const genre   = document.getElementById('genre').value;
+  const affLink = document.getElementById('affLink').value.trim();
+  const affName = document.getElementById('affName').value.trim();
+
+  if (!url)     return alert('Webhook URLを入力してください');
+  if (!token)   return alert('シークレットトークンを入力してください');
+  if (!keyword) return alert('キーワードを入力してください');
+
+  // Show loading
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('fireBtn').disabled = true;
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('connLabel').textContent = '接続中';
+  startStepCycle();
+
+  const fullUrl = url.replace(/\/$/, '') + '/?token=' + encodeURIComponent(token);
+
+  const body = { keyword, genre, dry_run: isDry };
+  if (affLink) body.aff_link = affLink;
+  if (affName) body.aff_name = affName;
+
+  try {
+    const res = await fetch(fullUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    resultData = data;
+
+    document.getElementById('loadingOverlay').classList.remove('show');
+    stopStepCycle();
+    document.getElementById('connLabel').textContent = '待機中';
+    document.getElementById('fireBtn').disabled = false;
+
+    renderResult(res.ok, data);
+
+  } catch (err) {
+    document.getElementById('loadingOverlay').classList.remove('show');
+    stopStepCycle();
+    document.getElementById('fireBtn').disabled = false;
+    document.getElementById('connLabel').textContent = '待機中';
+    renderResult(false, { error: err.message });
+  }
+}
+
+// ── Render result ────────────────────────────────────────────
+function renderResult(ok, data) {
+  const card   = document.getElementById('resultCard');
+  const status = document.getElementById('resultStatus');
+  const body   = document.getElementById('resultBody');
+
+  card.classList.add('show');
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  if (ok && data.status === 'ok') {
+    status.className = 'result-status ok';
+    status.innerHTML = '✅ 成功';
+
+    let html = '';
+    html += row('キーワード', data.keyword);
+    html += row('生成タイトル', data.title || '—');
+    if (data.excerpt) html += row('抜粋', data.excerpt);
+    if (data.dry_run) {
+      html += row('モード', '🔬 プレビュー（WP投稿なし）');
+      if (data.content_preview) html += row('本文冒頭', data.content_preview);
+    }
+    if (data.wordpress) {
+      html += `<div class="result-row">
+        <div class="result-label">WordPress 投稿</div>
+        <a class="result-link" href="${data.wordpress.edit_url}" target="_blank">✏️ 編集画面を開く →</a>
+      </div>`;
+    }
+    if (data.tokens) {
+      const t = data.tokens;
+      html += row('使用トークン', `入力 ${t.input_tokens || '?'} / 出力 ${t.output_tokens || '?'}`);
+    }
+    body.innerHTML = html;
+  } else {
+    status.className = 'result-status error';
+    status.innerHTML = '❌ エラー';
+    body.innerHTML = row('エラー内容', data.error || JSON.stringify(data));
+  }
+}
+
+function row(label, value) {
+  return `<div class="result-row">
+    <div class="result-label">${label}</div>
+    <div class="result-value">${escHtml(String(value))}</div>
+  </div>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyResult() {
+  if (!resultData) return;
+  const txt = JSON.stringify(resultData, null, 2);
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = event.currentTarget;
+    btn.textContent = '✅ コピーしました';
+    setTimeout(() => { btn.textContent = '📋 結果をコピー'; }, 2000);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+{
+  "name": "🤖 Gemini × 自動ブログ生成フロー",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "毎日スケジュール実行",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [240, 300],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=AI+自動化+DX&hl=ja&gl=JP&ceid=JP:ja",
+        "options": {}
+      },
+      "id": "rss-google-news",
+      "name": "Google Newsからトレンド収集",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [460, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "maxItems": 3
+      },
+      "id": "limit-articles",
+      "name": "記事を3件に絞る",
+      "type": "n8n-nodes-base.limit",
+      "position": [680, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"あなたは日本語で書く優れたブログライターです。\\n\\n以下のニュース記事を元に、日本のビジネスパーソン向けの有益なブログ記事を日本語で書いてください。\\n\\nタイトル: {{ $json.title }}\\n内容: {{ $json.content }}\\n\\n以下の形式で出力してください：\\n---\\n【タイトル】（魅力的なタイトル）\\n【導入】（150字程度のリード文）\\n【本文】（500字程度、箇条書きや改行を使い読みやすく）\\n【まとめ】（100字程度のまとめと行動提案）\\n【ハッシュタグ】（5個、SNS投稿用）\\n---\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.7,\n    \"maxOutputTokens\": 1024\n  }\n}",
+        "options": {}
+      },
+      "id": "gemini-generate",
+      "name": "Gemini Flash で記事生成",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [900, 300],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Geminiの応答からテキストを抽出\nconst response = $input.item.json;\nconst text = response.candidates?.[0]?.content?.parts?.[0]?.text || 'エラー: テキストなし';\n\n// タイトルと本文を分離\nconst titleMatch = text.match(/【タイトル】(.+?)\\n/);\nconst bodyMatch = text.match(/【本文】([\\s\\S]+?)【まとめ】/);\nconst summaryMatch = text.match(/【まとめ】([\\s\\S]+?)【ハッシュタグ】/);\nconst tagsMatch = text.match(/【ハッシュタグ】([\\s\\S]+)/);\n\nreturn [{\n  json: {\n    title: titleMatch ? titleMatch[1].trim() : '記事タイトル',\n    content: bodyMatch ? bodyMatch[1].trim() : text,\n    summary: summaryMatch ? summaryMatch[1].trim() : '',\n    hashtags: tagsMatch ? tagsMatch[1].trim() : '',\n    fullText: text,\n    generatedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "extract-text",
+      "name": "テキスト整形",
+      "type": "n8n-nodes-base.code",
+      "position": [1120, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "postType": "post",
+        "title": "={{ $json.title }}",
+        "content": "={{ $json.content + '\\n\\n' + $json.summary }}",
+        "status": "draft",
+        "additionalFields": {}
+      },
+      "id": "wordpress-post",
+      "name": "WordPressに下書き投稿",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [1340, 300],
+      "typeVersion": 1,
+      "notes": "WordPressの接続設定が必要: Settings > Credentials > WordPress"
+    }
+  ],
+  "connections": {
+    "毎日スケジュール実行": {
+      "main": [
+        [
+          {
+            "node": "Google Newsからトレンド収集",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Newsからトレンド収集": {
+      "main": [
+        [
+          {
+            "node": "記事を3件に絞る",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "記事を3件に絞る": {
+      "main": [
+        [
+          {
+            "node": "Gemini Flash で記事生成",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Flash で記事生成": {
+      "main": [
+        [
+          {
+            "node": "テキスト整形",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "テキスト整形": {
+      "main": [
+        [
+          {
+            "node": "WordPressに下書き投稿",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "Gemini" },
+    { "name": "自動ブログ" },
+    { "name": "AI" }
+  ],
+  "meta": {
+    "description": "Google NewsからトレンドをRSS取得し、Gemini 1.5 Flashで記事を自動生成してWordPressに下書き投稿するフロー。GEMINI_API_KEYをn8nの環境変数に設定してください。",
+    "instanceId": "jibun-kaisha-os"
+  }
+}

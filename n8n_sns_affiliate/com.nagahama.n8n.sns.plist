@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- サービス識別子 -->
+    <key>Label</key>
+    <string>com.nagahama.n8n.sns</string>
+
+    <!-- 実行するスクリプト -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/nagahamakeigo/Desktop/windowsパソコン/【仕事用】/アンチグラビティ　２/n8n_sns_affiliate/n8n_service.sh</string>
+    </array>
+
+    <!-- ログイン時に自動起動 -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- クラッシュした場合に自動再起動 -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- 標準出力のログ -->
+    <key>StandardOutPath</key>
+    <string>/Users/nagahamakeigo/Desktop/windowsパソコン/【仕事用】/アンチグラビティ　２/n8n_sns_affiliate/n8n_stdout.log</string>
+
+    <!-- エラー出力のログ -->
+    <key>StandardErrorPath</key>
+    <string>/Users/nagahamakeigo/Desktop/windowsパソコン/【仕事用】/アンチグラビティ　２/n8n_sns_affiliate/n8n_stderr.log</string>
+
+    <!-- 環境変数（PATH含む） -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/opt/node@22/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/nagahamakeigo</string>
+        <key>LANG</key>
+        <string>ja_JP.UTF-8</string>
+    </dict>
+</dict>
+</plist>

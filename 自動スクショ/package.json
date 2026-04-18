@@ -1,0 +1,26 @@
+{
+  "name": "auto-scroll-screenshot",
+  "version": "1.0.0",
+  "description": "自動スクロール連続スクショ → マルチページPDF生成システム",
+  "main": "auto-scroll-screenshot.js",
+  "scripts": {
+    "start": "node auto-scroll-screenshot.js",
+    "test": "node auto-scroll-screenshot.js --url \"https://example.com\" --scroll-mode full --filename test",
+    "screenshot:full": "node auto-scroll-screenshot.js --scroll-mode full",
+    "screenshot:viewport": "node auto-scroll-screenshot.js --scroll-mode viewport",
+    "screenshot:paginated": "node auto-scroll-screenshot.js --scroll-mode paginated",
+    "screenshot:infinite": "node auto-scroll-screenshot.js --scroll-mode infinite-scroll"
+  },
+  "keywords": [
+    "puppeteer",
+    "screenshot",
+    "pdf",
+    "google-apps-script"
+  ],
+  "author": "AntiGravity",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "puppeteer": "^24.40.0"
+  }
+}

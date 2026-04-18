@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: jibun-os-hub
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npx serve dist -p $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+    autoDeploy: true
