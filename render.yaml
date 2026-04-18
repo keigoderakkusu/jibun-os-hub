@@ -2,9 +2,19 @@ services:
   - type: web
     name: jibun-os-hub
     runtime: node
+    region: singapore
+    plan: free
     buildCommand: npm install && npm run build
-    startCommand: npx serve dist -p $PORT
+    startCommand: npx tsx scripts/server.ts
     envVars:
       - key: NODE_VERSION
         value: 20.11.0
+      - key: RENDER
+        value: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CREDENTIALS_JSON
+        sync: false
+      - key: SPREADSHEET_ID
+        sync: false
     autoDeploy: true
