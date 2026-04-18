@@ -623,14 +623,14 @@ ${theme}
 });
 
 
-// 本番環境: Viteビルド済み静的ファイルを配信
+// 本番環境: Viteビルド済み静的ファイルを配信 (SPA フォールバック)
 const distPath = path.join(process.cwd(), 'dist');
 if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));
-    app.get(/.*/, (req: any, res: any) => {
-        if (!req.path.startsWith('/api')) {
-            res.sendFile(path.join(distPath, 'index.html'));
-        }
+    // Express 5 対応: app.get('*') 非推奨のため app.use でフォールバック
+    app.use((req: any, res: any, next: any) => {
+        if (req.path.startsWith('/api')) return next();
+        res.sendFile(path.join(distPath, 'index.html'));
     });
 }
 
