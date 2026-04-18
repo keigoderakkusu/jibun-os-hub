@@ -10,8 +10,20 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { exec } from 'child_process';
 import util from 'util';
 import fs from 'fs-extra';
-import puppeteer from 'puppeteer';
 import { JSDOM } from 'jsdom';
+
+// Puppeteer: 起動失敗してもサーバーがクラッシュしないよう遅延ロード
+async function launchBrowser() {
+    try {
+        const pup = await import('puppeteer');
+        return await pup.default.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        });
+    } catch (e: any) {
+        throw new Error(`Browser unavailable: ${e.message}`);
+    }
+}
 
 const execPromise = util.promisify(exec);
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
@@ -302,7 +314,7 @@ wss.on('connection', (ws: WebSocket) => {
                     } else if (fnName === 'read_file') {
                         toolResult = await fs.readFile(args.filePath as string, 'utf-8');
                     } else if (fnName === 'search_web') {
-                        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] });
+                        const browser = await launchBrowser();
                         const page = await browser.newPage();
                         await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
@@ -332,7 +344,7 @@ wss.on('connection', (ws: WebSocket) => {
                     } else if (fnName === 'read_webpage') {
                         const url = args.url as string;
                         try {
-                            const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] });
+                            const browser = await launchBrowser();
                             const page = await browser.newPage();
                             await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
@@ -448,7 +460,7 @@ ${theme}
                             ws.send(JSON.stringify({ type: 'status', message: `🔍 「${theme}」について市場調査を開始...` }));
 
                             // 1. Web Search for context (using same logic as search_web)
-                            const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] });
+                            const browser = await launchBrowser();
                             const page = await browser.newPage();
                             await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
