@@ -4,9 +4,10 @@ import IntegratedDashboard from './IntegratedDashboard';
 import JibunOS_Hub from './JibunOS_Hub';
 import AIAgent from './AIAgent';
 import AppLauncher from './AppLauncher';
+import Blog from './Blog';
 
 export default function App() {
-  const [page, setPage] = useState<PageId>('dashboard');
+  const [page, setPage] = useState<PageId>('blog');
 
   return (
     <div className="flex h-screen overflow-hidden bg-[hsl(var(--background))]">
@@ -14,6 +15,7 @@ export default function App() {
 
       <main className="flex-1 overflow-hidden flex flex-col min-w-0">
         {page === 'dashboard' && <IntegratedDashboard />}
+        {page === 'blog' && <Blog />}
         {page === 'hub' && <JibunOS_Hub />}
         {page === 'agent' && <AIAgent />}
         {page === 'launcher' && <AppLauncher />}
