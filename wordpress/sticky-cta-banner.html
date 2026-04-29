@@ -1,0 +1,114 @@
+<!-- ============================================================
+  画面下部固定CTAバナー
+  貼り付け先: Cocoon設定 > フッター > フッターHTML
+  または WordPress > 外観 > テーマファイルエディター > footer.php の </body> 直前
+  ============================================================ -->
+
+<style>
+.jibun-sticky-cta {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 99999;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  border-top: 1px solid rgba(124,58,237,0.5);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+  transform: translateY(0);
+  transition: transform 0.3s;
+}
+.jibun-sticky-cta.hidden { transform: translateY(100%); }
+.jibun-sticky-cta .cta-text { flex: 1; min-width: 0; }
+.jibun-sticky-cta .cta-text strong {
+  display: block; color: #fff; font-size: 0.9rem; font-weight: 800;
+}
+.jibun-sticky-cta .cta-text span {
+  color: #94a3b8; font-size: 0.75rem;
+}
+.jibun-sticky-cta .cta-btn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff !important; text-decoration: none !important;
+  border-radius: 8px; padding: 10px 20px;
+  font-size: 0.85rem; font-weight: 800;
+  box-shadow: 0 4px 15px rgba(245,158,11,0.5);
+  transition: transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+.jibun-sticky-cta .cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245,158,11,0.6);
+  color: #fff !important;
+}
+.jibun-sticky-cta .cta-close {
+  color: #475569; background: none; border: none;
+  cursor: pointer; font-size: 1.1rem; padding: 4px;
+  flex-shrink: 0; line-height: 1;
+}
+.jibun-sticky-cta .cta-close:hover { color: #94a3b8; }
+@media (max-width: 600px) {
+  .jibun-sticky-cta { flex-direction: column; padding: 12px 16px; gap: 10px; }
+  .jibun-sticky-cta .cta-text { text-align: center; }
+  .jibun-sticky-cta .cta-btn { width: 100%; text-align: center; }
+  .jibun-sticky-cta .cta-close { position: absolute; top: 8px; right: 12px; }
+}
+</style>
+
+<div class="jibun-sticky-cta" id="jibunCta">
+  <div class="cta-text">
+    <strong>🎁 無料PDF「AIで月3万円稼ぐロードマップ」配布中</strong>
+    <span>Hermes Agent × n8n × アフィリエイトの組み合わせを完全解説</span>
+  </div>
+  <a href="/free-gift" class="cta-btn">今すぐ無料で受け取る →</a>
+  <button class="cta-close" onclick="document.getElementById('jibunCta').classList.add('hidden');localStorage.setItem('ctaClosed','1')">✕</button>
+</div>
+
+<script>
+(function(){
+  if(localStorage.getItem('ctaClosed')==='1'){
+    var el=document.getElementById('jibunCta');
+    if(el) el.classList.add('hidden');
+  }
+})();
+</script>
+
+
+<!-- ============================================================
+  記事内アフィリエイトカード（記事の途中・末尾に貼り付け）
+  ============================================================ -->
+
+<!-- n8n アフィリカード -->
+<div style="display:flex;gap:16px;align-items:flex-start;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #f59e0b;border-radius:12px;padding:20px;margin:32px 0;">
+  <div style="flex:1;min-width:0;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="background:#f59e0b;color:#78350f;font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:0.05em;">💰 PR</span>
+      <span style="font-weight:800;font-size:1rem;color:#1e293b;">n8n Cloud</span>
+    </div>
+    <p style="color:#64748b;font-size:0.85rem;line-height:1.6;margin:0 0 14px;">400以上のサービスを繋げて業務・ブログ投稿・SNSを全自動化。私が副業収益を上げた最大の武器。無料プランから始められます。</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <span style="background:rgba(16,185,129,0.1);color:#065f46;font-size:0.72rem;padding:3px 8px;border-radius:4px;font-weight:600;">✅ 無料プランあり</span>
+      <span style="background:rgba(59,130,246,0.1);color:#1e40af;font-size:0.72rem;padding:3px 8px;border-radius:4px;font-weight:600;">🌐 日本語対応</span>
+      <span style="background:rgba(124,58,237,0.1);color:#5b21b6;font-size:0.72rem;padding:3px 8px;border-radius:4px;font-weight:600;">⚡ 即座に自動化</span>
+    </div>
+    <a href="https://n8n.io" target="_blank" rel="noopener sponsored" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-radius:8px;padding:12px 24px;font-size:0.9rem;font-weight:800;text-decoration:none;box-shadow:0 4px 15px rgba(245,158,11,0.4);">無料で始める →</a>
+  </div>
+</div>
+
+<!-- Xserver アフィリカード -->
+<div style="display:flex;gap:16px;align-items:flex-start;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #3b82f6;border-radius:12px;padding:20px;margin:32px 0;">
+  <div style="flex:1;min-width:0;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="background:#3b82f6;color:#fff;font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:4px;">💰 PR</span>
+      <span style="font-weight:800;font-size:1rem;color:#1e293b;">エックスサーバー</span>
+    </div>
+    <p style="color:#64748b;font-size:0.85rem;line-height:1.6;margin:0 0 14px;">国内シェアNo.1。このブログも利用中。WordPressをワンクリックで設置でき、表示速度も国内最速クラス。月990円〜でスタートできます。</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <span style="background:rgba(16,185,129,0.1);color:#065f46;font-size:0.72rem;padding:3px 8px;border-radius:4px;font-weight:600;">✅ 10日間無料お試し</span>
+      <span style="background:rgba(245,158,11,0.1);color:#92400e;font-size:0.72rem;padding:3px 8px;border-radius:4px;font-weight:600;">⚡ 国内最速クラス</span>
+    </div>
+    <a href="https://www.xserver.ne.jp/" target="_blank" rel="noopener sponsored" style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border-radius:8px;padding:12px 24px;font-size:0.9rem;font-weight:800;text-decoration:none;box-shadow:0 4px 15px rgba(59,130,246,0.4);">詳細を見る →</a>
+  </div>
+</div>

@@ -10,26 +10,46 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { exec } from 'child_process';
 import util from 'util';
 import fs from 'fs-extra';
-import puppeteer from 'puppeteer';
 import { JSDOM } from 'jsdom';
 
+// Puppeteer: 起動失敗してもサーバーがクラッシュしないよう遅延ロード
+async function launchBrowser() {
+    try {
+        const pup = await import('puppeteer');
+        return await pup.default.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        });
+    } catch (e: any) {
+        throw new Error(`Browser unavailable: ${e.message}`);
+    }
+}
+
 const execPromise = util.promisify(exec);
-const genAI = new GoogleGenerativeAI('AIzaSyCmEd3SGm3LqrlblJJQX9agDL0pOy9Nq6w');
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 const app = express();
-const port = 3001;
-const DEFAULT_SPREADSHEET_ID = '1AKQuY8swWLQjSjV-5A5o0cejtI7WBQ-j6K4GIoj9W7M';
+const port = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+const DEFAULT_SPREADSHEET_ID = process.env.SPREADSHEET_ID || '1AKQuY8swWLQjSjV-5A5o0cejtI7WBQ-j6K4GIoj9W7M';
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Google認証: Render環境では GOOGLE_CREDENTIALS_JSON 環境変数 (base64) を使用
 const CREDENTIALS_PATH = path.join(process.cwd(), 'worker/credentials.json');
-const auth = new google.auth.GoogleAuth({
-    keyFile: CREDENTIALS_PATH,
-    scopes: [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive'
-    ],
-});
+const SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+];
+
+let auth: any;
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+    const creds = JSON.parse(Buffer.from(process.env.GOOGLE_CREDENTIALS_JSON, 'base64').toString('utf-8'));
+    auth = new google.auth.GoogleAuth({ credentials: creds, scopes: SCOPES });
+} else {
+    auth = new google.auth.GoogleAuth({ keyFile: CREDENTIALS_PATH, scopes: SCOPES });
+}
 const sheets = google.sheets({ version: 'v4', auth });
 const drive = google.drive({ version: 'v3', auth });
 
@@ -58,15 +78,16 @@ app.post('/api/command', async (req: any, res: any) => {
     }
 });
 
-// ローカル管理用のスクリプト起動API
+// ローカル管理用のスクリプト起動API (Mac専用: Render環境では無効)
 app.post('/api/run-script', async (req: any, res: any) => {
+    if (process.env.RENDER) {
+        return res.status(403).json({ success: false, error: 'このAPIはクラウド環境では利用できません。自宅Macからのみ実行可能です。' });
+    }
     const { scriptPath } = req.body;
     try {
         if (!scriptPath) {
             return res.status(400).json({ success: false, error: 'scriptPath is required' });
         }
-        
-        // 許可されたスクリプトのみ実行（セキュリティ対策）
         const allowedScripts = [
             'n8n_sns_affiliate/start_sns_system.command',
             '自動スクショ/batch-screenshot.sh',
@@ -74,29 +95,15 @@ app.post('/api/run-script', async (req: any, res: any) => {
             'setup_pocketbase.command',
             'setup_anythingllm.command'
         ];
-        
         if (!allowedScripts.includes(scriptPath)) {
             return res.status(403).json({ success: false, error: 'Unauthorized script execution' });
         }
-
         const absPath = path.join(process.cwd(), scriptPath);
-        
-        // bg実行するためのコマンド構築（openコマンドで別ターミナル窓を開いて実行するか、nohupを使う）
-        // ここでは、ユーザーに分かりやすくMacの別ターミナルを立ち上げて実行させる "open" を使用
-        let runCmd = '';
         if (scriptPath.endsWith('.sh') || scriptPath.endsWith('.command')) {
-            // make it executable first 
             await execPromise(`chmod +x "${absPath}"`);
-            runCmd = `open -a Terminal "${absPath}"`;
+            await execPromise(`open -a Terminal "${absPath}"`);
         }
-
-        if (runCmd) {
-            await execPromise(runCmd);
-            res.json({ success: true, message: 'Script launched in new terminal' });
-        } else {
-            res.status(400).json({ success: false, error: 'Unsupported format' });
-        }
-
+        res.json({ success: true, message: 'Script launched in new terminal' });
     } catch (err: any) {
         console.error(err);
         res.status(500).json({ success: false, error: err.message });
@@ -307,7 +314,7 @@ wss.on('connection', (ws: WebSocket) => {
                     } else if (fnName === 'read_file') {
                         toolResult = await fs.readFile(args.filePath as string, 'utf-8');
                     } else if (fnName === 'search_web') {
-                        const browser = await puppeteer.launch({ headless: true });
+                        const browser = await launchBrowser();
                         const page = await browser.newPage();
                         await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
@@ -337,7 +344,7 @@ wss.on('connection', (ws: WebSocket) => {
                     } else if (fnName === 'read_webpage') {
                         const url = args.url as string;
                         try {
-                            const browser = await puppeteer.launch({ headless: true });
+                            const browser = await launchBrowser();
                             const page = await browser.newPage();
                             await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
@@ -453,7 +460,7 @@ ${theme}
                             ws.send(JSON.stringify({ type: 'status', message: `🔍 「${theme}」について市場調査を開始...` }));
 
                             // 1. Web Search for context (using same logic as search_web)
-                            const browser = await puppeteer.launch({ headless: true });
+                            const browser = await launchBrowser();
                             const page = await browser.newPage();
                             await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
 
@@ -616,19 +623,19 @@ ${theme}
 });
 
 
+// 本番環境: Viteビルド済み静的ファイルを配信 (SPA フォールバック)
+const distPath = path.join(process.cwd(), 'dist');
+if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    // Express 5 対応: app.get('*') 非推奨のため app.use でフォールバック
+    app.use((req: any, res: any, next: any) => {
+        if (req.path.startsWith('/api')) return next();
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
+
 httpServer.listen(port, '0.0.0.0', () => {
-    const networks = os.networkInterfaces();
-    let localIp = 'localhost';
-    for (const name of Object.keys(networks)) {
-        const netArray = networks[name] || [];
-        for (const net of netArray) {
-            if (net.family === 'IPv4' && !net.internal) {
-                localIp = net.address;
-            }
-        }
-    }
-    console.log(`\n🚀 API & Agent Server is running on:`);
-    console.log(`   - Local:    http://localhost:${port}`);
-    console.log(`   - Network:  http://${localIp}:${port}`);
-    console.log(`\n📱 Smartphone access: view the dashboard via local tunnel.`);
+    console.log(`\n🚀 JIBUN-OS Server running on port ${port}`);
+    console.log(`   - API:  http://localhost:${port}/api`);
+    console.log(`   - Web:  http://localhost:${port}`);
 });
