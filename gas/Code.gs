@@ -726,6 +726,92 @@ JSON形式:
 }
 
 // ─────────────────────────────────────────────
+// NEWS SUMMARY
+// ─────────────────────────────────────────────
+
+function getNewsSummary(forceRefresh) {
+  const props = PropertiesService.getScriptProperties();
+  const cached = props.getProperty('NEWS_CACHE');
+  if (cached && !forceRefresh) {
+    const c = JSON.parse(cached);
+    if (Date.now() - c.ts < 6 * 60 * 60 * 1000) return c.data;
+  }
+
+  const articles = [];
+  const feeds = [
+    { url: 'https://www3.nhk.or.jp/rss/news/cat4.xml', label: '経済' },
+    { url: 'https://www3.nhk.or.jp/rss/news/cat6.xml', label: '国際' },
+    { url: 'https://news.google.com/rss/search?q=%E8%A3%BD%E9%80%A0%E6%A5%AD+%E6%9D%90%E6%96%99%E8%B2%BB+%E9%83%A8%E5%93%81+%E9%AB%98%E9%A8%B0&hl=ja&gl=JP&ceid=JP:ja', label: '材料・部品' },
+    { url: 'https://news.google.com/rss/search?q=%E4%B8%AD%E6%9D%B1+%E5%8E%9F%E6%B2%B9+%E3%82%A8%E3%83%8D%E3%83%AB%E3%82%AE%E3%83%BC%E4%BE%A1%E6%A0%BC&hl=ja&gl=JP&ceid=JP:ja', label: '中東・エネルギー' },
+    { url: 'https://news.google.com/rss/search?q=%E5%86%86%E7%9B%B8%E5%A0%B4+%E7%82%BA%E6%9B%BF+%E8%BC%B8%E5%87%BA%E5%85%A5&hl=ja&gl=JP&ceid=JP:ja', label: '為替' },
+    { url: 'https://news.google.com/rss/search?q=%E5%8D%8A%E5%B0%8E%E4%BD%93+%E9%89%84%E9%8B%BC+%E3%82%A2%E3%83%AB%E3%83%9F+%E4%BE%9B%E7%B5%A6%E9%80%BC%E8%BF%AB&hl=ja&gl=JP&ceid=JP:ja', label: '素材市況' },
+  ];
+
+  feeds.forEach(feed => {
+    try {
+      const res = UrlFetchApp.fetch(feed.url, { muteHttpExceptions: true, followRedirects: true });
+      if (res.getResponseCode() !== 200) return;
+      const xml = XmlService.parse(res.getContentText('UTF-8'));
+      const channel = xml.getRootElement().getChild('channel');
+      if (!channel) return;
+      channel.getChildren('item').slice(0, 7).forEach(item => {
+        const title = item.getChildText('title') || '';
+        const desc = (item.getChildText('description') || '').replace(/<[^>]+>/g, '').substring(0, 100);
+        if (title) articles.push({ category: feed.label, title, desc });
+      });
+    } catch(e) { Logger.log('RSS error [' + feed.label + ']: ' + e); }
+  });
+
+  const today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy年M月d日');
+  const headlines = articles.slice(0, 35).map((a, i) =>
+    `${i + 1}. [${a.category}] ${a.title}${a.desc ? ' / ' + a.desc : ''}`
+  ).join('\n') || '（RSS取得不可。AIの学習知識に基づき分析します）';
+
+  const prompt = `あなたは製造業（部品・基板・機械設備）の営業担当者を支援するビジネスアナリストです。
+本日 ${today} のニュース見出し一覧です（RSS取得）：
+
+${headlines}
+
+以下のJSON形式で要約・分析してください。製造業の2年目営業担当者が朝3分で読める内容にしてください。
+
+{
+  "sections": [
+    {
+      "icon": "絵文字1つ",
+      "title": "セクション名（15文字以内）",
+      "summary": "3〜4文の要約。具体的な数字・企業名・変動幅があれば含める",
+      "salesTip": "このニュースを踏まえた営業トーク・対応アクションの提案（1〜2文）"
+    }
+  ],
+  "briefing": "今日の営業で意識すべき3ポイント（①②③番号付き、改行区切り）",
+  "keywords": ["キーワード1","キーワード2","キーワード3","キーワード4","キーワード5"],
+  "alertLevel": "green または yellow または red",
+  "alertReason": "警戒度の理由（20文字以内）"
+}
+
+sectionsは必ず以下4テーマで作成：
+1. 材料・部品・エネルギー価格（鉄鋼・アルミ・樹脂・半導体・原油・天然ガス）
+2. 中東・地政学リスク（紛争・制裁・ホルムズ海峡・サプライチェーン影響）
+3. 為替・金融動向（円ドル・日銀・米FRB・輸出入コストへの影響）
+4. 国内製造業トレンド（設備投資・受注動向・景況感・技術動向）`;
+
+  let data;
+  try {
+    data = JSON.parse(_callGemini(prompt, true));
+  } catch(e) {
+    data = {
+      sections: [{ icon: '⚠️', title: '分析エラー', summary: '「今すぐ再取得」を押してください。', salesTip: '' }],
+      briefing: '', keywords: [], alertLevel: 'green', alertReason: ''
+    };
+  }
+
+  data.articleCount = articles.length;
+  data.updatedAt = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'M/d HH:mm');
+  props.setProperty('NEWS_CACHE', JSON.stringify({ ts: Date.now(), data }));
+  return data;
+}
+
+// ─────────────────────────────────────────────
 // CHECKLIST
 // ─────────────────────────────────────────────
 
