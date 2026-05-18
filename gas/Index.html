@@ -3,776 +3,1317 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>営業ナレッジ</title>
+<title>営業ナレッジ Pro</title>
 <style>
-/* ── Reset & Base ── */
+/* ── Reset ── */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Hiragino Sans','Meiryo',sans-serif;background:#fff;color:#37352f;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-button,input,textarea{font-family:inherit}
+body{font-family:'Hiragino Sans','Meiryo',sans-serif;background:#fff;color:#37352f;height:100vh;display:flex;overflow:hidden}
+button,input,textarea,select{font-family:inherit}
 
-/* ── Top Bar ── */
-#topbar{
-  display:flex;align-items:center;gap:6px;
-  padding:0 12px;height:46px;flex-shrink:0;
-  border-bottom:1px solid #e9e9e7;background:#fff;
-  position:relative;z-index:10;
+/* ── Sidebar ── */
+#sidebar{
+  width:190px;flex-shrink:0;
+  background:#fbfbfa;border-right:1px solid #e9e9e7;
+  display:flex;flex-direction:column;overflow:hidden;
 }
-#topbar-logo{font-size:17px;font-weight:700;margin-right:8px}
-.nav-btn{
-  padding:5px 11px;border:none;border-radius:6px;cursor:pointer;
-  font-size:13px;background:none;color:#787774;white-space:nowrap;
+.sidebar-logo{
+  padding:14px 14px 10px;font-size:15px;font-weight:700;
+  border-bottom:1px solid #e9e9e7;color:#37352f;
+  display:flex;align-items:center;gap:7px;
 }
-.nav-btn:hover{background:#e9e9e7;color:#37352f}
-.nav-btn.active{background:#e9e9e7;color:#37352f;font-weight:600}
-.spacer{flex:1}
-#db-link{font-size:11px;color:#9b9a97;text-decoration:none;padding:4px 8px;border-radius:4px}
-#db-link:hover{background:#f0f0ef}
+.sidebar-logo span{font-size:20px}
+.nav-items{flex:1;overflow-y:auto;padding:8px 6px}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:7px;cursor:pointer;
+  font-size:13.5px;color:#37352f;margin-bottom:2px;
+  transition:background .12s;
+}
+.nav-item:hover{background:#ebebea}
+.nav-item.active{background:#e9e9e7;font-weight:600}
+.nav-item .ni-icon{font-size:16px;flex-shrink:0}
+.nav-badge{
+  margin-left:auto;background:#eb5757;color:#fff;
+  border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;
+}
+.sidebar-footer{
+  padding:10px 12px;border-top:1px solid #e9e9e7;
+}
+#db-link{
+  display:block;font-size:12px;color:#9b9a97;text-decoration:none;
+  padding:6px 8px;border-radius:6px;
+}
+#db-link:hover{background:#ebebea;color:#37352f}
 
-/* ── Pages Container ── */
-#pages{flex:1;position:relative;overflow:hidden}
+/* ── Content area ── */
+#content{flex:1;position:relative;overflow:hidden}
 .page{position:absolute;inset:0;display:none;overflow-y:auto}
-.page.active{display:flex}
+.page.active{display:flex;flex-direction:column}
 
-/* ── Memo Layout (split) ── */
-#page-memo{flex-direction:row}
-#memo-list-col{
-  width:210px;flex-shrink:0;border-right:1px solid #e9e9e7;
-  background:#fbfbfa;display:flex;flex-direction:column;overflow:hidden;
-}
-#memo-list-header{padding:10px 8px 6px;flex-shrink:0}
-#memo-list-scroll{flex:1;overflow-y:auto;padding:0 4px 8px}
-#memo-editor-col{flex:1;overflow-y:auto;padding:36px 48px 60px}
+/* ── Page header ── */
+.page-header{padding:28px 36px 0;flex-shrink:0}
+.page-title{font-size:24px;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:13px;color:#787774;margin-bottom:20px}
+.page-body{padding:0 36px 40px;flex:1}
 
-/* ── Memo Items ── */
-.memo-item{
-  padding:7px 8px;border-radius:6px;cursor:pointer;margin-bottom:1px;
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;border-bottom:2px solid #e9e9e7;margin-bottom:20px}
+.tab-btn{
+  padding:8px 16px;border:none;background:none;cursor:pointer;
+  font-size:13px;color:#787774;border-bottom:2px solid transparent;
+  margin-bottom:-2px;transition:.15s;
 }
-.memo-item:hover{background:#ebebea}
-.memo-item.active{background:#e9e9e7}
-.mi-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
-.mi-date{font-size:11px;color:#9b9a97;margin-top:1px}
-
-/* ── Editor ── */
-#save-status{font-size:12px;color:#9b9a97;margin-bottom:10px;min-height:16px}
-#memo-title-input{
-  width:100%;font-size:30px;font-weight:700;border:none;outline:none;
-  background:transparent;color:#37352f;margin-bottom:6px;
-}
-#memo-tags-input{
-  width:100%;border:none;outline:none;font-size:13px;color:#9b9a97;
-  background:transparent;margin-bottom:14px;
-}
-#memo-content-input{
-  width:100%;min-height:500px;border:none;outline:none;resize:none;
-  font-size:15px;line-height:1.85;background:transparent;color:#37352f;
-}
-.editor-actions{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid #e9e9e7}
-
-/* ── Standard Page Layout ── */
-.std-page{flex-direction:column;padding:32px 40px;max-width:800px;width:100%;margin:0 auto}
-.page-heading{font-size:24px;font-weight:700;margin-bottom:4px}
-.page-sub{font-size:14px;color:#787774;margin-bottom:24px}
-.section-title{font-size:13px;font-weight:600;color:#787774;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px}
+.tab-btn.active{color:#2383e2;border-bottom-color:#2383e2;font-weight:600}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
 
 /* ── Buttons ── */
-.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;transition:background .15s}
+.btn{padding:7px 15px;border-radius:7px;border:none;cursor:pointer;font-size:13px;transition:.15s}
 .btn-primary{background:#2383e2;color:#fff}
 .btn-primary:hover{background:#1a6ec7}
 .btn-secondary{background:#e9e9e7;color:#37352f}
 .btn-secondary:hover{background:#d8d7d2}
 .btn-danger{background:#eb5757;color:#fff}
-.btn-danger:hover{background:#d44}
-.btn-sm{padding:4px 10px;font-size:12px}
+.btn-danger:hover{background:#c94040}
 .btn-ghost{background:none;border:1px solid #e9e9e7;color:#787774}
-.btn-ghost:hover{background:#f0f0ef}
+.btn-ghost:hover{background:#f5f5f4}
+.btn-sm{padding:4px 10px;font-size:12px}
 .btn-full{width:100%}
+.btn-ai{background:linear-gradient(135deg,#6940a5,#2383e2);color:#fff}
+.btn-ai:hover{opacity:.9}
 
-/* ── Inputs ── */
-label{display:block;font-size:13px;font-weight:600;color:#37352f;margin:14px 0 5px}
-input[type=text],input[type=email],textarea,select{
+/* ── Form elements ── */
+label{display:block;font-size:13px;font-weight:600;color:#37352f;margin:12px 0 5px}
+input[type=text],input[type=email],input[type=date],input[type=number],textarea,select{
   width:100%;border:1px solid #e9e9e7;border-radius:7px;
   padding:9px 12px;font-size:14px;background:#fff;outline:none;
   transition:border-color .15s;
 }
-input[type=text]:focus,input[type=email]:focus,textarea:focus,select:focus{border-color:#2383e2}
-textarea{resize:vertical;min-height:110px;line-height:1.7}
+input:focus,textarea:focus,select:focus{border-color:#2383e2}
+textarea{resize:vertical;min-height:90px;line-height:1.7}
+.form-row{display:flex;gap:10px}
+.form-row>*{flex:1}
 
 /* ── Cards ── */
 .card{
   border:1px solid #e9e9e7;border-radius:9px;padding:14px 16px;
-  margin-bottom:10px;cursor:pointer;transition:border-color .15s,background .15s;
+  margin-bottom:10px;background:#fff;
 }
-.card:hover{border-color:#2383e2;background:#f4f8ff}
-.card.selected{border-color:#2383e2;background:#eef4ff}
-.card-title{font-size:14px;font-weight:600;margin-bottom:3px}
-.card-sub{font-size:13px;color:#787774}
+.card-hover{cursor:pointer;transition:border-color .15s,background .15s}
+.card-hover:hover{border-color:#2383e2;background:#f4f8ff}
+.card-hover.selected{border-color:#2383e2;background:#eef4ff}
 
-/* ── OCR Drop Zone ── */
+/* ── MEMO LAYOUT ── */
+#page-memo{flex-direction:row!important;overflow:hidden}
+#memo-list-col{
+  width:210px;flex-shrink:0;border-right:1px solid #e9e9e7;
+  background:#fbfbfa;display:flex;flex-direction:column;overflow:hidden;
+}
+#memo-list-header{padding:10px 8px 8px;flex-shrink:0}
+#memo-list-scroll{flex:1;overflow-y:auto;padding:0 4px 8px}
+#memo-editor-col{flex:1;overflow-y:auto;padding:32px 40px 40px;display:flex;flex-direction:column}
+.mi{padding:7px 9px;border-radius:6px;cursor:pointer;margin-bottom:1px}
+.mi:hover{background:#ebebea}
+.mi.active{background:#e9e9e7}
+.mi-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mi-date{font-size:11px;color:#9b9a97;margin-top:1px}
+#save-status{font-size:12px;color:#9b9a97;margin-bottom:8px;min-height:16px}
+#memo-title-input{width:100%;font-size:28px;font-weight:700;border:none;outline:none;background:transparent;margin-bottom:6px}
+#memo-tags-input{width:100%;border:none;outline:none;font-size:13px;color:#9b9a97;background:transparent;margin-bottom:14px}
+#memo-content-input{width:100%;flex:1;min-height:400px;border:none;outline:none;resize:none;font-size:15px;line-height:1.85;background:transparent}
+
+/* ── TASK ── */
+.task-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border:1px solid #e9e9e7;border-radius:8px;
+  margin-bottom:6px;background:#fff;
+}
+.task-item.done{opacity:.5}
+.task-check{width:18px;height:18px;cursor:pointer;accent-color:#2383e2;flex-shrink:0}
+.task-title{flex:1;font-size:14px}
+.task-title.done{text-decoration:line-through;color:#9b9a97}
+.task-meta{font-size:11px;color:#9b9a97;margin-top:2px}
+.task-cat{
+  font-size:11px;padding:2px 8px;border-radius:10px;
+  background:#f0f0ef;color:#787774;flex-shrink:0;
+}
+.priority-high{background:#fdecea;color:#c94040}
+.priority-mid{background:#fff4e0;color:#946900}
+.priority-low{background:#eefbee;color:#2d8a4e}
+
+/* AI Analysis result */
+#ai-analysis-panel{
+  background:#f8f4ff;border:1px solid #d4c8f0;border-radius:10px;
+  padding:18px;margin-top:16px;display:none;
+}
+.ai-situation{
+  font-size:15px;font-weight:600;color:#6940a5;
+  margin-bottom:14px;padding:10px 14px;
+  background:#fff;border-radius:8px;border-left:4px solid #6940a5;
+}
+.ai-task-card{
+  background:#fff;border-radius:8px;padding:13px 15px;margin-bottom:8px;
+  border-left:4px solid #e9e9e7;
+}
+.ai-task-card.p-high{border-left-color:#eb5757}
+.ai-task-card.p-mid{border-left-color:#f5a623}
+.ai-task-card.p-low{border-left-color:#2d8a4e}
+.ai-task-title{font-weight:600;font-size:14px;margin-bottom:6px}
+.ai-task-meta{font-size:12px;color:#787774;display:flex;gap:12px;flex-wrap:wrap}
+.ai-tip{font-size:13px;color:#37352f;margin-top:6px;padding-top:6px;border-top:1px solid #f0f0ef}
+.ai-advice-box{
+  margin-top:14px;padding:12px 14px;background:#fff;border-radius:8px;
+  font-size:14px;line-height:1.7;color:#37352f;border:1px solid #d4c8f0;
+}
+
+/* ── EMAIL ── */
+.var-chip{
+  display:inline-block;background:#fffbe6;color:#946900;
+  border-radius:4px;padding:2px 7px;font-size:11px;margin:2px;
+  border:1px solid #f0e6c0;
+}
+.preview-box{
+  background:#fbfbfa;border:1px solid #e9e9e7;border-radius:8px;
+  padding:16px;white-space:pre-wrap;font-size:14px;line-height:1.8;
+  margin-top:10px;
+}
+
+/* Proofreading result */
+.score-ring{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;flex-shrink:0;
+}
+.score-high{background:#eefbee;color:#2d8a4e;border:3px solid #2d8a4e}
+.score-mid{background:#fff4e0;color:#946900;border:3px solid #f5a623}
+.score-low{background:#fdecea;color:#c94040;border:3px solid #eb5757}
+.proof-issue{
+  display:flex;gap:10px;padding:10px 12px;background:#fffbe6;
+  border-radius:7px;margin-bottom:6px;border-left:3px solid #f5a623;font-size:13px;
+}
+.proof-good{
+  display:flex;gap:10px;padding:10px 12px;background:#eefbee;
+  border-radius:7px;margin-bottom:6px;border-left:3px solid #2d8a4e;font-size:13px;
+}
+.corrected-area{
+  background:#f8f4ff;border:1px solid #d4c8f0;border-radius:8px;
+  padding:16px;white-space:pre-wrap;font-size:14px;line-height:1.8;
+  margin-top:8px;outline:none;
+}
+
+/* ── OCR ── */
 #drop-zone{
-  border:2px dashed #d3d1cb;border-radius:12px;padding:44px;
+  border:2px dashed #d3d1cb;border-radius:12px;padding:40px;
   text-align:center;cursor:pointer;transition:.2s;background:#fbfbfa;
-  margin-bottom:16px;
 }
 #drop-zone:hover,#drop-zone.drag-over{border-color:#2383e2;background:#f0f6ff}
-#drop-zone .dz-icon{font-size:44px}
-#drop-zone .dz-main{font-weight:600;font-size:15px;margin-top:10px}
-#drop-zone .dz-sub{font-size:13px;color:#787774;margin-top:4px}
 #ocr-result-box{
   border:1px solid #e9e9e7;border-radius:9px;padding:16px;
   min-height:100px;font-size:14px;line-height:1.85;
   white-space:pre-wrap;background:#fbfbfa;outline:none;
 }
 
-/* ── Checklist ── */
-.progress-wrap{margin:14px 0 6px}
-.progress-bar{height:6px;background:#e9e9e7;border-radius:3px}
+/* ── LOG ── */
+.log-item{
+  border:1px solid #e9e9e7;border-radius:8px;padding:13px 15px;
+  margin-bottom:8px;
+}
+.log-date{font-size:12px;font-weight:700;color:#2383e2;margin-bottom:6px}
+.log-section{font-size:12px;color:#787774;margin-top:6px}
+.log-text{font-size:13px;line-height:1.6;color:#37352f}
+.log-hours{display:inline-block;background:#f0f6ff;color:#2383e2;padding:1px 8px;border-radius:10px;font-size:11px;margin-left:6px}
+
+/* ── HR EVALUATION ── */
+.goal-card{
+  border:1px solid #e9e9e7;border-radius:9px;padding:14px 16px;
+  margin-bottom:10px;background:#fff;
+}
+.goal-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.goal-kpi{font-size:12px;color:#2383e2;background:#f0f6ff;display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:6px}
+.goal-detail{font-size:13px;color:#787774;line-height:1.6}
+.eval-section{margin-bottom:18px}
+.eval-section-title{font-size:12px;font-weight:700;color:#6940a5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.eval-item{
+  padding:10px 12px;background:#f8f4ff;border-radius:7px;
+  margin-bottom:5px;font-size:14px;line-height:1.6;border-left:3px solid #6940a5;
+}
+.eval-body{
+  background:#fbfbfa;border:1px solid #e9e9e7;border-radius:8px;
+  padding:16px;font-size:14px;line-height:1.85;white-space:pre-wrap;
+  outline:none;
+}
+.interview-tip{
+  padding:10px 12px;background:#fff4e0;border-radius:7px;
+  margin-bottom:5px;font-size:13px;border-left:3px solid #f5a623;
+}
+.goal-advice-card{
+  border:1px solid #d4c8f0;border-radius:9px;padding:14px 16px;
+  margin-bottom:10px;background:#f8f4ff;
+}
+.gac-cat{font-size:11px;color:#6940a5;font-weight:700;margin-bottom:4px}
+.gac-title{font-size:14px;font-weight:600;margin-bottom:5px}
+.gac-kpi{font-size:12px;color:#2383e2;margin-bottom:5px}
+.gac-why{font-size:12px;color:#787774}
+
+/* ── CHECKLIST ── */
+.progress-bar{height:6px;background:#e9e9e7;border-radius:3px;margin:10px 0 6px}
 .progress-fill{height:100%;background:#2383e2;border-radius:3px;transition:width .3s}
 .check-item{
-  display:flex;align-items:center;gap:10px;
-  padding:11px 13px;border-radius:7px;margin-bottom:5px;
-  border:1px solid #e9e9e7;cursor:pointer;font-size:14px;
-  transition:background .15s;
+  display:flex;align-items:center;gap:10px;padding:11px 13px;
+  border-radius:7px;margin-bottom:5px;border:1px solid #e9e9e7;
+  cursor:pointer;font-size:14px;transition:background .15s;
 }
 .check-item:hover{background:#f5f5f4}
 .check-item.done{opacity:.45;text-decoration:line-through;color:#9b9a97}
-.check-item input[type=checkbox]{
-  width:17px;height:17px;cursor:pointer;accent-color:#2383e2;flex-shrink:0;
+.check-item input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:#2383e2;flex-shrink:0}
+
+/* ── AI CHAT ── */
+#chat-page-inner{display:flex;flex-direction:column;height:100%}
+#chat-messages{flex:1;overflow-y:auto;padding:20px 36px}
+.chat-bubble{max-width:78%;margin-bottom:14px}
+.chat-bubble.user{margin-left:auto}
+.bubble-inner{
+  padding:11px 15px;border-radius:12px;font-size:14px;line-height:1.7;
 }
-.checklist-type-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-
-/* ── Search ── */
-#search-box{
-  width:100%;padding:11px 16px;font-size:15px;
-  border:1px solid #e9e9e7;border-radius:9px;
-  outline:none;margin-bottom:18px;
+.user .bubble-inner{background:#2383e2;color:#fff;border-bottom-right-radius:3px}
+.assistant .bubble-inner{background:#f5f5f4;color:#37352f;border-bottom-left-radius:3px;white-space:pre-wrap}
+.chat-input-area{
+  padding:12px 36px 20px;border-top:1px solid #e9e9e7;
+  display:flex;gap:8px;align-items:flex-end;
 }
-#search-box:focus{border-color:#2383e2}
-.s-result{border:1px solid #e9e9e7;border-radius:8px;padding:13px 15px;margin-bottom:8px;cursor:pointer}
-.s-result:hover{border-color:#2383e2;background:#f4f8ff}
-.s-title{font-weight:600;font-size:14px}
-.s-excerpt{font-size:13px;color:#787774;margin-top:3px}
-.tag{display:inline-block;background:#f3f0ff;color:#6940a5;border-radius:4px;padding:2px 7px;font-size:11px;margin:1px}
-
-/* ── Template fill area ── */
-#tpl-two-col{display:flex;gap:20px}
-#tpl-list-col{flex:0 0 220px}
-#tpl-fill-col{flex:1;min-width:0}
-.var-chip{background:#fffbe6;color:#946900;border-radius:4px;padding:2px 7px;font-size:12px;display:inline-block;margin:2px;border:1px solid #f0e6c0}
-.preview-box{background:#fbfbfa;border:1px solid #e9e9e7;border-radius:8px;padding:16px;margin-top:12px;white-space:pre-wrap;font-size:14px;line-height:1.8}
-
-/* ── Toast ── */
-#toast{
-  position:fixed;bottom:22px;right:22px;
-  background:#37352f;color:#fff;padding:10px 18px;
-  border-radius:9px;font-size:13px;z-index:9999;
-  opacity:0;transition:opacity .2s;pointer-events:none;
+#chat-input{flex:1;min-height:44px;max-height:140px;border:1px solid #e9e9e7;border-radius:9px;padding:10px 14px;font-size:14px;resize:none;outline:none;line-height:1.5}
+#chat-input:focus{border-color:#2383e2}
+.quick-prompts{display:flex;gap:6px;flex-wrap:wrap;padding:0 36px 10px}
+.qp-btn{
+  border:1px solid #d4c8f0;border-radius:14px;padding:4px 12px;
+  font-size:12px;background:#f8f4ff;color:#6940a5;cursor:pointer;white-space:nowrap;
 }
-#toast.show{opacity:1}
+.qp-btn:hover{background:#ede7ff}
 
-/* ── Divider ── */
+/* ── Utilities ── */
 .divider{height:1px;background:#e9e9e7;margin:16px 0}
-
-/* ── Loading ── */
-.loading{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#787774}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid #d3d1cb;border-top-color:#2383e2;border-radius:50%;animation:spin .7s linear infinite}
+.empty{text-align:center;padding:40px 20px;color:#9b9a97}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #d3d1cb;border-top-color:#2383e2;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── Empty state ── */
-.empty{text-align:center;padding:48px 20px;color:#9b9a97;font-size:14px}
-.empty-icon{font-size:40px;margin-bottom:12px}
-
-/* ── Responsive ── */
+.loading{color:#787774;font-size:13px}
+.search-result{border:1px solid #e9e9e7;border-radius:8px;padding:12px 14px;margin-bottom:7px;cursor:pointer}
+.search-result:hover{border-color:#2383e2;background:#f4f8ff}
+.tag{display:inline-block;background:#f3f0ff;color:#6940a5;border-radius:4px;padding:1px 7px;font-size:11px;margin:1px}
+#toast{position:fixed;bottom:20px;right:20px;background:#37352f;color:#fff;padding:10px 18px;border-radius:9px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
 @media(max-width:640px){
-  #memo-list-col{width:150px}
-  #memo-editor-col{padding:20px 16px}
-  .std-page{padding:20px 16px}
-  #tpl-two-col{flex-direction:column}
-  #tpl-list-col{flex:none;width:100%}
-  .nav-btn{font-size:12px;padding:4px 8px}
+  #sidebar{width:50px}
+  .nav-item span:last-child{display:none}
+  .sidebar-logo span:last-child{display:none}
+  .page-header{padding:16px 16px 0}
+  .page-body{padding:0 16px 30px}
+  #memo-list-col{width:140px}
+  #memo-editor-col{padding:16px}
+  #chat-messages{padding:16px}
+  .chat-input-area{padding:10px 16px 16px}
+  .quick-prompts{padding:0 16px 8px}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════ TOP BAR ═══════════════ -->
-<div id="topbar">
-  <span id="topbar-logo">📋 営業ナレッジ</span>
-  <button class="nav-btn active" id="nav-memo"      onclick="showPage('memo')">📝 メモ</button>
-  <button class="nav-btn"        id="nav-search"    onclick="showPage('search')">🔍 検索</button>
-  <button class="nav-btn"        id="nav-ocr"       onclick="showPage('ocr')">📷 OCR</button>
-  <button class="nav-btn"        id="nav-template"  onclick="showPage('template')">✉️ テンプレ</button>
-  <button class="nav-btn"        id="nav-checklist" onclick="showPage('checklist')">✅ チェック</button>
-  <div class="spacer"></div>
-  <a id="db-link" href="#" target="_blank" title="データベースを開く">📊 DB</a>
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav id="sidebar">
+  <div class="sidebar-logo"><span>📋</span><span>営業ナレッジ</span></div>
+  <div class="nav-items">
+    <div class="nav-item active" id="nav-memo"      onclick="showPage('memo')">      <span class="ni-icon">📝</span><span>メモ</span></div>
+    <div class="nav-item"        id="nav-task"      onclick="showPage('task')">      <span class="ni-icon">📋</span><span>タスク</span><span class="nav-badge" id="task-badge" style="display:none">0</span></div>
+    <div class="nav-item"        id="nav-ocr"       onclick="showPage('ocr')">       <span class="ni-icon">📷</span><span>OCR</span></div>
+    <div class="nav-item"        id="nav-email"     onclick="showPage('email')">     <span class="ni-icon">✉️</span><span>メール</span></div>
+    <div class="nav-item"        id="nav-checklist" onclick="showPage('checklist')"> <span class="ni-icon">☑️</span><span>チェック</span></div>
+    <div class="nav-item"        id="nav-log"       onclick="showPage('log')">       <span class="ni-icon">📓</span><span>業務日誌</span></div>
+    <div class="nav-item"        id="nav-hr"        onclick="showPage('hr')">        <span class="ni-icon">🏆</span><span>評価サポート</span></div>
+    <div class="nav-item"        id="nav-chat"      onclick="showPage('chat')">      <span class="ni-icon">🤖</span><span>AI相談</span></div>
+  </div>
+  <div class="sidebar-footer"><a id="db-link" href="#" target="_blank">📊 データベース</a></div>
+</nav>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<div id="content">
+
+<!-- ── MEMO ── -->
+<div class="page active" id="page-memo" style="flex-direction:row!important;overflow:hidden">
+  <div id="memo-list-col">
+    <div id="memo-list-header">
+      <button class="btn btn-primary btn-full" style="font-size:13px" onclick="newMemo()">＋ 新規メモ</button>
+    </div>
+    <div id="memo-list-scroll"><div id="memo-list"></div></div>
+  </div>
+  <div id="memo-editor-col">
+    <div id="save-status"></div>
+    <input id="memo-title-input"   type="text" placeholder="タイトル…"            oninput="autoSave()">
+    <input id="memo-tags-input"    type="text" placeholder="タグ（カンマ区切り）…" oninput="autoSave()">
+    <div class="divider"></div>
+    <textarea id="memo-content-input" placeholder="機種の仕様、お客様情報、手順メモなど何でも…" oninput="autoSave()"></textarea>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="deleteCurrent()">🗑 削除</button>
+    </div>
+  </div>
 </div>
 
-<!-- ═══════════════ PAGES ═══════════════ -->
-<div id="pages">
-
-  <!-- ── MEMO ── -->
-  <div class="page active" id="page-memo">
-    <div id="memo-list-col">
-      <div id="memo-list-header">
-        <button class="btn btn-primary btn-full" onclick="newMemo()">＋ 新規メモ</button>
-      </div>
-      <div id="memo-list-scroll">
-        <div class="empty" id="memo-list-empty" style="display:none">
-          <div>まだメモがありません</div>
-        </div>
-        <div id="memo-list"></div>
-      </div>
-    </div>
-    <div id="memo-editor-col">
-      <div id="save-status"></div>
-      <input id="memo-title-input"   type="text" placeholder="タイトル…"               oninput="autoSave()">
-      <input id="memo-tags-input"    type="text" placeholder="タグ（カンマ区切り）…"    oninput="autoSave()">
-      <div class="divider"></div>
-      <textarea id="memo-content-input" placeholder="ここに内容を入力…&#10;&#10;機種の仕様、お客様メモ、手順など何でも" oninput="autoSave()"></textarea>
-      <div class="editor-actions">
-        <button class="btn btn-ghost btn-sm" onclick="deleteCurrent()">🗑 削除</button>
-      </div>
-    </div>
+<!-- ── TASK ── -->
+<div class="page" id="page-task">
+  <div class="page-header">
+    <div class="page-title">📋 タスク管理</div>
+    <div class="page-sub">未完了タスクをAIが優先度分析します</div>
   </div>
-
-  <!-- ── SEARCH ── -->
-  <div class="page" id="page-search">
-    <div class="std-page">
-      <div class="page-heading">🔍 全文検索</div>
-      <div class="page-sub">メモのタイトル・内容・タグを横断検索します</div>
-      <input id="search-box" type="text" placeholder="キーワードを入力…" oninput="doSearch(this.value)">
-      <div id="search-results"></div>
+  <div class="page-body">
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <input type="text" id="task-input" placeholder="タスク名を入力…" style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter')addTask()">
+      <input type="date" id="task-deadline" style="width:140px">
+      <select id="task-category" style="width:110px">
+        <option>見積</option><option>営業</option><option>内部作業</option>
+        <option>製品知識</option><option>通常</option>
+      </select>
+      <button class="btn btn-primary" onclick="addTask()">追加</button>
+      <button class="btn btn-ai" onclick="runTaskAnalysis()">🤖 AI優先度分析</button>
     </div>
+    <div id="task-list"></div>
+    <div id="ai-analysis-panel"></div>
   </div>
+</div>
 
-  <!-- ── OCR ── -->
-  <div class="page" id="page-ocr">
-    <div class="std-page">
-      <div class="page-heading">📷 OCR・テキスト抽出</div>
-      <div class="page-sub">画像・PDFをアップロードしてテキストを自動抽出します（Gemini AI使用）</div>
-
-      <div id="drop-zone"
-           onclick="document.getElementById('file-input').click()"
-           ondragover="event.preventDefault();this.classList.add('drag-over')"
-           ondragleave="this.classList.remove('drag-over')"
-           ondrop="handleDrop(event)">
-        <div class="dz-icon" id="dz-icon">📄</div>
-        <div class="dz-main" id="dz-main">クリックまたはドロップでファイルを選択</div>
-        <div class="dz-sub" id="dz-sub">対応: JPG・PNG・PDF（最大 10MB）</div>
+<!-- ── OCR ── -->
+<div class="page" id="page-ocr">
+  <div class="page-header">
+    <div class="page-title">📷 OCR・テキスト抽出</div>
+    <div class="page-sub">画像・PDFからテキストを自動抽出します（Gemini AI）</div>
+  </div>
+  <div class="page-body" style="max-width:740px">
+    <div id="drop-zone"
+         onclick="document.getElementById('file-input').click()"
+         ondragover="event.preventDefault();this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)">
+      <div style="font-size:42px" id="dz-icon">📄</div>
+      <div style="font-weight:600;font-size:15px;margin-top:10px" id="dz-main">クリックまたはドロップでファイルを選択</div>
+      <div style="font-size:13px;color:#787774;margin-top:4px" id="dz-sub">対応: JPG・PNG・PDF（最大10MB）</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none" onchange="handleFileInput(this)">
+    <div id="ocr-actions" style="display:none;margin:14px 0">
+      <label>抽出の指示（任意）</label>
+      <input type="text" id="ocr-prompt" placeholder="例: 金額と品番だけ抽出して　/　表を読み取って">
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+        <button class="btn btn-primary" onclick="runOcr()">テキスト抽出</button>
+        <button class="btn btn-secondary" onclick="resetOcr()">リセット</button>
+        <span id="ocr-loading" class="loading" style="display:none"><span class="spin"></span>処理中…</span>
       </div>
-      <input type="file" id="file-input" accept="image/*,application/pdf" style="display:none" onchange="handleFileInput(this)">
-
-      <div id="ocr-actions" style="display:none;margin-bottom:16px">
-        <label>抽出の指示（任意）</label>
-        <input type="text" id="ocr-prompt" placeholder="例: 金額と品番だけ抽出して  /  表を読み取って">
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-primary" onclick="runOcr()">テキスト抽出</button>
-          <button class="btn btn-secondary" onclick="resetOcr()">ファイルをリセット</button>
-          <span id="ocr-loading" class="loading" style="display:none"><span class="spin"></span>処理中…</span>
+    </div>
+    <div id="ocr-result-area" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:14px">抽出結果（クリックで編集可）</strong>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="copyOcrText()">コピー</button>
+          <button class="btn btn-primary btn-sm" onclick="saveOcrAsMemo()">メモに保存</button>
         </div>
       </div>
+      <div id="ocr-result-box" contenteditable="true"></div>
+    </div>
+  </div>
+</div>
 
-      <div id="ocr-result-area" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong style="font-size:14px">抽出結果（クリックして編集可）</strong>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-secondary btn-sm" onclick="copyOcrText()">コピー</button>
-            <button class="btn btn-primary btn-sm" onclick="saveOcrAsMemo()">メモに保存</button>
+<!-- ── EMAIL ── -->
+<div class="page" id="page-email">
+  <div class="page-header">
+    <div class="page-title">✉️ メール</div>
+    <div class="page-sub">テンプレートから下書き作成、またはAI添削</div>
+  </div>
+  <div class="page-body">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('email','templates')">テンプレート</button>
+      <button class="tab-btn"        onclick="switchTab('email','proofread')">AI添削</button>
+    </div>
+
+    <!-- テンプレートタブ -->
+    <div class="tab-pane active" id="email-tab-templates">
+      <div style="display:flex;gap:20px">
+        <div style="flex:0 0 210px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong style="font-size:13px;color:#787774">一覧</strong>
+            <button class="btn btn-primary btn-sm" onclick="openNewTpl()">＋ 新規</button>
           </div>
-        </div>
-        <div id="ocr-result-box" contenteditable="true"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TEMPLATE ── -->
-  <div class="page" id="page-template">
-    <div class="std-page" style="max-width:960px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <div class="page-heading">✉️ メールテンプレート</div>
-        <button class="btn btn-primary btn-sm" onclick="openNewTpl()">＋ 新規</button>
-      </div>
-      <div class="page-sub">テンプレートを選択して変数を入力し、Gmailの下書きを一発作成します</div>
-      <div id="tpl-two-col">
-        <div id="tpl-list-col">
-          <div class="section-title">テンプレート一覧</div>
           <div id="tpl-list"></div>
         </div>
-        <div id="tpl-fill-col">
-          <div id="tpl-fill-area">
-            <div class="empty">
-              <div class="empty-icon">👈</div>
-              <div>左からテンプレートを選んでください</div>
-            </div>
+        <div style="flex:1" id="tpl-fill-area">
+          <div class="empty"><div class="empty-icon">👈</div><div>テンプレートを選んでください</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI添削タブ -->
+    <div class="tab-pane" id="email-tab-proofread">
+      <div style="max-width:700px">
+        <label>添削したいメール本文を貼り付け</label>
+        <textarea id="proof-input" rows="10" placeholder="件名：〇〇&#10;&#10;〇〇様&#10;&#10;お世話になっております。&#10;…"></textarea>
+        <label>補足情報（任意）</label>
+        <input type="text" id="proof-context" placeholder="例: 初回連絡のメール　/ 苦情対応のフォロー">
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <button class="btn btn-ai" onclick="runProofread()">🤖 AI添削</button>
+          <span id="proof-loading" class="loading" style="display:none"><span class="spin"></span>添削中…</span>
+        </div>
+        <div id="proof-result" style="display:none;margin-top:20px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CHECKLIST ── -->
+<div class="page" id="page-checklist">
+  <div class="page-header">
+    <div class="page-title">☑️ 送信前チェックリスト</div>
+    <div class="page-sub">確認漏れによるミスを防ぎます</div>
+  </div>
+  <div class="page-body" style="max-width:580px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn btn-secondary" onclick="loadChecklist('email')">📧 メール送信前</button>
+      <button class="btn btn-secondary" onclick="loadChecklist('estimate')">📊 見積書送付前</button>
+      <button class="btn btn-secondary" onclick="loadChecklist('visit')">🚗 訪問前</button>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="resetChecklist()">リセット</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div id="checklist-count" style="font-size:13px;color:#787774;margin-bottom:12px">種類を選択してください</div>
+    <div id="checklist-items"></div>
+  </div>
+</div>
+
+<!-- ── DAILY LOG ── -->
+<div class="page" id="page-log">
+  <div class="page-header">
+    <div class="page-title">📓 業務日誌</div>
+    <div class="page-sub">日々の記録が人事評価の材料になります。毎日1分で記録を</div>
+  </div>
+  <div class="page-body">
+    <div style="display:flex;gap:20px">
+      <!-- 入力フォーム -->
+      <div style="flex:0 0 320px">
+        <strong style="font-size:13px;color:#787774">今日の記録</strong>
+        <div id="log-editing-badge" style="display:none;background:#fff4e0;color:#946900;font-size:12px;padding:4px 10px;border-radius:6px;margin-top:6px;border:1px solid #f5a623">編集中</div>
+        <label>日付</label>
+        <input type="date" id="log-date">
+        <label>本日の業務内容</label>
+        <textarea id="log-work" rows="3" placeholder="例: 〇〇社へ見積書作成・送付、△△社フォローアップメール送信"></textarea>
+        <label>達成したこと・良かったこと</label>
+        <textarea id="log-achievements" rows="2" placeholder="例: 〇〇社から受注連絡あり、見積書を30分で完成できた"></textarea>
+        <label>課題・困ったこと</label>
+        <textarea id="log-issues" rows="2" placeholder="例: 機種Aの納期回答に時間がかかった"></textarea>
+        <div class="form-row" style="margin-top:12px">
+          <div>
+            <label>業務時間（時間）</label>
+            <input type="number" id="log-hours" min="0" max="24" step="0.5" placeholder="8">
+          </div>
+          <div>
+            <label>タグ</label>
+            <input type="text" id="log-tags" placeholder="見積,訪問">
+          </div>
+        </div>
+        <input type="hidden" id="log-editing-id">
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn btn-primary" onclick="saveLog()">保存</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearLogForm()">クリア</button>
+        </div>
+      </div>
+      <!-- 履歴 -->
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <strong style="font-size:13px;color:#787774">記録履歴</strong>
+          <span id="log-count" style="font-size:12px;color:#9b9a97"></span>
+        </div>
+        <div id="log-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HR EVALUATION ── -->
+<div class="page" id="page-hr">
+  <div class="page-header">
+    <div class="page-title">🏆 人事評価サポート</div>
+    <div class="page-sub">日々の記録から自己評価文を自動生成。面談対策まで対応</div>
+  </div>
+  <div class="page-body">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('hr','goals')">目標管理</button>
+      <button class="tab-btn"        onclick="switchTab('hr','generate')">自己評価を生成</button>
+      <button class="tab-btn"        onclick="switchTab('hr','advice')">目標設定アドバイス</button>
+    </div>
+
+    <!-- 目標管理 -->
+    <div class="tab-pane active" id="hr-tab-goals">
+      <div style="display:flex;gap:20px">
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <strong style="font-size:14px">設定中の目標</strong>
+            <button class="btn btn-primary btn-sm" onclick="openNewGoal()">＋ 目標を追加</button>
+          </div>
+          <div id="hr-goal-list"></div>
+        </div>
+        <div style="flex:0 0 280px" id="hr-goal-form-area">
+          <div class="empty" style="padding:20px 10px">
+            <div>＋ボタンで目標を追加</div>
+            <div style="font-size:12px;margin-top:6px">サンプル目標が入っています<br>内容を編集してご利用ください</div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ── CHECKLIST ── -->
-  <div class="page" id="page-checklist">
-    <div class="std-page" style="max-width:600px">
-      <div class="page-heading">✅ 送信前チェックリスト</div>
-      <div class="page-sub">確認漏れによるミスを防ぎます</div>
-      <div class="checklist-type-btns">
-        <button class="btn btn-secondary" onclick="loadChecklist('email')">📧 メール送信前</button>
-        <button class="btn btn-secondary" onclick="loadChecklist('estimate')">📊 見積書送付前</button>
-        <button class="btn btn-secondary" onclick="loadChecklist('visit')">🚗 訪問前</button>
-        <button class="btn btn-ghost btn-sm" onclick="resetChecklist()" style="margin-left:auto">リセット</button>
+    <!-- 評価生成 -->
+    <div class="tab-pane" id="hr-tab-generate">
+      <div style="max-width:700px">
+        <div class="card" style="background:#f8f4ff;border-color:#d4c8f0;margin-bottom:16px">
+          <strong style="font-size:14px;color:#6940a5">📝 使い方</strong>
+          <div style="font-size:13px;color:#37352f;margin-top:6px;line-height:1.7">
+            ① 「目標管理」タブで期初目標を設定<br>
+            ② 「業務日誌」に日々の記録を蓄積<br>
+            ③ 「自己評価を生成」ボタンで評価文を自動作成
+          </div>
+        </div>
+        <label>評価期間</label>
+        <input type="text" id="hr-term-input" placeholder="例: 2025年度上期（4〜9月）" value="2025年度上期（4〜9月）">
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <button class="btn btn-ai" onclick="runGenerateEval()">🤖 自己評価文を生成</button>
+          <span id="hr-gen-loading" class="loading" style="display:none"><span class="spin"></span>生成中（30秒ほど）…</span>
+        </div>
+        <div id="hr-eval-result" style="display:none;margin-top:24px"></div>
       </div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- 目標設定アドバイス -->
+    <div class="tab-pane" id="hr-tab-advice">
+      <div style="max-width:700px">
+        <label>現在の状況・課題を入力してください</label>
+        <textarea id="hr-situation" rows="5" placeholder="例:&#10;・今年で営業2年目&#10;・見積書作成に時間がかかっている&#10;・機種の知識が不足していると感じる&#10;・新規顧客の開拓をもっとやりたい&#10;・評価面談でうまく自分をアピールできていない"></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <button class="btn btn-ai" onclick="runGoalAdvice()">🤖 目標案を提案してもらう</button>
+          <span id="hr-adv-loading" class="loading" style="display:none"><span class="spin"></span>提案中…</span>
+        </div>
+        <div id="hr-advice-result" style="display:none;margin-top:24px"></div>
       </div>
-      <div id="checklist-count" style="font-size:13px;color:#787774;margin-bottom:12px">種類を選択してください</div>
-      <div id="checklist-items"></div>
     </div>
   </div>
+</div>
 
-</div><!-- /pages -->
+<!-- ── AI CHAT ── -->
+<div class="page" id="page-chat" style="overflow:hidden">
+  <div id="chat-page-inner">
+    <div style="padding:20px 36px 8px;border-bottom:1px solid #e9e9e7;flex-shrink:0">
+      <div class="page-title" style="font-size:20px">🤖 AI相談</div>
+      <div class="page-sub" style="margin-bottom:0">営業・業務・製品知識・スキルアップについて何でも聞いてください</div>
+    </div>
+    <div class="quick-prompts" style="padding:10px 36px 6px">
+      <button class="qp-btn" onclick="quickPrompt('見積書を素早く作るコツを教えてください')">見積書を早く作るコツ</button>
+      <button class="qp-btn" onclick="quickPrompt('お客様のクレームへの対応方法を教えてください')">クレーム対応</button>
+      <button class="qp-btn" onclick="quickPrompt('新規顧客への初回アプローチのポイントを教えてください')">新規アプローチ</button>
+      <button class="qp-btn" onclick="quickPrompt('基板・PCBの基礎知識を営業として知っておくべき点を教えてください')">基板の基礎知識</button>
+      <button class="qp-btn" onclick="quickPrompt('仕事が忙しくて残業が続いています。優先度のつけ方を教えてください')">優先度のつけ方</button>
+      <button class="qp-btn" onclick="quickPrompt('評価面談でどうアピールすればいいか教えてください')">評価面談のコツ</button>
+    </div>
+    <div id="chat-messages">
+      <div class="chat-bubble assistant">
+        <div class="bubble-inner">こんにちは！営業専門AIアシスタントです。<br>見積書・メール・顧客対応・製品知識・評価面談など、仕事のことは何でも相談してください。<br><br>上のクイックボタンからも相談できます 👆</div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <textarea id="chat-input" placeholder="質問を入力…（Shift+Enterで改行）" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+      <button class="btn btn-primary" onclick="sendChat()" style="height:44px;padding:0 18px">送信</button>
+    </div>
+  </div>
+</div>
 
+</div><!-- /content -->
 <div id="toast"></div>
 
-<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
 <script>
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 // STATE
-// ─────────────────────────────────────────────
-let memos = [];
-let currentMemoId = null;
-let saveTimer = null;
-let templates = [];
-let selectedTplId = null;
-let checkItems = [];
-let ocrBase64 = null;
-let ocrMime = null;
+// ─────────────────────────────────────
+const S = {
+  memos: [], currentMemoId: null, saveTimer: null,
+  tasks: [],
+  templates: [], selectedTplId: null,
+  checkItems: [],
+  ocrBase64: null, ocrMime: null,
+  hrGoals: [],
+  chatHistory: [],
+};
 
-// ─────────────────────────────────────────────
-// NAVIGATION
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
+// NAV
+// ─────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-
   if (name === 'memo')     loadMemos();
-  if (name === 'template') loadTemplates();
+  if (name === 'task')     loadTasks();
+  if (name === 'email')    loadTemplates();
+  if (name === 'log')      { initLogForm(); loadLogs(); }
+  if (name === 'hr')       loadHrGoals();
 }
 
-// ─────────────────────────────────────────────
+function switchTab(page, tab) {
+  const prefix = page + '-tab-';
+  document.querySelectorAll(`#page-${page} .tab-pane`).forEach(p => p.classList.remove('active'));
+  document.querySelectorAll(`#page-${page} .tab-btn`).forEach(b => b.classList.remove('active'));
+  document.getElementById(prefix + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (page === 'hr' && tab === 'goals') loadHrGoals();
+}
+
+// ─────────────────────────────────────
 // TOAST
-// ─────────────────────────────────────────────
-let toastTimer;
+// ─────────────────────────────────────
+let _toastT;
 function toast(msg, dur = 2200) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), dur);
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 // MEMO
-// ─────────────────────────────────────────────
-function loadMemos(query) {
-  google.script.run
-    .withSuccessHandler(data => { memos = data; renderMemoList(); })
-    .getMemos(query || null);
+// ─────────────────────────────────────
+function loadMemos(q) {
+  google.script.run.withSuccessHandler(d => { S.memos = d; renderMemoList(); }).getMemos(q || null);
 }
-
 function renderMemoList() {
-  const listEl = document.getElementById('memo-list');
-  const emptyEl = document.getElementById('memo-list-empty');
-  if (!memos.length) {
-    listEl.innerHTML = '';
-    emptyEl.style.display = 'block';
-    return;
-  }
-  emptyEl.style.display = 'none';
-  listEl.innerHTML = memos.map(m => `
-    <div class="memo-item ${m.id === currentMemoId ? 'active' : ''}"
-         onclick="openMemo('${m.id}')">
+  const el = document.getElementById('memo-list');
+  if (!S.memos.length) { el.innerHTML = '<div style="font-size:13px;color:#9b9a97;padding:10px 8px">まだメモがありません</div>'; return; }
+  el.innerHTML = S.memos.map(m =>
+    `<div class="mi ${m.id === S.currentMemoId ? 'active' : ''}" onclick="openMemo('${m.id}')">
       <div class="mi-title">${esc(m.title || '無題')}</div>
       <div class="mi-date">${m.updated || ''}</div>
-    </div>
-  `).join('');
+    </div>`
+  ).join('');
 }
-
 function newMemo() {
-  currentMemoId = null;
-  document.getElementById('memo-title-input').value = '';
-  document.getElementById('memo-tags-input').value = '';
-  document.getElementById('memo-content-input').value = '';
+  S.currentMemoId = null;
+  ['memo-title-input','memo-tags-input','memo-content-input'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('save-status').textContent = '新規メモ';
   renderMemoList();
   document.getElementById('memo-title-input').focus();
 }
-
 function openMemo(id) {
-  const m = memos.find(x => x.id === id);
-  if (!m) return;
-  currentMemoId = id;
+  const m = S.memos.find(x => x.id === id); if (!m) return;
+  S.currentMemoId = id;
   document.getElementById('memo-title-input').value = m.title || '';
   document.getElementById('memo-tags-input').value = m.tags || '';
   document.getElementById('memo-content-input').value = m.content || '';
-  document.getElementById('save-status').textContent = '更新: ' + (m.updated || m.created || '');
+  document.getElementById('save-status').textContent = '更新: ' + (m.updated || '');
   renderMemoList();
 }
-
 function autoSave() {
   document.getElementById('save-status').textContent = '入力中…';
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(doSave, 1400);
+  clearTimeout(S.saveTimer);
+  S.saveTimer = setTimeout(doSave, 1400);
 }
-
 function doSave() {
   const memo = {
-    id: currentMemoId,
-    title:   document.getElementById('memo-title-input').value || '無題',
+    id: S.currentMemoId,
+    title: document.getElementById('memo-title-input').value || '無題',
     content: document.getElementById('memo-content-input').value,
-    tags:    document.getElementById('memo-tags-input').value,
+    tags: document.getElementById('memo-tags-input').value,
   };
-  google.script.run
-    .withSuccessHandler(res => {
-      if (!res.ok) return;
-      currentMemoId = res.id;
-      document.getElementById('save-status').textContent = '保存済み ✓';
-      loadMemos();
-    })
-    .saveMemo(memo);
+  google.script.run.withSuccessHandler(r => {
+    if (!r.ok) return;
+    S.currentMemoId = r.id;
+    document.getElementById('save-status').textContent = '保存済み ✓';
+    loadMemos();
+  }).saveMemo(memo);
 }
-
 function deleteCurrent() {
-  if (!currentMemoId) return;
+  if (!S.currentMemoId) return;
   if (!confirm('このメモを削除しますか？')) return;
+  google.script.run.withSuccessHandler(() => {
+    S.currentMemoId = null;
+    ['memo-title-input','memo-tags-input','memo-content-input'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('save-status').textContent = '削除しました';
+    loadMemos();
+  }).deleteMemo(S.currentMemoId);
+}
+// Search from memo page - simple: tap search from sidebar will work
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'k') { e.preventDefault(); showPage('task'); }
+});
+
+// ─────────────────────────────────────
+// TASKS
+// ─────────────────────────────────────
+function loadTasks() {
+  google.script.run.withSuccessHandler(d => { S.tasks = d; renderTasks(); }).getTasks();
+}
+function renderTasks() {
+  const el = document.getElementById('task-list');
+  const open = S.tasks.filter(t => t.status !== '完了');
+  const done = S.tasks.filter(t => t.status === '完了');
+  const badge = document.getElementById('task-badge');
+  if (open.length) { badge.textContent = open.length; badge.style.display = 'inline'; }
+  else badge.style.display = 'none';
+  const renderItem = t => `
+    <div class="task-item ${t.status === '完了' ? 'done' : ''}">
+      <input type="checkbox" class="task-check" ${t.status === '完了' ? 'checked' : ''} onclick="toggleTask('${t.id}')">
+      <div style="flex:1;min-width:0">
+        <div class="task-title ${t.status === '完了' ? 'done' : ''}">${esc(t.title)}</div>
+        <div class="task-meta">${t.deadline ? '期限: ' + t.deadline : '期限なし'}</div>
+      </div>
+      <span class="task-cat">${esc(t.category)}</span>
+      <button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')">✕</button>
+    </div>`;
+  el.innerHTML = (open.length ? open.map(renderItem).join('') : '<div class="empty"><div class="empty-icon">✅</div><div>未完了タスクはありません</div></div>') +
+    (done.length ? `<div style="font-size:12px;color:#9b9a97;margin:14px 0 6px">完了済み</div>${done.map(renderItem).join('')}` : '');
+}
+function addTask() {
+  const title = document.getElementById('task-input').value.trim();
+  if (!title) return;
+  const task = {
+    title,
+    deadline: document.getElementById('task-deadline').value,
+    category: document.getElementById('task-category').value,
+  };
+  google.script.run.withSuccessHandler(() => {
+    document.getElementById('task-input').value = '';
+    document.getElementById('task-deadline').value = '';
+    loadTasks();
+  }).saveTask(task);
+}
+function toggleTask(id) {
+  google.script.run.withSuccessHandler(() => loadTasks()).toggleTaskStatus(id);
+}
+function deleteTask(id) {
+  google.script.run.withSuccessHandler(() => loadTasks()).deleteTask(id);
+}
+function runTaskAnalysis() {
+  const panel = document.getElementById('ai-analysis-panel');
+  panel.style.display = 'block';
+  panel.innerHTML = '<div class="loading"><span class="spin"></span>AIが分析中…</div>';
   google.script.run
-    .withSuccessHandler(() => {
-      currentMemoId = null;
-      ['memo-title-input','memo-tags-input','memo-content-input']
-        .forEach(id => document.getElementById(id).value = '');
-      document.getElementById('save-status').textContent = '削除しました';
-      loadMemos();
+    .withSuccessHandler(r => {
+      if (r.error) { panel.innerHTML = `<div style="color:#eb5757">${esc(r.error)}</div>`; return; }
+      renderTaskAnalysis(r.data);
     })
-    .deleteMemo(currentMemoId);
+    .withFailureHandler(e => { panel.innerHTML = `<div style="color:#eb5757">エラー: ${esc(String(e))}</div>`; })
+    .analyzeTasks();
+}
+function renderTaskAnalysis(d) {
+  const panel = document.getElementById('ai-analysis-panel');
+  if (!d) { panel.innerHTML = '<div style="color:#eb5757">分析結果を取得できませんでした</div>'; return; }
+  const pMap = {'高':'p-high','中':'p-mid','低':'p-low'};
+  const tasks = (d.tasks || []).map(t => `
+    <div class="ai-task-card ${pMap[t.priority] || ''}">
+      <div class="ai-task-title">
+        <span style="background:${t.priority==='高'?'#fdecea':t.priority==='中'?'#fff4e0':'#eefbee'};color:${t.priority==='高'?'#c94040':t.priority==='中'?'#946900':'#2d8a4e'};padding:1px 8px;border-radius:10px;font-size:12px;margin-right:8px">${t.priority}</span>
+        ${esc(t.title)}
+      </div>
+      <div class="ai-task-meta">
+        <span>📅 ${t.deadline || '期限なし'}</span>
+        <span>⏱ ${esc(t.time || '—')}</span>
+      </div>
+      <div style="font-size:12px;color:#787774;margin-top:5px">理由: ${esc(t.reason)}</div>
+      <div class="ai-tip">💡 ${esc(t.tip)}</div>
+    </div>`).join('');
+  panel.innerHTML = `
+    <div class="ai-situation">🎯 ${esc(d.situation || '')}</div>
+    <div style="font-size:13px;font-weight:600;color:#6940a5;margin-bottom:10px">優先度順のタスク一覧</div>
+    ${tasks}
+    <div class="ai-advice-box">📝 <strong>今日のアドバイス：</strong>${esc(d.advice || '')}</div>`;
 }
 
-// ─────────────────────────────────────────────
-// SEARCH
-// ─────────────────────────────────────────────
-let searchTimer;
-function doSearch(q) {
-  clearTimeout(searchTimer);
-  const el = document.getElementById('search-results');
-  if (!q.trim()) { el.innerHTML = ''; return; }
-  searchTimer = setTimeout(() => {
-    google.script.run
-      .withSuccessHandler(data => {
-        if (!data.length) {
-          el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div>見つかりませんでした</div></div>';
-          return;
-        }
-        el.innerHTML = data.map(m => {
-          const excerpt = (m.content || '').slice(0, 90) + ((m.content || '').length > 90 ? '…' : '');
-          const tags = (m.tags || '').split(',').filter(t => t.trim()).map(t => `<span class="tag">${esc(t.trim())}</span>`).join('');
-          return `<div class="s-result" onclick="goToMemo('${m.id}')">
-            <div class="s-title">${esc(m.title || '無題')}</div>
-            <div class="s-excerpt">${esc(excerpt)}</div>
-            ${tags ? `<div style="margin-top:5px">${tags}</div>` : ''}
-          </div>`;
-        }).join('');
-      })
-      .getMemos(q);
-  }, 280);
-}
-
-function goToMemo(id) {
-  showPage('memo');
-  setTimeout(() => {
-    const m = memos.find(x => x.id === id);
-    if (m) openMemo(id);
-    else {
-      loadMemos();
-      setTimeout(() => openMemo(id), 600);
-    }
-  }, 100);
-}
-
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 // OCR
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 function handleDrop(e) {
   e.preventDefault();
   document.getElementById('drop-zone').classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) loadOcrFile(file);
+  const f = e.dataTransfer.files[0]; if (f) loadOcrFile(f);
 }
-
 function handleFileInput(input) {
-  const file = input.files[0];
-  if (file) loadOcrFile(file);
-  input.value = '';
+  const f = input.files[0]; if (f) loadOcrFile(f); input.value = '';
 }
-
-function loadOcrFile(file) {
-  if (file.size > 10 * 1024 * 1024) { toast('10MB以下のファイルを選択してください'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    ocrBase64 = e.target.result.split(',')[1];
-    ocrMime = file.type || 'application/octet-stream';
-    document.getElementById('dz-icon').textContent = file.type.includes('pdf') ? '📑' : '🖼';
-    document.getElementById('dz-main').textContent = file.name;
-    document.getElementById('dz-sub').textContent = (file.size / 1024).toFixed(0) + ' KB — クリックで変更';
+function loadOcrFile(f) {
+  if (f.size > 10 * 1024 * 1024) { toast('10MB以下のファイルを選択してください'); return; }
+  const r = new FileReader();
+  r.onload = e => {
+    S.ocrBase64 = e.target.result.split(',')[1];
+    S.ocrMime = f.type;
+    document.getElementById('dz-icon').textContent = f.type.includes('pdf') ? '📑' : '🖼';
+    document.getElementById('dz-main').textContent = f.name;
+    document.getElementById('dz-sub').textContent = (f.size / 1024).toFixed(0) + ' KB';
     document.getElementById('ocr-actions').style.display = 'block';
     document.getElementById('ocr-result-area').style.display = 'none';
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(f);
 }
-
 function resetOcr() {
-  ocrBase64 = null; ocrMime = null;
+  S.ocrBase64 = null; S.ocrMime = null;
   document.getElementById('dz-icon').textContent = '📄';
   document.getElementById('dz-main').textContent = 'クリックまたはドロップでファイルを選択';
-  document.getElementById('dz-sub').textContent = '対応: JPG・PNG・PDF（最大 10MB）';
+  document.getElementById('dz-sub').textContent = '対応: JPG・PNG・PDF（最大10MB）';
   document.getElementById('ocr-actions').style.display = 'none';
   document.getElementById('ocr-result-area').style.display = 'none';
 }
-
 function runOcr() {
-  if (!ocrBase64) { toast('ファイルを選択してください'); return; }
-  const prompt = document.getElementById('ocr-prompt').value;
-  document.getElementById('ocr-loading').style.display = 'inline-flex';
+  if (!S.ocrBase64) { toast('ファイルを選択してください'); return; }
+  document.getElementById('ocr-loading').style.display = 'inline';
   google.script.run
-    .withSuccessHandler(res => {
+    .withSuccessHandler(r => {
       document.getElementById('ocr-loading').style.display = 'none';
-      if (res.error) { toast('エラー: ' + res.error, 5000); return; }
-      document.getElementById('ocr-result-box').textContent = res.text;
+      if (r.error) { toast('エラー: ' + r.error, 5000); return; }
+      document.getElementById('ocr-result-box').textContent = r.text;
       document.getElementById('ocr-result-area').style.display = 'block';
     })
-    .withFailureHandler(() => {
-      document.getElementById('ocr-loading').style.display = 'none';
-      toast('エラーが発生しました。APIキーを確認してください。', 5000);
-    })
-    .processFile(ocrBase64, ocrMime, prompt || null);
+    .processFile(S.ocrBase64, S.ocrMime, document.getElementById('ocr-prompt').value || null);
 }
-
 function copyOcrText() {
-  const text = document.getElementById('ocr-result-box').textContent;
-  navigator.clipboard.writeText(text).then(() => toast('クリップボードにコピーしました'));
+  navigator.clipboard.writeText(document.getElementById('ocr-result-box').textContent)
+    .then(() => toast('コピーしました'));
 }
-
 function saveOcrAsMemo() {
   const text = document.getElementById('ocr-result-box').textContent;
-  const today = new Date().toLocaleDateString('ja-JP');
-  google.script.run
-    .withSuccessHandler(res => {
-      if (res.ok) { toast('メモに保存しました'); showPage('memo'); }
-    })
-    .saveMemo({ title: 'OCR ' + today, content: text, tags: 'OCR' });
+  google.script.run.withSuccessHandler(r => {
+    if (r.ok) { toast('メモに保存しました'); showPage('memo'); }
+  }).saveMemo({ title: 'OCR ' + new Date().toLocaleDateString('ja-JP'), content: text, tags: 'OCR' });
 }
 
-// ─────────────────────────────────────────────
-// TEMPLATES
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
+// EMAIL TEMPLATES
+// ─────────────────────────────────────
 function loadTemplates() {
-  google.script.run
-    .withSuccessHandler(data => { templates = data; renderTplList(); })
-    .getTemplates();
+  google.script.run.withSuccessHandler(d => { S.templates = d; renderTplList(); }).getTemplates();
 }
-
 function renderTplList() {
-  document.getElementById('tpl-list').innerHTML = templates.map(t => `
-    <div class="card ${t.id === selectedTplId ? 'selected' : ''}" onclick="selectTpl('${t.id}')">
-      <div class="card-title">${esc(t.name)}</div>
-      <div class="card-sub">${esc(t.subject.slice(0, 36))}${t.subject.length > 36 ? '…' : ''}</div>
-    </div>
-  `).join('') + `
-    <div class="card" onclick="openNewTpl()" style="border-style:dashed;text-align:center;color:#9b9a97">
-      ＋ 新規テンプレート
-    </div>
-  `;
+  document.getElementById('tpl-list').innerHTML = S.templates.map(t =>
+    `<div class="card card-hover ${t.id === S.selectedTplId ? 'selected' : ''}" onclick="selectTpl('${t.id}')">
+      <div style="font-size:13px;font-weight:600">${esc(t.name)}</div>
+      <div style="font-size:12px;color:#787774;margin-top:2px">${esc(t.subject.slice(0, 30))}…</div>
+    </div>`
+  ).join('') + `<div class="card card-hover" style="border-style:dashed;text-align:center;color:#9b9a97;font-size:13px" onclick="openNewTpl()">＋ 新規テンプレート</div>`;
 }
-
 function extractVars(tpl) {
-  const all = ((tpl.subject || '') + ' ' + (tpl.body || '')).match(/\{[^}]+\}/g) || [];
-  return [...new Set(all)];
+  const m = ((tpl.subject || '') + ' ' + (tpl.body || '')).match(/\{[^}]+\}/g) || [];
+  return [...new Set(m)];
 }
-
 function selectTpl(id) {
-  selectedTplId = id;
-  renderTplList();
-  const tpl = templates.find(t => t.id === id);
-  if (!tpl) return;
+  S.selectedTplId = id; renderTplList();
+  const tpl = S.templates.find(t => t.id === id); if (!tpl) return;
   const vars = extractVars(tpl);
-  const fillEl = document.getElementById('tpl-fill-area');
-  fillEl.innerHTML = `
+  const el = document.getElementById('tpl-fill-area');
+  el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <strong style="font-size:16px">${esc(tpl.name)}</strong>
+      <strong style="font-size:15px">${esc(tpl.name)}</strong>
       <button class="btn btn-danger btn-sm" onclick="deleteTpl('${id}')">削除</button>
     </div>
-    ${vars.length ? `
-      <div class="section-title">変数を入力</div>
-      <div style="margin-bottom:6px">${vars.map(v => `<span class="var-chip">${esc(v)}</span>`).join('')}</div>
-      ${vars.map(v => `
-        <label>${esc(v)}</label>
-        <input type="text" id="var_${v.replace(/[{}]/g,'')}" placeholder="${esc(v)}">
-      `).join('')}
-    ` : '<div class="section-title">変数なし</div>'}
+    ${vars.length ? `<div style="margin-bottom:10px">${vars.map(v=>`<span class="var-chip">${esc(v)}</span>`).join('')}</div>
+    ${vars.map(v=>`<label>${esc(v)}</label><input type="text" id="var_${v.replace(/[{}]/g,'')}" placeholder="${esc(v)}">`).join('')}` : ''}
     <label>送信先メール（任意）</label>
     <input type="email" id="tpl-to" placeholder="example@company.com">
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
       <button class="btn btn-secondary" onclick="previewTpl('${id}')">プレビュー</button>
-      <button class="btn btn-primary"   onclick="createDraft('${id}')">✉️ Gmail 下書きを作成</button>
+      <button class="btn btn-primary" onclick="createDraft('${id}')">✉️ Gmail下書きを作成</button>
     </div>
-    <div id="tpl-preview" style="display:none;margin-top:14px"></div>
-  `;
+    <div id="tpl-preview" style="display:none;margin-top:14px"></div>`;
 }
-
+function applyVars(str, vars) {
+  let r = str;
+  for (const [k, v] of Object.entries(vars)) r = r.split(k).join(v || k);
+  return r.replace(/\{日付\}/g, new Date().toLocaleDateString('ja-JP'));
+}
 function getVarMap(tpl) {
   const vars = extractVars(tpl);
-  const map = {};
-  vars.forEach(v => {
-    const key = v.replace(/[{}]/g, '');
-    const el = document.getElementById('var_' + key);
-    map[v] = el ? el.value : v;
-  });
-  return map;
+  const m = {};
+  vars.forEach(v => { const el = document.getElementById('var_' + v.replace(/[{}]/g, '')); m[v] = el ? el.value : ''; });
+  return m;
 }
-
-function applyVars(str, map) {
-  let r = str;
-  for (const [k, v] of Object.entries(map)) r = r.split(k).join(v || k);
-  // Replace {日付} with today automatically
-  r = r.replace(/\{日付\}/g, new Date().toLocaleDateString('ja-JP'));
-  return r;
-}
-
 function previewTpl(id) {
-  const tpl = templates.find(t => t.id === id);
-  if (!tpl) return;
+  const tpl = S.templates.find(t => t.id === id); if (!tpl) return;
   const map = getVarMap(tpl);
-  const subj = applyVars(tpl.subject, map);
-  const body = applyVars(tpl.body, map);
   const el = document.getElementById('tpl-preview');
   el.style.display = 'block';
-  el.innerHTML = `
-    <div class="section-title">プレビュー</div>
-    <div class="preview-box">
-      <div style="font-size:12px;color:#787774;margin-bottom:4px">件名</div>
-      <div style="font-weight:600;font-size:14px;margin-bottom:12px">${esc(subj)}</div>
-      <div style="font-size:12px;color:#787774;margin-bottom:4px">本文</div>
-      <div style="font-size:14px;line-height:1.85">${esc(body)}</div>
-    </div>
-  `;
+  el.innerHTML = `<div style="font-size:12px;color:#787774;margin-bottom:4px">件名</div>
+    <div style="font-weight:600;font-size:14px;margin-bottom:12px">${esc(applyVars(tpl.subject, map))}</div>
+    <div style="font-size:12px;color:#787774;margin-bottom:4px">本文</div>
+    <div class="preview-box">${esc(applyVars(tpl.body, map))}</div>`;
 }
-
 function createDraft(id) {
-  const tpl = templates.find(t => t.id === id);
-  if (!tpl) return;
+  const tpl = S.templates.find(t => t.id === id); if (!tpl) return;
   const map = getVarMap(tpl);
-  const subj = applyVars(tpl.subject, map);
-  const body = applyVars(tpl.body, map);
-  const to   = (document.getElementById('tpl-to') || {}).value || '';
-  google.script.run
-    .withSuccessHandler(() => toast('Gmailに下書きを作成しました ✓'))
-    .createGmailDraft(to, subj, body);
+  google.script.run.withSuccessHandler(() => toast('Gmail に下書きを作成しました ✓'))
+    .createGmailDraft(document.getElementById('tpl-to')?.value || '', applyVars(tpl.subject, map), applyVars(tpl.body, map));
 }
-
 function openNewTpl() {
-  selectedTplId = null;
-  renderTplList();
+  S.selectedTplId = null; renderTplList();
   document.getElementById('tpl-fill-area').innerHTML = `
-    <strong style="font-size:16px">新規テンプレート</strong>
-    <label>テンプレート名</label>
-    <input type="text" id="new-name" placeholder="見積書送付">
-    <label>件名（変数は {顧客名} のように記述）</label>
-    <input type="text" id="new-subj" placeholder="【見積書】{顧客名}様_{商品名}">
+    <strong style="font-size:15px">新規テンプレート</strong>
+    <label>名前</label><input type="text" id="new-tpl-name" placeholder="見積書送付">
+    <label>件名（変数は {顧客名} の形式）</label>
+    <input type="text" id="new-tpl-subject" placeholder="【見積書】{顧客名}様">
     <label>本文</label>
-    <textarea id="new-body" rows="7" placeholder="{顧客名} 様\n\nいつもお世話になっております。{自分の名前}です。\n…"></textarea>
+    <textarea id="new-tpl-body" rows="7" placeholder="{顧客名} 様&#10;&#10;お世話になっております。…"></textarea>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn btn-primary" onclick="saveTpl()">保存</button>
       <button class="btn btn-secondary" onclick="loadTemplates()">キャンセル</button>
-    </div>
-  `;
+    </div>`;
 }
-
 function saveTpl() {
-  const tpl = {
-    name:    (document.getElementById('new-name') || {}).value || 'テンプレート',
-    subject: (document.getElementById('new-subj') || {}).value || '',
-    body:    (document.getElementById('new-body') || {}).value || '',
-  };
-  google.script.run
-    .withSuccessHandler(() => { toast('保存しました'); loadTemplates(); })
-    .saveTemplate(tpl);
+  google.script.run.withSuccessHandler(() => { toast('保存しました'); loadTemplates(); })
+    .saveTemplate({
+      name: document.getElementById('new-tpl-name')?.value || 'テンプレート',
+      subject: document.getElementById('new-tpl-subject')?.value || '',
+      body: document.getElementById('new-tpl-body')?.value || '',
+    });
 }
-
 function deleteTpl(id) {
   if (!confirm('このテンプレートを削除しますか？')) return;
-  google.script.run
-    .withSuccessHandler(() => {
-      toast('削除しました');
-      selectedTplId = null;
-      loadTemplates();
-      document.getElementById('tpl-fill-area').innerHTML = '<div class="empty"><div class="empty-icon">👈</div><div>テンプレートを選んでください</div></div>';
-    })
-    .deleteTemplate(id);
+  google.script.run.withSuccessHandler(() => {
+    toast('削除しました'); S.selectedTplId = null; loadTemplates();
+    document.getElementById('tpl-fill-area').innerHTML = '<div class="empty"><div class="empty-icon">👈</div><div>テンプレートを選んでください</div></div>';
+  }).deleteTemplate(id);
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
+// EMAIL PROOFREADING
+// ─────────────────────────────────────
+function runProofread() {
+  const text = document.getElementById('proof-input').value.trim();
+  if (!text) { toast('メール本文を入力してください'); return; }
+  document.getElementById('proof-loading').style.display = 'inline';
+  document.getElementById('proof-result').style.display = 'none';
+  google.script.run
+    .withSuccessHandler(r => {
+      document.getElementById('proof-loading').style.display = 'none';
+      if (r.error) { toast('エラー: ' + r.error, 5000); return; }
+      renderProofResult(r.data);
+    })
+    .proofreadEmail(text, document.getElementById('proof-context').value);
+}
+function renderProofResult(d) {
+  const el = document.getElementById('proof-result');
+  if (!d) { el.innerHTML = '<div style="color:#eb5757">結果を取得できませんでした</div>'; el.style.display = 'block'; return; }
+  const score = d.score || 0;
+  const cls = score >= 80 ? 'score-high' : score >= 60 ? 'score-mid' : 'score-low';
+  const issues = (d.issues || []).map(i => `<div class="proof-issue"><span>⚠️</span><div><strong>${esc(i.type)}</strong>: ${esc(i.text)}</div></div>`).join('');
+  const goods = (d.good_points || []).map(g => `<div class="proof-good"><span>✓</span><div>${esc(g)}</div></div>`).join('');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div class="score-ring ${cls}">${score}</div>
+      <div>
+        <div style="font-size:16px;font-weight:700">${esc(d.verdict || '')}</div>
+        <div style="font-size:13px;color:#787774">スコア: ${score}/100</div>
+      </div>
+    </div>
+    ${issues ? `<div style="margin-bottom:14px"><strong style="font-size:13px;color:#787774;display:block;margin-bottom:6px">問題点・改善提案</strong>${issues}</div>` : ''}
+    ${goods ? `<div style="margin-bottom:14px"><strong style="font-size:13px;color:#787774;display:block;margin-bottom:6px">良かった点</strong>${goods}</div>` : ''}
+    ${d.corrected_body ? `
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:13px;color:#6940a5">✨ 修正後の本文</strong>
+        <button class="btn btn-secondary btn-sm" onclick="copyText('proof-corrected')">コピー</button>
+      </div>
+      <div class="corrected-area" id="proof-corrected" contenteditable="true">${esc(d.corrected_body)}</div>
+    </div>` : ''}`;
+}
+
+// ─────────────────────────────────────
 // CHECKLIST
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 function loadChecklist(type) {
-  google.script.run
-    .withSuccessHandler(items => {
-      checkItems = items.map((text, i) => ({ id: i, text, done: false }));
-      renderChecklist();
-    })
-    .getChecklist(type);
+  google.script.run.withSuccessHandler(items => {
+    S.checkItems = items.map((text, i) => ({ id: i, text, done: false }));
+    renderChecklist();
+  }).getChecklist(type);
 }
-
 function renderChecklist() {
-  const el = document.getElementById('checklist-items');
-  el.innerHTML = checkItems.map(item => `
-    <div class="check-item ${item.done ? 'done' : ''}" onclick="toggleCheck(${item.id})">
+  document.getElementById('checklist-items').innerHTML = S.checkItems.map(item =>
+    `<div class="check-item ${item.done ? 'done' : ''}" onclick="toggleCheck(${item.id})">
       <input type="checkbox" ${item.done ? 'checked' : ''} onclick="event.stopPropagation();toggleCheck(${item.id})">
       <span>${esc(item.text)}</span>
-    </div>
-  `).join('');
-  updateProgress();
-}
-
-function toggleCheck(id) {
-  const item = checkItems.find(x => x.id === id);
-  if (!item) return;
-  item.done = !item.done;
-  renderChecklist();
-}
-
-function updateProgress() {
-  const done  = checkItems.filter(x => x.done).length;
-  const total = checkItems.length;
-  const pct   = total ? Math.round(done / total * 100) : 0;
+    </div>`
+  ).join('');
+  const done = S.checkItems.filter(x => x.done).length;
+  const total = S.checkItems.length;
+  const pct = total ? Math.round(done / total * 100) : 0;
   document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('checklist-count').textContent =
-    total ? `${done} / ${total} 完了 (${pct}%)` : '種類を選択してください';
+  document.getElementById('checklist-count').textContent = total ? `${done} / ${total} 完了 (${pct}%)` : '種類を選択してください';
   if (total && done === total) setTimeout(() => toast('全項目チェック完了！送信できます ✓'), 200);
 }
+function toggleCheck(id) {
+  const item = S.checkItems.find(x => x.id === id); if (item) { item.done = !item.done; renderChecklist(); }
+}
+function resetChecklist() { S.checkItems.forEach(x => x.done = false); renderChecklist(); }
 
-function resetChecklist() {
-  checkItems.forEach(x => x.done = false);
-  renderChecklist();
+// ─────────────────────────────────────
+// DAILY LOG
+// ─────────────────────────────────────
+function initLogForm() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('log-date').value = today;
+}
+function clearLogForm() {
+  document.getElementById('log-editing-id').value = '';
+  document.getElementById('log-editing-badge').style.display = 'none';
+  initLogForm();
+  ['log-work','log-achievements','log-issues'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('log-hours').value = '';
+  document.getElementById('log-tags').value = '';
+}
+function loadLogs() {
+  google.script.run.withSuccessHandler(d => {
+    document.getElementById('log-count').textContent = d.length + '件の記録';
+    document.getElementById('log-list').innerHTML = d.length ? d.map(l => `
+      <div class="log-item">
+        <div class="log-date">${l.date}<span class="log-hours">⏱ ${l.hours}時間</span>
+          <span style="float:right;display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="editLog(${JSON.stringify(l).split('"').join("&quot;")})">編集</button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteLog('${l.id}')">削除</button>
+          </span>
+        </div>
+        ${l.work ? `<div class="log-section">業務内容</div><div class="log-text">${esc(l.work)}</div>` : ''}
+        ${l.achievements ? `<div class="log-section">達成・成果</div><div class="log-text">${esc(l.achievements)}</div>` : ''}
+        ${l.issues ? `<div class="log-section">課題</div><div class="log-text">${esc(l.issues)}</div>` : ''}
+      </div>`).join('') : '<div class="empty"><div class="empty-icon">📓</div><div>まだ記録がありません</div></div>';
+  }).getDailyLogs(null);
+}
+function saveLog() {
+  const log = {
+    id: document.getElementById('log-editing-id').value || null,
+    date: document.getElementById('log-date').value,
+    work: document.getElementById('log-work').value,
+    achievements: document.getElementById('log-achievements').value,
+    issues: document.getElementById('log-issues').value,
+    hours: document.getElementById('log-hours').value,
+    tags: document.getElementById('log-tags').value,
+  };
+  if (!log.work && !log.achievements) { toast('業務内容か達成したことを入力してください'); return; }
+  google.script.run.withSuccessHandler(() => {
+    toast('保存しました ✓'); clearLogForm(); loadLogs();
+  }).saveDailyLog(log);
+}
+function editLog(log) {
+  document.getElementById('log-editing-id').value = log.id;
+  document.getElementById('log-editing-badge').style.display = 'block';
+  document.getElementById('log-date').value = log.date ? log.date.replace(/\//g, '-') : '';
+  document.getElementById('log-work').value = log.work || '';
+  document.getElementById('log-achievements').value = log.achievements || '';
+  document.getElementById('log-issues').value = log.issues || '';
+  document.getElementById('log-hours').value = log.hours || '';
+  document.getElementById('log-tags').value = log.tags || '';
+}
+function deleteLog(id) {
+  if (!confirm('この日誌を削除しますか？')) return;
+  google.script.run.withSuccessHandler(() => { toast('削除しました'); loadLogs(); }).deleteDailyLog(id);
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
+// HR EVALUATION
+// ─────────────────────────────────────
+function loadHrGoals() {
+  google.script.run.withSuccessHandler(d => { S.hrGoals = d; renderHrGoals(); }).getHrGoals();
+}
+function renderHrGoals() {
+  const el = document.getElementById('hr-goal-list');
+  el.innerHTML = S.hrGoals.length ? S.hrGoals.map(g => `
+    <div class="goal-card">
+      <div class="goal-title">${esc(g.title)}</div>
+      <div><span class="goal-kpi">${esc(g.kpi)}</span></div>
+      <div class="goal-detail" style="margin-top:6px">${esc(g.detail)}</div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="btn btn-ghost btn-sm" onclick="openEditGoal(${JSON.stringify(g).split('"').join("&quot;")})">編集</button>
+        <button class="btn btn-ghost btn-sm" onclick="deleteGoal('${g.id}')">削除</button>
+      </div>
+    </div>`).join('') : '<div class="empty"><div>目標がまだありません</div></div>';
+}
+function openNewGoal() {
+  const el = document.getElementById('hr-goal-form-area');
+  el.innerHTML = `
+    <strong style="font-size:14px">目標を追加</strong>
+    <label>評価期</label><input type="text" id="gf-term" placeholder="2025年度上期（4〜9月）">
+    <label>目標タイトル</label><input type="text" id="gf-title" placeholder="例: 見積書作成時間を50%短縮">
+    <label>測定指標（KPI）</label><input type="text" id="gf-kpi" placeholder="例: 作成時間 現状比50%削減">
+    <label>詳細・取り組み方</label>
+    <textarea id="gf-detail" rows="4" placeholder="例: テンプレートを整備し…"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-primary" onclick="saveGoal(null)">保存</button>
+      <button class="btn btn-secondary" onclick="clearGoalForm()">キャンセル</button>
+    </div>`;
+}
+function openEditGoal(g) {
+  const el = document.getElementById('hr-goal-form-area');
+  el.innerHTML = `
+    <strong style="font-size:14px">目標を編集</strong>
+    <input type="hidden" id="gf-id" value="${g.id}">
+    <label>評価期</label><input type="text" id="gf-term" value="${esc(g.term)}">
+    <label>目標タイトル</label><input type="text" id="gf-title" value="${esc(g.title)}">
+    <label>測定指標（KPI）</label><input type="text" id="gf-kpi" value="${esc(g.kpi)}">
+    <label>詳細・取り組み方</label>
+    <textarea id="gf-detail" rows="4">${esc(g.detail)}</textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-primary" onclick="saveGoal('${g.id}')">更新</button>
+      <button class="btn btn-secondary" onclick="clearGoalForm()">キャンセル</button>
+    </div>`;
+}
+function clearGoalForm() {
+  document.getElementById('hr-goal-form-area').innerHTML = '<div class="empty" style="padding:20px 10px"><div>＋ボタンで目標を追加</div></div>';
+}
+function saveGoal(id) {
+  const goal = {
+    id: id || document.getElementById('gf-id')?.value || null,
+    term: document.getElementById('gf-term')?.value || '',
+    title: document.getElementById('gf-title')?.value || '',
+    kpi: document.getElementById('gf-kpi')?.value || '',
+    detail: document.getElementById('gf-detail')?.value || '',
+  };
+  if (!goal.title) { toast('目標タイトルを入力してください'); return; }
+  google.script.run.withSuccessHandler(() => { toast('保存しました'); clearGoalForm(); loadHrGoals(); }).saveHrGoal(goal);
+}
+function deleteGoal(id) {
+  if (!confirm('この目標を削除しますか？')) return;
+  google.script.run.withSuccessHandler(() => { toast('削除しました'); loadHrGoals(); }).deleteHrGoal(id);
+}
+function runGenerateEval() {
+  const term = document.getElementById('hr-term-input').value;
+  document.getElementById('hr-gen-loading').style.display = 'inline';
+  document.getElementById('hr-eval-result').style.display = 'none';
+  google.script.run
+    .withSuccessHandler(r => {
+      document.getElementById('hr-gen-loading').style.display = 'none';
+      if (r.error) { toast('エラー: ' + r.error, 6000); return; }
+      renderEvalResult(r.data);
+    })
+    .withFailureHandler(e => { document.getElementById('hr-gen-loading').style.display = 'none'; toast('エラー: ' + e, 5000); })
+    .generateEvaluation(term);
+}
+function renderEvalResult(d) {
+  const el = document.getElementById('hr-eval-result');
+  if (!d) { el.innerHTML = '<div style="color:#eb5757">結果を取得できませんでした</div>'; el.style.display = 'block'; return; }
+  const achievements = (d.achievements || []).map(a => `<div class="eval-item">・${esc(a)}</div>`).join('');
+  const appeals = (d.appeal_points || []).map(a => `<div class="eval-item">⭐ ${esc(a)}</div>`).join('');
+  const nextGoals = (d.next_goals || []).map(g => `<div class="eval-item">→ ${esc(g)}</div>`).join('');
+  const tips = (d.interview_tips || []).map(t => `<div class="interview-tip">💬 ${esc(t)}</div>`).join('');
+  el.style.display = 'block';
+  el.innerHTML = `
+    ${achievements ? `<div class="eval-section"><div class="eval-section-title">達成・実績</div>${achievements}</div>` : ''}
+    <div class="eval-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="eval-section-title" style="margin-bottom:0">自己評価文（コピーして使用）</div>
+        <button class="btn btn-secondary btn-sm" onclick="copyText('eval-body-text')">コピー</button>
+      </div>
+      <div class="eval-body" id="eval-body-text" contenteditable="true">${esc(d.self_eval || '')}</div>
+    </div>
+    ${appeals ? `<div class="eval-section"><div class="eval-section-title">アピールポイント</div>${appeals}</div>` : ''}
+    ${d.growth ? `<div class="eval-section"><div class="eval-section-title">成長・改善の記録</div><div class="eval-body" contenteditable="true">${esc(d.growth)}</div></div>` : ''}
+    ${nextGoals ? `<div class="eval-section"><div class="eval-section-title">次期目標案</div>${nextGoals}</div>` : ''}
+    ${tips ? `<div class="eval-section"><div class="eval-section-title">面談アドバイス</div>${tips}</div>` : ''}`;
+}
+function runGoalAdvice() {
+  const sit = document.getElementById('hr-situation').value.trim();
+  if (!sit) { toast('現在の状況を入力してください'); return; }
+  document.getElementById('hr-adv-loading').style.display = 'inline';
+  document.getElementById('hr-advice-result').style.display = 'none';
+  google.script.run
+    .withSuccessHandler(r => {
+      document.getElementById('hr-adv-loading').style.display = 'none';
+      if (r.error) { toast('エラー: ' + r.error, 5000); return; }
+      renderGoalAdvice(r.data);
+    })
+    .generateGoalAdvice(sit);
+}
+function renderGoalAdvice(d) {
+  const el = document.getElementById('hr-advice-result');
+  el.style.display = 'block';
+  const goals = (d.goals || []).map(g => `
+    <div class="goal-advice-card">
+      <div class="gac-cat">${esc(g.category)}</div>
+      <div class="gac-title">${esc(g.title)}</div>
+      <div class="gac-kpi">📊 ${esc(g.kpi)}</div>
+      <div style="font-size:13px;line-height:1.6;color:#37352f;margin-bottom:4px">${esc(g.detail)}</div>
+      <div class="gac-why">💡 ${esc(g.why)}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="useGoalAdvice('${esc(g.title)}','${esc(g.kpi)}','${esc(g.detail)}')">この目標を使う</button>
+    </div>`).join('');
+  el.innerHTML = `
+    ${goals}
+    ${d.advice ? `<div class="ai-advice-box" style="margin-top:10px">📝 ${esc(d.advice)}</div>` : ''}
+    ${d.caution ? `<div style="margin-top:8px;padding:10px 14px;background:#fdecea;border-radius:8px;font-size:13px;border-left:3px solid #eb5757">⚠️ ${esc(d.caution)}</div>` : ''}`;
+}
+function useGoalAdvice(title, kpi, detail) {
+  // Switch to goal management tab and pre-fill form
+  document.querySelectorAll('#page-hr .tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#page-hr .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('hr-tab-goals').classList.add('active');
+  document.querySelectorAll('#page-hr .tab-btn')[0].classList.add('active');
+  openNewGoal();
+  setTimeout(() => {
+    document.getElementById('gf-title').value = title;
+    document.getElementById('gf-kpi').value = kpi;
+    document.getElementById('gf-detail').value = detail;
+    document.getElementById('gf-term').value = '2025年度下期（10〜3月）';
+  }, 50);
+}
+
+// ─────────────────────────────────────
+// AI CHAT
+// ─────────────────────────────────────
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  S.chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  appendBubble('user', text);
+  const loadingId = 'loading-' + Date.now();
+  appendBubble('assistant', '<span class="spin"></span>考え中…', loadingId);
+  google.script.run
+    .withSuccessHandler(r => {
+      const el = document.getElementById(loadingId);
+      if (el) el.remove();
+      if (r.error) { appendBubble('assistant', 'エラー: ' + r.error); return; }
+      S.chatHistory.push({ role: 'assistant', content: r.text });
+      appendBubble('assistant', r.text);
+    })
+    .aiChat(S.chatHistory);
+}
+function appendBubble(role, text, id) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ' + role;
+  if (id) div.id = id;
+  div.innerHTML = `<div class="bubble-inner">${role === 'assistant' ? escHtml(text) : esc(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function quickPrompt(text) {
+  document.getElementById('chat-input').value = text;
+  sendChat();
+}
+function escHtml(str) {
+  // For assistant messages, allow basic formatting
+  return esc(str).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+// ─────────────────────────────────────
 // UTILS
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 function esc(str) {
-  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent || el.innerText)
+    .then(() => toast('コピーしました'));
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 // INIT
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────
 loadMemos();
 google.script.run.withSuccessHandler(url => {
   if (url) document.getElementById('db-link').href = url;
