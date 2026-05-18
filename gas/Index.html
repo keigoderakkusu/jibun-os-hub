@@ -369,6 +369,41 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .news-loading{text-align:center;padding:60px 0;color:var(--muted);font-size:14px}
 .news-sources{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6}
 
+/* ── SELF ANALYSIS ── */
+.sa-tabs{display:flex;gap:4px;margin-bottom:20px;background:#f3f3f1;padding:4px;border-radius:10px;width:fit-content}
+.sa-tab{padding:7px 22px;border-radius:7px;border:none;background:transparent;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s}
+.sa-tab.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.sa-picker{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.sa-picker button{background:none;border:none;font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.sa-picker button:hover{background:#f0f0ef}
+.sa-period-label{font-size:17px;font-weight:700;min-width:120px;text-align:center}
+.sa-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:20px}
+.sa-stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 12px;text-align:center}
+.sa-stat-num{font-size:26px;font-weight:800;color:#2383e2;line-height:1}
+.sa-stat-label{font-size:11px;color:var(--muted);margin-top:4px}
+.sa-score-wrap{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:14px;padding:20px 24px;margin-bottom:16px;color:#fff;display:flex;align-items:center;gap:20px}
+.sa-score-num{font-size:56px;font-weight:900;line-height:1}
+.sa-score-label{font-size:12px;opacity:.8;margin-bottom:4px}
+.sa-score-comment{font-size:13px;line-height:1.6}
+.sa-section{margin-bottom:16px}
+.sa-section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sa-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:10px}
+.sa-list{list-style:none;padding:0;margin:0}
+.sa-list li{padding:6px 0 6px 18px;position:relative;font-size:13px;line-height:1.6;border-bottom:1px solid #f0f0ef}
+.sa-list li:last-child{border:none}
+.sa-list li::before{content:"•";position:absolute;left:4px;color:#2383e2;font-weight:700}
+.sa-list.challenge li::before{color:#f5a623}
+.sa-list.action li::before{content:"→";color:#2d8a4e}
+.sa-pr-box{width:100%;min-height:140px;padding:14px;border:2px solid #e0e7ff;border-radius:10px;font-size:13px;line-height:1.85;resize:vertical;font-family:inherit;color:#1a1a1a;background:#fafbff}
+.sa-pr-box:focus{outline:none;border-color:#6366f1}
+.sa-copy-btn{margin-top:8px;font-size:12px}
+.sa-coach{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:12px;padding:16px 20px;font-size:13px;line-height:1.8;color:#14532d}
+.sa-hidden-strength{background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;font-size:13px;color:#713f12}
+.sa-hidden-label{font-size:11px;font-weight:700;color:#a16207;margin-bottom:6px}
+.sa-loading{text-align:center;padding:80px 0;color:var(--muted)}
+.sa-mood-bar{height:6px;background:#e5e7eb;border-radius:3px;margin-top:6px;overflow:hidden}
+.sa-mood-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f87171,#fb923c,#facc15,#4ade80,#22d3ee)}
+
 /* ── Utilities ── */
 .divider{height:1px;background:#e9e9e7;margin:16px 0}
 .empty{text-align:center;padding:40px 20px;color:#9b9a97}
@@ -414,6 +449,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
     <div class="nav-item"        id="nav-meeting"   onclick="showPage('meeting')">  <span class="ni-icon">📅</span><span>商談メモ</span></div>
     <div class="nav-item"        id="nav-numbers"   onclick="showPage('numbers')">  <span class="ni-icon">📈</span><span>数値目標</span></div>
     <div class="nav-item"        id="nav-news"      onclick="showPage('news')">     <span class="ni-icon">📰</span><span>ニュース</span></div>
+    <div class="nav-item"        id="nav-selfana"   onclick="showPage('selfana')">  <span class="ni-icon">🔍</span><span>自己分析</span></div>
   </div>
   <div class="sidebar-footer"><a id="db-link" href="#" target="_blank">📊 データベース</a></div>
 </nav>
@@ -814,6 +850,27 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
   </div>
 </div>
 
+<div class="page" id="page-selfana">
+  <div class="page-header">
+    <div class="page-title">🔍 自己分析レポート</div>
+    <div class="page-sub">業務日誌・タスク・商談・数値目標をAIが統合分析。人事評価の自己PR文も自動生成</div>
+  </div>
+  <div class="page-body" style="max-width:780px">
+    <div class="sa-tabs">
+      <button class="sa-tab active" id="sa-tab-month" onclick="saSetPeriod('month',this)">月次振り返り</button>
+      <button class="sa-tab"        id="sa-tab-year"  onclick="saSetPeriod('year',this)">年次振り返り</button>
+    </div>
+    <div class="sa-picker">
+      <button onclick="saChangePeriod(-1)">◀</button>
+      <span class="sa-period-label" id="sa-period-label">—</span>
+      <button onclick="saChangePeriod(1)">▶</button>
+      <button class="btn btn-ai" style="margin-left:12px" onclick="runSelfAnalysis()">🤖 分析開始</button>
+      <span class="loading" id="sa-loading" style="display:none"><span class="spin"></span>AIが分析中…（30秒ほど）</span>
+    </div>
+    <div id="sa-result"></div>
+  </div>
+</div>
+
 <div class="page" id="page-news">
   <div class="page-header">
     <div class="page-title">📰 マーケットニュース</div>
@@ -870,6 +927,7 @@ function showPage(name) {
   if (name === 'meeting')  { initMeetingForm(); loadMeetings(); }
   if (name === 'numbers')  initNumbers();
   if (name === 'news')     loadNews(false);
+  if (name === 'selfana')  initSelfAna();
 }
 
 function switchTab(page, tab, btn) {
@@ -1941,6 +1999,178 @@ function renderWeeklyReport(d) {
     ${iss ? `<div class="report-section"><div class="report-label">課題・懸念事項</div>${iss}</div>` : ''}
     ${nxt ? `<div class="report-section"><div class="report-label">来週の予定</div>${nxt}</div>` : ''}
     ${d.message ? `<div style="margin-top:12px;padding:10px 14px;background:#eefbee;border-radius:8px;font-size:13px;border-left:3px solid #2d8a4e">💬 ${esc(d.message)}</div>` : ''}`;
+}
+
+// ─────────────────────────────────────
+// SELF ANALYSIS
+// ─────────────────────────────────────
+const SA = { period: 'month', year: 0, month: 0 };
+
+function initSelfAna() {
+  const now = new Date();
+  if (!SA.year) { SA.year = now.getFullYear(); SA.month = now.getMonth() + 1; }
+  updateSaLabel();
+  document.getElementById('sa-result').innerHTML =
+    '<div class="sa-loading" style="color:var(--muted);padding:60px 0;text-align:center">期間を選んで「分析開始」を押してください<br><br>' +
+    '<small>業務日誌・タスク・商談・数値目標・人事評価目標を統合分析します</small></div>';
+}
+
+function saSetPeriod(p, btn) {
+  SA.period = p;
+  document.querySelectorAll('.sa-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateSaLabel();
+}
+
+function saChangePeriod(d) {
+  if (SA.period === 'month') {
+    SA.month += d;
+    if (SA.month > 12) { SA.month = 1; SA.year++; }
+    if (SA.month < 1)  { SA.month = 12; SA.year--; }
+  } else {
+    SA.year += d;
+  }
+  updateSaLabel();
+}
+
+function updateSaLabel() {
+  const el = document.getElementById('sa-period-label');
+  el.textContent = SA.period === 'month'
+    ? SA.year + '年' + SA.month + '月'
+    : SA.year + '年';
+}
+
+function runSelfAnalysis() {
+  const targetPeriod = SA.period === 'month'
+    ? SA.year + '-' + String(SA.month).padStart(2, '0')
+    : String(SA.year);
+  document.getElementById('sa-loading').style.display = '';
+  document.getElementById('sa-result').innerHTML = '';
+  google.script.run
+    .withSuccessHandler(d => { document.getElementById('sa-loading').style.display = 'none'; renderSelfAnalysis(d); })
+    .withFailureHandler(e => {
+      document.getElementById('sa-loading').style.display = 'none';
+      document.getElementById('sa-result').innerHTML =
+        `<div class="empty-state">分析に失敗しました。<br><small>${esc(e.message||'')}</small></div>`;
+    })
+    .getSelfAnalysis(SA.period, targetPeriod);
+}
+
+function renderSelfAnalysis(d) {
+  if (d.error) {
+    document.getElementById('sa-result').innerHTML = `<div class="empty-state">${esc(d.error)}</div>`;
+    return;
+  }
+  const st = d.rawStats || {};
+  const score = Number(d.growthScore) || 0;
+  const moodPct = st.avgMood !== '-' ? Math.round((parseFloat(st.avgMood) / 5) * 100) : 0;
+
+  // ── stats bar ──
+  let html = `<div class="sa-stats-row">
+    <div class="sa-stat"><div class="sa-stat-num">${st.logCount||0}</div><div class="sa-stat-label">業務日誌</div></div>
+    <div class="sa-stat"><div class="sa-stat-num">${st.taskCount||0}</div><div class="sa-stat-label">完了タスク</div></div>
+    <div class="sa-stat"><div class="sa-stat-num">${st.meetingCount||0}</div><div class="sa-stat-label">商談件数</div></div>
+    <div class="sa-stat"><div class="sa-stat-num">${st.companyCount||0}</div><div class="sa-stat-label">訪問先企業</div></div>
+    <div class="sa-stat">
+      <div class="sa-stat-num" style="font-size:18px">${st.avgMood !== '-' ? st.avgMood+'/5' : '-'}</div>
+      <div class="sa-stat-label">平均コンディション</div>
+      ${moodPct ? `<div class="sa-mood-bar"><div class="sa-mood-fill" style="width:${moodPct}%"></div></div>` : ''}
+    </div>
+    <div class="sa-stat"><div class="sa-stat-num">${st.numAchieved||0}/${st.numTotal||0}</div><div class="sa-stat-label">数値目標達成</div></div>
+  </div>`;
+
+  // ── growth score ──
+  html += `<div class="sa-score-wrap">
+    <div>
+      <div class="sa-score-label">成長スコア（AI評価）</div>
+      <div class="sa-score-num">${score}<span style="font-size:20px;opacity:.7">/10</span></div>
+    </div>
+    <div class="sa-score-comment">${esc(d.growthComment||'')}<br><small style="opacity:.65">分析: ${d.generatedAt||''}</small></div>
+  </div>`;
+
+  // ── highlights ──
+  if ((d.highlights||[]).length) {
+    html += `<div class="sa-section">
+      <div class="sa-section-title">🏆 成果・実績ハイライト</div>
+      <div class="sa-card"><ul class="sa-list">${(d.highlights||[]).map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>
+    </div>`;
+  }
+
+  // ── strengths & challenges ──
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div class="sa-section">
+      <div class="sa-section-title">💪 この期間の強み</div>
+      <div class="sa-card" style="height:100%"><ul class="sa-list">${(d.strengths||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>
+    </div>
+    <div class="sa-section">
+      <div class="sa-section-title">💡 改善ポイント</div>
+      <div class="sa-card" style="height:100%"><ul class="sa-list challenge">${(d.challenges||[]).map(c=>`<li>${esc(c)}</li>`).join('')}</ul></div>
+    </div>
+  </div>`;
+
+  // ── goal achievement ──
+  if (d.goalAchievement) {
+    html += `<div class="sa-section">
+      <div class="sa-section-title">🎯 目標達成度の総評</div>
+      <div class="sa-card" style="font-size:13px;line-height:1.8">${esc(d.goalAchievement)}</div>
+    </div>`;
+  }
+
+  // ── condition trend ──
+  if (d.conditionTrend) {
+    html += `<div class="sa-section">
+      <div class="sa-section-title">😊 コンディション傾向</div>
+      <div class="sa-card" style="font-size:13px;line-height:1.8">${esc(d.conditionTrend)}</div>
+    </div>`;
+  }
+
+  // ── HR self PR ──
+  html += `<div class="sa-section">
+    <div class="sa-section-title">📝 人事評価用 自己PR文 <span style="font-weight:400;font-size:11px;color:var(--muted)">（そのまま提出できます）</span></div>
+    <textarea class="sa-pr-box" id="sa-pr-text">${esc(d.hrSelfPR||'')}</textarea>
+    <button class="btn btn-secondary sa-copy-btn" onclick="copyPR('sa-pr-text','自己PR文')">📋 コピー</button>
+  </div>`;
+
+  // ── HR goal proposal ──
+  if (d.hrGoalProposal) {
+    html += `<div class="sa-section">
+      <div class="sa-section-title">🎯 次期目標の提案文 <span style="font-weight:400;font-size:11px;color:var(--muted)">（SMART形式）</span></div>
+      <textarea class="sa-pr-box" id="sa-goal-text" style="min-height:90px">${esc(d.hrGoalProposal||'')}</textarea>
+      <button class="btn btn-secondary sa-copy-btn" onclick="copyPR('sa-goal-text','目標提案文')">📋 コピー</button>
+    </div>`;
+  }
+
+  // ── hidden strength ──
+  if (d.hiddenStrength) {
+    html += `<div class="sa-hidden-strength">
+      <div class="sa-hidden-label">✨ AIが発見した潜在的強み</div>
+      ${esc(d.hiddenStrength)}
+    </div>`;
+  }
+
+  // ── coach message ──
+  if (d.coachMessage) {
+    html += `<div class="sa-section" style="margin-top:14px">
+      <div class="sa-section-title">🎓 コーチからのメッセージ</div>
+      <div class="sa-coach">${esc(d.coachMessage)}</div>
+    </div>`;
+  }
+
+  // ── next actions ──
+  if ((d.nextActions||[]).length) {
+    html += `<div class="sa-section">
+      <div class="sa-section-title">⚡ 来期へのアクション</div>
+      <div class="sa-card"><ul class="sa-list action">${(d.nextActions||[]).map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>
+    </div>`;
+  }
+
+  document.getElementById('sa-result').innerHTML = html;
+}
+
+function copyPR(id, label) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.value).then(() => toast(label + 'をコピーしました'));
 }
 
 // ─────────────────────────────────────

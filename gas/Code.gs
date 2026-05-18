@@ -726,6 +726,128 @@ JSON形式:
 }
 
 // ─────────────────────────────────────────────
+// SELF ANALYSIS
+// ─────────────────────────────────────────────
+
+function getSelfAnalysis(period, targetPeriod) {
+  // period: 'month' | 'year'
+  // targetPeriod: 'YYYY-MM' or 'YYYY'
+  let startStr, endStr, label;
+  if (period === 'month') {
+    const [y, m] = targetPeriod.split('-').map(Number);
+    const start = new Date(y, m - 1, 1);
+    const end   = new Date(y, m, 0);
+    startStr = _fmt(start); endStr = _fmt(end);
+    label = y + '年' + m + '月';
+  } else {
+    const y = parseInt(targetPeriod);
+    startStr = y + '-01-01'; endStr = y + '-12-31';
+    label = y + '年';
+  }
+
+  // ── collect daily logs ──
+  const logRows = _sheet('daily_logs', ['id','date','content','mood','tags'])
+    .getDataRange().getValues().slice(1)
+    .filter(r => r[0] && String(r[1]) >= startStr && String(r[1]) <= endStr);
+  const logs = logRows.map(r => ({ date: r[1], content: String(r[2]).substring(0, 120), mood: r[3] }));
+
+  // ── collect done tasks ──
+  const taskRows = _sheet('tasks', ['id','title','due','priority','status','createdAt'])
+    .getDataRange().getValues().slice(1)
+    .filter(r => r[0] && r[4] === 'done');
+  const tasks = taskRows.map(r => ({ title: r[1], due: String(r[2]), priority: r[3] }))
+    .filter(t => t.due >= startStr && t.due <= endStr);
+
+  // ── collect meetings ──
+  const mtgRows = _sheet('meetings', ['id','date','company','contact','purpose','content','followup','nextAction','createdAt'])
+    .getDataRange().getValues().slice(1)
+    .filter(r => r[0] && String(r[1]) >= startStr && String(r[1]) <= endStr);
+  const meetings = mtgRows.map(r => ({ date: r[1], company: r[2], purpose: r[4], nextAction: r[7] }));
+
+  // ── collect numbers ──
+  const numRows = _sheet('monthly_numbers', ['id','yearMonth','category','target','actual','unit','updatedAt'])
+    .getDataRange().getValues().slice(1).filter(r => r[0]);
+  const nums = numRows.filter(r => {
+    const ym = String(r[1]);
+    return period === 'month' ? ym === targetPeriod : ym.startsWith(targetPeriod);
+  }).map(r => ({ ym: r[1], cat: r[2], tgt: Number(r[3]), act: Number(r[4]), unit: r[5] }));
+
+  // ── collect HR goals ──
+  const goalRows = _sheet('hr_goals', ['id','term','category','goal','measure','progress','selfEval','createdAt'])
+    .getDataRange().getValues().slice(1).filter(r => r[0]);
+  const goals = goalRows.map(r => ({ term: r[1], cat: r[2], goal: r[3], progress: r[5], selfEval: r[6] }));
+
+  // ── stats ──
+  const moodVals = logs.map(l => parseInt(l.mood)).filter(v => !isNaN(v) && v > 0);
+  const avgMood  = moodVals.length ? (moodVals.reduce((a,b) => a+b,0)/moodVals.length).toFixed(1) : '-';
+  const companies = [...new Set(meetings.map(m => m.company).filter(Boolean))];
+  const numAchieved = nums.filter(n => n.tgt > 0 && n.act >= n.tgt).length;
+
+  // ── build text blocks ──
+  const logText  = logs.slice(-40).map(l => `[${l.date}] ${l.content}`).join('\n') || '記録なし';
+  const taskText = tasks.slice(-40).map(t => `[${t.priority||'中'}] ${t.title}`).join('\n') || '記録なし';
+  const mtgText  = meetings.map(m => `[${m.date}] ${m.company}: ${m.purpose}`).join('\n') || '記録なし';
+  const numText  = nums.map(n => {
+    const pct = n.tgt > 0 ? Math.round(n.act / n.tgt * 100) : '-';
+    return `${n.ym} ${n.cat}: 目標${n.tgt}${n.unit} 実績${n.act}${n.unit} 達成率${pct}%`;
+  }).join('\n') || '記録なし';
+  const goalText = goals.map(g => `[${g.term}][${g.cat}] ${g.goal} 進捗:${g.progress||'未'} 自己評価:${g.selfEval||'未'}`).join('\n') || '記録なし';
+
+  const prompt = `あなたは製造業（部品・基板・機械設備）の2年目営業担当者のキャリアコーチ兼人事評価アドバイザーです。
+以下のデータをもとに ${label} の振り返り自己分析レポートを作成してください。
+
+【集計】業務日誌:${logs.length}件 完了タスク:${tasks.length}件 商談:${meetings.length}件 訪問先:${companies.length}社 平均コンディション:${avgMood}/5 数値目標達成:${numAchieved}/${nums.length}項目
+
+【業務日誌（抜粋）】
+${logText}
+
+【完了タスク】
+${taskText}
+
+【商談記録】
+${mtgText}
+
+【数値実績】
+${numText}
+
+【人事評価目標】
+${goalText}
+
+以下のJSON形式で分析レポートを生成してください。データが少ない項目は一般的な2年目製造業営業の知見で補完してください：
+
+{
+  "period": "${label}",
+  "highlights": ["成果・実績ハイライト（3〜5件、具体的数字があれば含める）"],
+  "strengths": ["この期間に発揮できた強み・成長した点（3件）"],
+  "challenges": ["正直な改善課題（2〜3件、成長機会として前向きに表現）"],
+  "goalAchievement": "目標達成度の総評（2〜3文、データに基づき客観的に）",
+  "growthScore": 成長度スコア（1〜10の数値のみ）,
+  "growthComment": "スコアの根拠（1〜2文）",
+  "conditionTrend": "コンディション傾向と分析（1〜2文）",
+  "hrSelfPR": "人事評価提出用の自己PR文（200〜300文字、です・ます調、このまま使えるレベルで。具体的な数字・行動・成果を含める）",
+  "hrGoalProposal": "次期目標の提案文（150文字前後、SMART形式、このまま提出できる文章）",
+  "coachMessage": "コーチからの総合メッセージ（3〜4文、励ましと具体的指摘を含む）",
+  "nextActions": ["来期に向けた具体的アクション（3件、すぐ実行できるレベルで）"],
+  "hiddenStrength": "データから読み取れる本人が気づいていないかもしれない潜在的強み（1件）"
+}`;
+
+  let data;
+  try {
+    data = JSON.parse(_callGemini(prompt, true));
+  } catch(e) {
+    data = { error: '分析に失敗しました。再試行してください。period=' + period };
+  }
+
+  data.rawStats = {
+    logCount: logs.length, taskCount: tasks.length,
+    meetingCount: meetings.length, companyCount: companies.length,
+    avgMood, numAchieved, numTotal: nums.length
+  };
+  data.generatedAt = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm');
+  return data;
+}
+
+// ─────────────────────────────────────────────
 // NEWS SUMMARY
 // ─────────────────────────────────────────────
 
