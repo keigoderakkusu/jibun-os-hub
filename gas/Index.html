@@ -290,6 +290,66 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 }
 .qp-btn:hover{background:#ede7ff}
 
+/* ── CUSTOMER ── */
+.nav-section{font-size:10px;font-weight:700;color:#9b9a97;letter-spacing:.8px;padding:10px 10px 4px;text-transform:uppercase}
+.rank-badge{display:inline-block;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;text-align:center;line-height:20px;flex-shrink:0}
+.rank-A{background:#fdecea;color:#c94040}
+.rank-B{background:#fff4e0;color:#946900}
+.rank-C{background:#f0f0ef;color:#787774}
+.cust-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:7px;margin-bottom:3px;cursor:pointer;border:1px solid transparent}
+.cust-item:hover{background:#f0f6ff;border-color:#d0e4ff}
+.cust-item.active{background:#eef4ff;border-color:#2383e2}
+.cust-company{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cust-name{font-size:11px;color:#787774}
+.last-contact{font-size:11px;color:#9b9a97;margin-left:auto;flex-shrink:0}
+.days-hot{color:#c94040!important;font-weight:600}
+.days-warm{color:#946900!important}
+.cust-detail-panel{flex:1;overflow-y:auto;padding:28px 36px}
+.detail-field{margin-bottom:14px}
+.detail-label{font-size:11px;font-weight:700;color:#9b9a97;text-transform:uppercase;margin-bottom:4px}
+.detail-value{font-size:14px;color:#37352f}
+
+/* ── MEETING ── */
+.meeting-card{border:1px solid #e9e9e7;border-radius:9px;padding:14px 16px;margin-bottom:10px;background:#fff}
+.meeting-card .mc-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.meeting-card .mc-company{font-size:14px;font-weight:600}
+.meeting-card .mc-date{font-size:12px;color:#787774}
+.status-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+.status-フォロー中{background:#fff4e0;color:#946900}
+.status-完了{background:#eefbee;color:#2d8a4e}
+.status-クローズ{background:#f0f0ef;color:#787774}
+.mc-content{font-size:13px;color:#37352f;line-height:1.6;margin-bottom:8px}
+.mc-action{font-size:12px;color:#2383e2;background:#f0f6ff;padding:6px 10px;border-radius:6px;margin-top:6px}
+.prep-result{background:#f8f4ff;border:1px solid #d4c8f0;border-radius:9px;padding:16px;margin-top:14px}
+.prep-section{margin-bottom:12px}
+.prep-label{font-size:12px;font-weight:700;color:#6940a5;margin-bottom:5px}
+.prep-item{font-size:13px;padding:5px 10px;background:#fff;border-radius:6px;margin-bottom:4px;border-left:3px solid #6940a5}
+
+/* ── NUMBERS ── */
+.num-month-picker{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.num-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid #e9e9e7;border-radius:9px;margin-bottom:8px;background:#fff}
+.num-cat{font-size:14px;font-weight:600;flex:0 0 120px}
+.num-bar-wrap{flex:1}
+.num-bar-bg{height:8px;background:#f0f0ef;border-radius:4px;overflow:hidden;margin-top:4px}
+.num-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.num-bar-over{background:#2d8a4e!important}
+.num-bar-ok{background:#2383e2}
+.num-bar-warn{background:#f5a623}
+.num-bar-low{background:#eb5757}
+.num-pct{font-size:15px;font-weight:700;flex:0 0 52px;text-align:right}
+.num-inputs{display:flex;gap:8px;flex:0 0 200px}
+.num-inputs input{width:80px;padding:5px 8px;border:1px solid #e9e9e7;border-radius:6px;font-size:13px;text-align:center;outline:none}
+.num-inputs input:focus{border-color:#2383e2}
+.num-ai-box{background:#f8f4ff;border:1px solid #d4c8f0;border-radius:9px;padding:16px;margin-top:16px;display:none}
+.ai-metric{display:flex;gap:10px;margin-bottom:8px;font-size:13px}
+.ai-metric-label{font-weight:600;color:#6940a5;flex:0 0 60px}
+
+/* ── WEEKLY REPORT ── */
+.report-section{margin-bottom:16px}
+.report-label{font-size:11px;font-weight:700;color:#787774;text-transform:uppercase;margin-bottom:6px}
+.report-item{padding:8px 12px;background:#f8f4ff;border-radius:6px;margin-bottom:4px;font-size:13px;border-left:3px solid #6940a5}
+.report-body{background:#fbfbfa;border:1px solid #e9e9e7;border-radius:8px;padding:14px;font-size:14px;line-height:1.85;white-space:pre-wrap;outline:none}
+
 /* ── Utilities ── */
 .divider{height:1px;background:#e9e9e7;margin:16px 0}
 .empty{text-align:center;padding:40px 20px;color:#9b9a97}
@@ -330,6 +390,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
     <div class="nav-item"        id="nav-log"       onclick="showPage('log')">       <span class="ni-icon">📓</span><span>業務日誌</span></div>
     <div class="nav-item"        id="nav-hr"        onclick="showPage('hr')">        <span class="ni-icon">🏆</span><span>評価サポート</span></div>
     <div class="nav-item"        id="nav-chat"      onclick="showPage('chat')">      <span class="ni-icon">🤖</span><span>AI相談</span></div>
+    <div class="nav-section">営業管理</div>
+    <div class="nav-item"        id="nav-customer"  onclick="showPage('customer')"> <span class="ni-icon">👥</span><span>顧客カルテ</span></div>
+    <div class="nav-item"        id="nav-meeting"   onclick="showPage('meeting')">  <span class="ni-icon">📅</span><span>商談メモ</span></div>
+    <div class="nav-item"        id="nav-numbers"   onclick="showPage('numbers')">  <span class="ni-icon">📈</span><span>数値目標</span></div>
   </div>
   <div class="sidebar-footer"><a id="db-link" href="#" target="_blank">📊 データベース</a></div>
 </nav>
@@ -625,6 +689,111 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
   </div>
 </div>
 
+<!-- ── CUSTOMER ── -->
+<div class="page" id="page-customer" style="flex-direction:row!important;overflow:hidden">
+  <div style="width:230px;flex-shrink:0;border-right:1px solid #e9e9e7;background:#fbfbfa;display:flex;flex-direction:column;overflow:hidden">
+    <div style="padding:10px 8px 8px;flex-shrink:0;display:flex;flex-direction:column;gap:6px">
+      <input type="text" id="cust-search" placeholder="会社名・担当者で検索…" style="font-size:13px;padding:7px 10px" oninput="searchCustomers(this.value)">
+      <button class="btn btn-primary btn-full" style="font-size:13px" onclick="newCustomer()">＋ 顧客を追加</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 6px 8px" id="cust-list"></div>
+  </div>
+  <div id="cust-detail" style="flex:1;overflow-y:auto;padding:28px 36px">
+    <div class="empty"><div class="empty-icon">👥</div><div>左から顧客を選んでください</div><div style="font-size:12px;margin-top:6px">最終連絡日を記録すると<br>フォロー漏れを防げます</div></div>
+  </div>
+</div>
+
+<!-- ── MEETING ── -->
+<div class="page" id="page-meeting">
+  <div class="page-header">
+    <div class="page-title">📅 商談メモ</div>
+    <div class="page-sub">商談後5分で記録 → AIがフォローアップメールを自動生成</div>
+  </div>
+  <div class="page-body">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('meeting','list',this)">商談記録</button>
+      <button class="tab-btn"        onclick="switchTab('meeting','prep',this)">商談準備AI</button>
+    </div>
+    <div class="tab-pane active" id="meeting-tab-list">
+      <div style="display:flex;gap:20px">
+        <div style="flex:0 0 300px">
+          <div id="meeting-editing-badge" style="display:none;background:#fff4e0;color:#946900;font-size:12px;padding:4px 10px;border-radius:6px;margin-bottom:8px;border:1px solid #f5a623">編集中</div>
+          <input type="hidden" id="mtg-id">
+          <label>日付</label><input type="date" id="mtg-date">
+          <label>会社名</label><input type="text" id="mtg-company" placeholder="〇〇株式会社">
+          <label>担当者名</label><input type="text" id="mtg-person" placeholder="田中 様">
+          <label>商談目的</label><input type="text" id="mtg-purpose" placeholder="例: 新製品の提案、納期相談">
+          <label>商談内容・話した内容</label>
+          <textarea id="mtg-content" rows="3" placeholder="例: 基板Aの価格について交渉。先方は10%値引きを希望。当方は5%が限界と回答。"></textarea>
+          <label>自分の宿題（約束したこと）</label>
+          <textarea id="mtg-my-actions" rows="2" placeholder="例: 来週水曜までに正式見積書を送付"></textarea>
+          <label>先方の宿題</label>
+          <textarea id="mtg-their-actions" rows="2" placeholder="例: 社内で検討後、来週末までに回答"></textarea>
+          <label>次回予定日</label><input type="date" id="mtg-next-date">
+          <label>ステータス</label>
+          <select id="mtg-status"><option>フォロー中</option><option>完了</option><option>クローズ</option></select>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn-primary" onclick="saveMeetingForm()">保存</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearMeetingForm()">クリア</button>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <strong style="font-size:13px;color:#787774">商談履歴</strong>
+            <span id="mtg-count" style="font-size:12px;color:#9b9a97"></span>
+          </div>
+          <div id="meeting-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane" id="meeting-tab-prep">
+      <div style="max-width:640px">
+        <div class="card" style="background:#f0f6ff;border-color:#b3d4f5;margin-bottom:16px">
+          <strong style="font-size:13px;color:#2383e2">💡 使い方</strong>
+          <div style="font-size:13px;margin-top:6px;line-height:1.7">訪問・商談の前に会社名と目的を入力してAIに準備してもらいます。<br>過去の商談内容があれば入力すると精度が上がります。</div>
+        </div>
+        <label>会社名</label><input type="text" id="prep-company" placeholder="〇〇株式会社">
+        <label>今回の商談目的</label><input type="text" id="prep-purpose" placeholder="例: 新製品A-123の提案、価格改定の交渉">
+        <label>過去の商談・関係性（任意）</label>
+        <textarea id="prep-past" rows="3" placeholder="例: 先月、見積を送ったが返答なし。担当の田中様は価格に敏感。競合はXX社。"></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <button class="btn btn-ai" onclick="runMeetingPrep()">🤖 商談準備ブリーフィングを作成</button>
+          <span id="prep-loading" class="loading" style="display:none"><span class="spin"></span>準備中…</span>
+        </div>
+        <div id="prep-result" style="display:none;margin-top:18px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NUMBERS ── -->
+<div class="page" id="page-numbers">
+  <div class="page-header">
+    <div class="page-title">📈 数値目標</div>
+    <div class="page-sub">目標 vs 実績を可視化。評価面談で「数字で語る」ための記録</div>
+  </div>
+  <div class="page-body" style="max-width:760px">
+    <div class="num-month-picker">
+      <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">◀</button>
+      <strong id="num-month-label" style="font-size:16px;min-width:120px;text-align:center"></strong>
+      <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">▶</button>
+      <button class="btn btn-secondary btn-sm" onclick="addNumberRow()">＋ 指標を追加</button>
+      <button class="btn btn-ai btn-sm" style="margin-left:auto" onclick="runNumbersAnalysis()">🤖 AIコメント</button>
+    </div>
+    <div id="num-rows"></div>
+    <div id="num-ai-box" class="num-ai-box"></div>
+    <div class="divider" style="margin:24px 0"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <strong style="font-size:14px">📋 週次報告書（業務日誌から自動生成）</strong>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ai btn-sm" onclick="runWeeklyReport()">🤖 報告書を生成</button>
+        <span id="report-loading" class="loading" style="display:none"><span class="spin"></span>生成中…</span>
+      </div>
+    </div>
+    <div id="weekly-report-result" style="display:none"></div>
+  </div>
+</div>
+
 </div><!-- /content -->
 <div id="toast"></div>
 
@@ -659,6 +828,9 @@ function showPage(name) {
   if (name === 'email')    loadTemplates();
   if (name === 'log')      { initLogForm(); loadLogs(); }
   if (name === 'hr')       loadHrGoals();
+  if (name === 'customer') loadCustomers();
+  if (name === 'meeting')  { initMeetingForm(); loadMeetings(); }
+  if (name === 'numbers')  initNumbers();
 }
 
 function switchTab(page, tab, btn) {
@@ -1326,6 +1498,410 @@ function copyText(id) {
   if (!el) return;
   navigator.clipboard.writeText(el.textContent || el.innerText)
     .then(() => toast('コピーしました'));
+}
+
+// ─────────────────────────────────────
+// CUSTOMERS
+// ─────────────────────────────────────
+let _custMap = {}, _currentCustId = null;
+
+function loadCustomers(q) {
+  google.script.run.withSuccessHandler(d => {
+    _custMap = {};
+    d.forEach(c => { _custMap[c.id] = c; });
+    renderCustList(d);
+  }).getCustomers(q || null);
+}
+
+function searchCustomers(q) {
+  clearTimeout(S.saveTimer);
+  S.saveTimer = setTimeout(() => loadCustomers(q), 300);
+}
+
+function renderCustList(list) {
+  const el = document.getElementById('cust-list');
+  if (!list.length) {
+    el.innerHTML = '<div style="font-size:13px;color:#9b9a97;padding:10px 8px">顧客がいません</div>';
+    return;
+  }
+  el.innerHTML = list.map(c => {
+    const days = c.last_contact ? daysSince(c.last_contact) : null;
+    const daysLabel = days === null ? '未連絡' : days + '日前';
+    const daysCls = days === null || days > 30 ? 'days-hot' : days > 14 ? 'days-warm' : '';
+    return `<div class="cust-item ${c.id === _currentCustId ? 'active' : ''}" onclick="openCustomer('${c.id}')">
+      <span class="rank-badge rank-${c.rank}">${c.rank}</span>
+      <div style="flex:1;min-width:0">
+        <div class="cust-company">${esc(c.company)}</div>
+        <div class="cust-name">${esc(c.name)}</div>
+      </div>
+      <span class="last-contact ${daysCls}">${daysLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.replace(/\//g, '-').split('-');
+  if (parts.length < 3) return null;
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function newCustomer() {
+  _currentCustId = null;
+  renderCustDetail(null);
+}
+
+function openCustomer(id) {
+  _currentCustId = id;
+  renderCustDetail(_custMap[id]);
+  document.querySelectorAll('.cust-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.cust-item').forEach(el => {
+    if (el.getAttribute('onclick') === `openCustomer('${id}')`) el.classList.add('active');
+  });
+}
+
+function renderCustDetail(c) {
+  const el = document.getElementById('cust-detail');
+  const isNew = !c;
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <strong style="font-size:16px">${isNew ? '新規顧客' : esc(c.company)}</strong>
+      ${!isNew ? `<button class="btn btn-danger btn-sm" onclick="deleteCustomerById('${c.id}')">削除</button>` : ''}
+    </div>
+    <div class="form-row">
+      <div><label>ランク</label>
+        <select id="cf-rank" style="width:80px">
+          ${['A','B','C'].map(r => `<option ${!isNew && c.rank===r?'selected':''}>${r}</option>`).join('')}
+        </select>
+      </div>
+      <div><label>最終連絡日</label>
+        <input type="date" id="cf-lastcontact" value="${!isNew && c.last_contact ? c.last_contact.replace(/\//g,'-') : ''}">
+      </div>
+    </div>
+    <label>会社名</label><input type="text" id="cf-company" value="${isNew ? '' : esc(c.company)}" placeholder="〇〇株式会社">
+    <div class="form-row">
+      <div><label>担当者名</label><input type="text" id="cf-name" value="${isNew ? '' : esc(c.name)}" placeholder="田中 太郎"></div>
+      <div><label>役職</label><input type="text" id="cf-role" value="${isNew ? '' : esc(c.role)}" placeholder="購買部長"></div>
+    </div>
+    <div class="form-row">
+      <div><label>電話</label><input type="text" id="cf-phone" value="${isNew ? '' : esc(c.phone)}"></div>
+      <div><label>メール</label><input type="text" id="cf-email" value="${isNew ? '' : esc(c.email)}"></div>
+    </div>
+    <label>メモ・特記事項</label>
+    <textarea id="cf-notes" rows="3" placeholder="価格交渉の余地あり、担当者は技術的な話が好き、など">${isNew ? '' : esc(c.notes)}</textarea>
+    <label>タグ</label>
+    <input type="text" id="cf-tags" value="${isNew ? '' : esc(c.tags)}" placeholder="既存客,大手,精密機器">
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveCustomerForm('${isNew ? '' : c.id}')">保存</button>
+      ${!isNew ? `<button class="btn btn-secondary" onclick="openMeetingForCustomer('${esc(c.company)}')">📅 商談メモを追加</button>` : ''}
+      ${!isNew && c.email ? `<button class="btn btn-ghost btn-sm" onclick="openEmailForCustomer('${esc(c.company)}','${esc(c.name)}','${esc(c.email)}')">✉️ メール作成</button>` : ''}
+    </div>`;
+}
+
+function saveCustomerForm(id) {
+  const c = {
+    id: id || null,
+    rank: document.getElementById('cf-rank').value,
+    last_contact: document.getElementById('cf-lastcontact').value,
+    company: document.getElementById('cf-company').value,
+    name: document.getElementById('cf-name').value,
+    role: document.getElementById('cf-role').value,
+    phone: document.getElementById('cf-phone').value,
+    email: document.getElementById('cf-email').value,
+    notes: document.getElementById('cf-notes').value,
+    tags: document.getElementById('cf-tags').value,
+  };
+  if (!c.company) { toast('会社名を入力してください'); return; }
+  google.script.run.withSuccessHandler(r => {
+    if (r.ok) { toast('保存しました ✓'); _currentCustId = r.id || id; loadCustomers(); }
+  }).saveCustomer(c);
+}
+
+function deleteCustomerById(id) {
+  if (!confirm('この顧客を削除しますか？')) return;
+  google.script.run.withSuccessHandler(() => {
+    toast('削除しました');
+    _currentCustId = null;
+    document.getElementById('cust-detail').innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div>顧客を選んでください</div></div>';
+    loadCustomers();
+  }).deleteCustomer(id);
+}
+
+function openMeetingForCustomer(company) {
+  showPage('meeting');
+  setTimeout(() => { document.getElementById('mtg-company').value = company; }, 100);
+}
+
+function openEmailForCustomer(company, name, email) {
+  showPage('email');
+  setTimeout(() => {
+    if (S.templates.length) {
+      selectTpl(S.templates[0].id);
+      const toEl = document.getElementById('tpl-to');
+      if (toEl) toEl.value = email;
+    }
+  }, 300);
+}
+
+// ─────────────────────────────────────
+// MEETINGS
+// ─────────────────────────────────────
+let _mtgMap = {};
+
+function initMeetingForm() {
+  const now = new Date();
+  const today = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  document.getElementById('mtg-date').value = today;
+}
+
+function loadMeetings() {
+  google.script.run.withSuccessHandler(d => {
+    _mtgMap = {};
+    d.forEach(m => { _mtgMap[m.id] = m; });
+    document.getElementById('mtg-count').textContent = d.length + '件';
+    document.getElementById('meeting-list').innerHTML = d.length ? d.map(m => `
+      <div class="meeting-card">
+        <div class="mc-header">
+          <div>
+            <div class="mc-company">${esc(m.company)} <span style="font-weight:400;color:#787774">${esc(m.person)}</span></div>
+            <div class="mc-date">${esc(m.date)} ${m.purpose ? '/ ' + esc(m.purpose) : ''}</div>
+          </div>
+          <span class="status-badge status-${m.status}" style="margin-left:auto">${esc(m.status)}</span>
+        </div>
+        ${m.content ? `<div class="mc-content">${esc(m.content)}</div>` : ''}
+        ${m.my_actions ? `<div class="mc-action">🙋 自分の宿題: ${esc(m.my_actions)}</div>` : ''}
+        ${m.their_actions ? `<div class="mc-action">📌 先方の宿題: ${esc(m.their_actions)}</div>` : ''}
+        ${m.next_date ? `<div style="font-size:12px;color:#6940a5;margin-top:6px">📅 次回: ${esc(m.next_date)}</div>` : ''}
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="editMeetingById('${m.id}')">編集</button>
+          <button class="btn btn-ai btn-sm" onclick="genFollowupEmail('${m.id}')">✉️ フォローアップメール生成</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteMeetingById('${m.id}')">削除</button>
+        </div>
+      </div>`).join('') : '<div class="empty"><div class="empty-icon">📅</div><div>商談記録がありません</div></div>';
+  }).getMeetings(null);
+}
+
+function saveMeetingForm() {
+  const m = {
+    id: document.getElementById('mtg-id').value || null,
+    date: document.getElementById('mtg-date').value,
+    company: document.getElementById('mtg-company').value,
+    person: document.getElementById('mtg-person').value,
+    purpose: document.getElementById('mtg-purpose').value,
+    content: document.getElementById('mtg-content').value,
+    my_actions: document.getElementById('mtg-my-actions').value,
+    their_actions: document.getElementById('mtg-their-actions').value,
+    next_date: document.getElementById('mtg-next-date').value,
+    status: document.getElementById('mtg-status').value,
+  };
+  if (!m.company) { toast('会社名を入力してください'); return; }
+  google.script.run.withSuccessHandler(() => {
+    toast('保存しました ✓'); clearMeetingForm(); loadMeetings();
+  }).saveMeeting(m);
+}
+
+function clearMeetingForm() {
+  document.getElementById('mtg-id').value = '';
+  document.getElementById('meeting-editing-badge').style.display = 'none';
+  initMeetingForm();
+  ['mtg-company','mtg-person','mtg-purpose','mtg-content','mtg-my-actions','mtg-their-actions','mtg-next-date'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mtg-status').value = 'フォロー中';
+}
+
+function editMeetingById(id) {
+  const m = _mtgMap[id]; if (!m) return;
+  document.getElementById('mtg-id').value = m.id;
+  document.getElementById('meeting-editing-badge').style.display = 'block';
+  document.getElementById('mtg-date').value = m.date ? m.date.replace(/\//g,'-') : '';
+  document.getElementById('mtg-company').value = m.company || '';
+  document.getElementById('mtg-person').value = m.person || '';
+  document.getElementById('mtg-purpose').value = m.purpose || '';
+  document.getElementById('mtg-content').value = m.content || '';
+  document.getElementById('mtg-my-actions').value = m.my_actions || '';
+  document.getElementById('mtg-their-actions').value = m.their_actions || '';
+  document.getElementById('mtg-next-date').value = m.next_date ? m.next_date.replace(/\//g,'-') : '';
+  document.getElementById('mtg-status').value = m.status || 'フォロー中';
+}
+
+function deleteMeetingById(id) {
+  if (!confirm('この商談記録を削除しますか？')) return;
+  google.script.run.withSuccessHandler(() => { toast('削除しました'); loadMeetings(); }).deleteMeeting(id);
+}
+
+function genFollowupEmail(id) {
+  toast('メール生成中…', 5000);
+  google.script.run.withSuccessHandler(r => {
+    if (r.error) { toast('エラー: ' + r.error, 5000); return; }
+    // Switch to email page and fill proofreading tab with generated email
+    showPage('email');
+    setTimeout(() => {
+      switchTab('email', 'proofread', document.querySelectorAll('#page-email .tab-btn')[1]);
+      document.getElementById('proof-input').value = r.text;
+      toast('フォローアップメールを生成しました。送信前にAI添削も活用できます ✓');
+    }, 200);
+  }).generateFollowupEmail(id);
+}
+
+function runMeetingPrep() {
+  const company = document.getElementById('prep-company').value.trim();
+  const purpose = document.getElementById('prep-purpose').value.trim();
+  if (!company || !purpose) { toast('会社名と商談目的を入力してください'); return; }
+  document.getElementById('prep-loading').style.display = 'inline';
+  document.getElementById('prep-result').style.display = 'none';
+  google.script.run.withSuccessHandler(r => {
+    document.getElementById('prep-loading').style.display = 'none';
+    if (r.error) { toast('エラー: ' + r.error, 5000); return; }
+    renderPrepResult(r.data);
+  }).generateMeetingPrep(company, purpose, document.getElementById('prep-past').value);
+}
+
+function renderPrepResult(d) {
+  if (!d) return;
+  const el = document.getElementById('prep-result');
+  el.style.display = 'block';
+  const kp = (d.key_points || []).map(p => `<div class="prep-item">📌 ${esc(p)}</div>`).join('');
+  const qs = (d.questions || []).map(q => `<div class="prep-item">❓ ${esc(q)}</div>`).join('');
+  const wo = (d.watch_out || []).map(w => `<div class="prep-item" style="border-left-color:#eb5757">⚠️ ${esc(w)}</div>`).join('');
+  el.innerHTML = `<div class="prep-result">
+    ${d.goal ? `<div style="font-size:15px;font-weight:700;color:#6940a5;margin-bottom:14px;padding:10px 14px;background:#fff;border-radius:8px">🎯 ゴール: ${esc(d.goal)}</div>` : ''}
+    ${d.opening ? `<div class="prep-section"><div class="prep-label">最初の一言</div><div class="prep-item">💬 ${esc(d.opening)}</div></div>` : ''}
+    ${kp ? `<div class="prep-section"><div class="prep-label">必ず押さえるポイント</div>${kp}</div>` : ''}
+    ${qs ? `<div class="prep-section"><div class="prep-label">顧客に聞く質問</div>${qs}</div>` : ''}
+    ${wo ? `<div class="prep-section"><div class="prep-label">注意・リスク</div>${wo}</div>` : ''}
+  </div>`;
+}
+
+// ─────────────────────────────────────
+// NUMBERS & WEEKLY REPORT
+// ─────────────────────────────────────
+let _currentYM = '', _numData = [];
+const _defaultCategories = [
+  { category: '受注件数', unit: '件' },
+  { category: '売上金額', unit: '万円' },
+  { category: '新規商談数', unit: '件' },
+  { category: '訪問件数', unit: '件' },
+];
+
+function initNumbers() {
+  if (_currentYM) { loadNumbers(); return; }
+  const now = new Date();
+  _currentYM = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  updateMonthLabel();
+  loadNumbers();
+}
+
+function changeMonth(delta) {
+  const [y, m] = _currentYM.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  _currentYM = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  updateMonthLabel();
+  loadNumbers();
+}
+
+function updateMonthLabel() {
+  const [y, m] = _currentYM.split('-');
+  document.getElementById('num-month-label').textContent = y + '年' + parseInt(m) + '月';
+}
+
+function loadNumbers() {
+  google.script.run.withSuccessHandler(d => {
+    _numData = d;
+    // Ensure default categories exist
+    const existing = d.map(x => x.category);
+    _defaultCategories.forEach(cat => {
+      if (!existing.includes(cat.category)) {
+        _numData.push({ id: null, year_month: _currentYM, category: cat.category, target: 0, actual: 0, unit: cat.unit });
+      }
+    });
+    renderNumbers();
+  }).getNumbers(_currentYM);
+}
+
+function renderNumbers() {
+  const el = document.getElementById('num-rows');
+  el.innerHTML = _numData.map((n, i) => {
+    const pct = n.target > 0 ? Math.min(Math.round(n.actual / n.target * 100), 200) : 0;
+    const barW = Math.min(pct, 100);
+    const barCls = pct >= 100 ? 'num-bar-over' : pct >= 70 ? 'num-bar-ok' : pct >= 40 ? 'num-bar-warn' : 'num-bar-low';
+    const pctColor = pct >= 100 ? '#2d8a4e' : pct >= 70 ? '#2383e2' : pct >= 40 ? '#946900' : '#c94040';
+    return `<div class="num-row">
+      <div class="num-cat">${esc(n.category)}</div>
+      <div class="num-bar-wrap">
+        <div style="font-size:11px;color:#787774">${n.actual}${esc(n.unit)} / 目標 ${n.target}${esc(n.unit)}</div>
+        <div class="num-bar-bg"><div class="num-bar-fill ${barCls}" style="width:${barW}%"></div></div>
+      </div>
+      <div class="num-pct" style="color:${pctColor}">${pct}%</div>
+      <div class="num-inputs">
+        <input type="number" placeholder="目標" value="${n.target}" onchange="updateNum(${i},'target',this.value)">
+        <input type="number" placeholder="実績" value="${n.actual}" onchange="updateNum(${i},'actual',this.value)">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateNum(i, field, val) {
+  _numData[i][field] = Number(val) || 0;
+  const n = _numData[i];
+  google.script.run.withSuccessHandler(r => {
+    if (r.ok && r.id && !n.id) { _numData[i].id = r.id; }
+    renderNumbers();
+  }).saveNumber({ id: n.id, year_month: _currentYM, category: n.category, target: n.target, actual: n.actual, unit: n.unit });
+}
+
+function addNumberRow() {
+  const cat = prompt('指標名を入力してください（例: 新規アポ数）');
+  if (!cat) return;
+  const unit = prompt('単位を入力してください（例: 件、万円）') || '件';
+  _numData.push({ id: null, year_month: _currentYM, category: cat, target: 0, actual: 0, unit });
+  renderNumbers();
+}
+
+function runNumbersAnalysis() {
+  const box = document.getElementById('num-ai-box');
+  box.style.display = 'block';
+  box.innerHTML = '<div class="loading"><span class="spin"></span>AIが分析中…</div>';
+  google.script.run.withSuccessHandler(r => {
+    if (r.error) { box.innerHTML = `<div style="color:#eb5757">${esc(r.error)}</div>`; return; }
+    const d = r.data;
+    box.innerHTML = `
+      <div style="font-size:14px;font-weight:700;color:#6940a5;margin-bottom:12px">🤖 ${esc(d.overall || '')}</div>
+      <div class="ai-metric"><span class="ai-metric-label">できてる</span><span>${esc(d.best || '')}</span></div>
+      <div class="ai-metric"><span class="ai-metric-label">注力を</span><span>${esc(d.focus || '')}</span></div>
+      <div class="ai-metric"><span class="ai-metric-label">アドバイス</span><span>${esc(d.tip || '')}</span></div>`;
+  }).analyzeNumbers(_currentYM);
+}
+
+function runWeeklyReport() {
+  document.getElementById('report-loading').style.display = 'inline';
+  document.getElementById('weekly-report-result').style.display = 'none';
+  google.script.run.withSuccessHandler(r => {
+    document.getElementById('report-loading').style.display = 'none';
+    if (r.error) { toast('エラー: ' + r.error, 5000); return; }
+    renderWeeklyReport(r.data);
+  }).generateWeeklyReport();
+}
+
+function renderWeeklyReport(d) {
+  if (!d) return;
+  const el = document.getElementById('weekly-report-result');
+  el.style.display = 'block';
+  const ach = (d.achievements || []).map(a => `<div class="report-item">✅ ${esc(a)}</div>`).join('');
+  const iss = (d.issues || []).map(i => `<div class="report-item" style="border-left-color:#f5a623">⚠️ ${esc(i)}</div>`).join('');
+  const nxt = (d.next_week || []).map(n => `<div class="report-item" style="border-left-color:#2383e2">→ ${esc(n)}</div>`).join('');
+  el.innerHTML = `
+    ${d.subject ? `<div style="font-size:14px;font-weight:600;margin-bottom:14px;padding:10px 14px;background:#f8f4ff;border-radius:8px;border-left:4px solid #6940a5">📧 件名: ${esc(d.subject)}</div>` : ''}
+    <div class="report-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div class="report-label">サマリー</div>
+        <button class="btn btn-secondary btn-sm" onclick="copyText('rpt-summary')">コピー</button>
+      </div>
+      <div class="report-body" id="rpt-summary" contenteditable="true">${esc(d.summary || '')}</div>
+    </div>
+    ${ach ? `<div class="report-section"><div class="report-label">今週の成果</div>${ach}</div>` : ''}
+    ${iss ? `<div class="report-section"><div class="report-label">課題・懸念事項</div>${iss}</div>` : ''}
+    ${nxt ? `<div class="report-section"><div class="report-label">来週の予定</div>${nxt}</div>` : ''}
+    ${d.message ? `<div style="margin-top:12px;padding:10px 14px;background:#eefbee;border-radius:8px;font-size:13px;border-left:3px solid #2d8a4e">💬 ${esc(d.message)}</div>` : ''}`;
 }
 
 // ─────────────────────────────────────

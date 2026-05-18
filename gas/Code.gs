@@ -529,6 +529,206 @@ function aiChat(messages) {
 // CHECKLIST
 // ─────────────────────────────────────────────
 
+// ─────────────────────────────────────────────
+// CUSTOMERS（顧客カルテ）
+// ─────────────────────────────────────────────
+
+function getCustomers(query) {
+  const sh = _sheet('customers', ['id','company','name','role','phone','email','rank','last_contact','notes','tags','created']);
+  const rows = sh.getDataRange().getValues().slice(1).filter(r => r[0])
+    .map(r => ({
+      id: r[0], company: r[1], name: r[2], role: r[3],
+      phone: r[4], email: r[5], rank: r[6],
+      last_contact: r[7] ? _fmtDate(r[7]) : '',
+      notes: r[8], tags: r[9], created: _fmt(r[10])
+    }))
+    .sort((a, b) => ({ 'A': 0, 'B': 1, 'C': 2 }[a.rank] - ({ 'A': 0, 'B': 1, 'C': 2 }[b.rank] || 2) || 0));
+  if (!query) return rows;
+  const q = String(query).toLowerCase();
+  return rows.filter(r => (r.company + r.name + r.tags + r.notes).toLowerCase().includes(q));
+}
+
+function saveCustomer(c) {
+  const sh = _sheet('customers', ['id','company','name','role','phone','email','rank','last_contact','notes','tags','created']);
+  const lc = c.last_contact ? new Date(c.last_contact) : '';
+  if (c.id) {
+    const all = sh.getDataRange().getValues();
+    for (let i = 1; i < all.length; i++) {
+      if (String(all[i][0]) === String(c.id)) {
+        sh.getRange(i + 1, 2, 1, 9).setValues([[c.company || '', c.name || '', c.role || '', c.phone || '', c.email || '', c.rank || 'B', lc, c.notes || '', c.tags || '']]);
+        return { ok: true };
+      }
+    }
+  }
+  const id = _uuid();
+  sh.appendRow([id, c.company || '', c.name || '', c.role || '', c.phone || '', c.email || '', c.rank || 'B', lc, c.notes || '', c.tags || '', new Date()]);
+  return { ok: true, id };
+}
+
+function deleteCustomer(id) {
+  const sh = _sheet('customers', ['id','company','name','role','phone','email','rank','last_contact','notes','tags','created']);
+  const all = sh.getDataRange().getValues();
+  for (let i = 1; i < all.length; i++) {
+    if (String(all[i][0]) === String(id)) { sh.deleteRow(i + 1); return { ok: true }; }
+  }
+  return { ok: false };
+}
+
+// ─────────────────────────────────────────────
+// MEETINGS（商談メモ）
+// ─────────────────────────────────────────────
+
+function getMeetings(limit) {
+  const sh = _sheet('meetings', ['id','date','company','person','purpose','content','my_actions','their_actions','next_date','status','created']);
+  const rows = sh.getDataRange().getValues().slice(1).filter(r => r[0])
+    .map(r => ({
+      id: r[0], date: _fmtDate(r[1]), company: r[2], person: r[3],
+      purpose: r[4], content: r[5], my_actions: r[6], their_actions: r[7],
+      next_date: r[8] ? _fmtDate(r[8]) : '', status: r[9]
+    })).reverse();
+  return limit ? rows.slice(0, limit) : rows;
+}
+
+function saveMeeting(m) {
+  const sh = _sheet('meetings', ['id','date','company','person','purpose','content','my_actions','their_actions','next_date','status','created']);
+  const now = new Date();
+  const date = m.date ? new Date(m.date) : now;
+  const nextDate = m.next_date ? new Date(m.next_date) : '';
+  if (m.id) {
+    const all = sh.getDataRange().getValues();
+    for (let i = 1; i < all.length; i++) {
+      if (String(all[i][0]) === String(m.id)) {
+        sh.getRange(i + 1, 2, 1, 9).setValues([[date, m.company || '', m.person || '', m.purpose || '', m.content || '', m.my_actions || '', m.their_actions || '', nextDate, m.status || 'フォロー中']]);
+        return { ok: true };
+      }
+    }
+  }
+  const id = _uuid();
+  sh.appendRow([id, date, m.company || '', m.person || '', m.purpose || '', m.content || '', m.my_actions || '', m.their_actions || '', nextDate, m.status || 'フォロー中', now]);
+  return { ok: true, id };
+}
+
+function deleteMeeting(id) {
+  const sh = _sheet('meetings', ['id','date','company','person','purpose','content','my_actions','their_actions','next_date','status','created']);
+  const all = sh.getDataRange().getValues();
+  for (let i = 1; i < all.length; i++) {
+    if (String(all[i][0]) === String(id)) { sh.deleteRow(i + 1); return { ok: true }; }
+  }
+  return { ok: false };
+}
+
+function generateFollowupEmail(meetingId) {
+  const m = getMeetings(null).find(x => x.id === meetingId);
+  if (!m) return { error: '商談記録が見つかりません' };
+  const prompt = `あなたは製造業向け営業担当者です。以下の商談記録をもとに訪問後フォローアップメールを作成してください。
+
+顧客: ${m.company} ${m.person}様 / 日付: ${m.date}
+商談目的: ${m.purpose}
+商談内容: ${m.content}
+自分の宿題: ${m.my_actions || 'なし'}
+先方の宿題: ${m.their_actions || 'なし'}
+次回予定: ${m.next_date || '未定'}
+
+要件: 件名(30字以内)と本文(300字以内)。自分の宿題は対応予定を明記。先方の宿題は丁寧に確認。次回への橋渡しで締める。`;
+  return _callGemini(prompt, false);
+}
+
+function generateMeetingPrep(company, purpose, pastContent) {
+  const prompt = `製造業向け営業のプロとして、以下の商談前の準備ブリーフィングをJSONで作成してください。
+
+顧客: ${company} / 目的: ${purpose}
+過去の商談: ${pastContent || '（初回訪問または記録なし）'}
+
+JSON形式:
+{
+  "opening": "最初の一言・アイスブレイク（具体的に）",
+  "key_points": ["必ず押さえるポイント（3つ）"],
+  "questions": ["顧客に聞くべき質問（3つ）"],
+  "watch_out": ["気をつけるべきリスク・注意点"],
+  "goal": "この商談のゴール（一文）"
+}`;
+  return _callGemini(prompt, true);
+}
+
+// ─────────────────────────────────────────────
+// MONTHLY NUMBERS（数値目標）
+// ─────────────────────────────────────────────
+
+function getNumbers(yearMonth) {
+  const sh = _sheet('monthly_numbers', ['id','year_month','category','target','actual','unit','created']);
+  const rows = sh.getDataRange().getValues().slice(1).filter(r => r[0])
+    .map(r => ({ id: r[0], year_month: r[1], category: r[2], target: Number(r[3]) || 0, actual: Number(r[4]) || 0, unit: r[5] }));
+  return yearMonth ? rows.filter(r => r.year_month === yearMonth) : rows;
+}
+
+function saveNumber(n) {
+  const sh = _sheet('monthly_numbers', ['id','year_month','category','target','actual','unit','created']);
+  const all = sh.getDataRange().getValues();
+  for (let i = 1; i < all.length; i++) {
+    if (String(all[i][0]) === String(n.id) || (all[i][1] === n.year_month && all[i][2] === n.category)) {
+      sh.getRange(i + 1, 2, 1, 5).setValues([[n.year_month, n.category, Number(n.target) || 0, Number(n.actual) || 0, n.unit || '']]);
+      return { ok: true, id: all[i][0] };
+    }
+  }
+  const id = _uuid();
+  sh.appendRow([id, n.year_month, n.category, Number(n.target) || 0, Number(n.actual) || 0, n.unit || '', new Date()]);
+  return { ok: true, id };
+}
+
+function analyzeNumbers(yearMonth) {
+  const nums = getNumbers(yearMonth);
+  if (!nums.length) return { error: 'この月のデータがありません' };
+  const numText = nums.map(n => {
+    const rate = n.target > 0 ? Math.round(n.actual / n.target * 100) : 0;
+    return `${n.category}: 目標${n.target}${n.unit} 実績${n.actual}${n.unit} 達成率${rate}%`;
+  }).join('\n');
+  const prompt = `営業担当者の${yearMonth}の実績データです。
+${numText}
+
+以下のJSON形式でコメントをください:
+{
+  "overall": "全体評価（20字以内、必ず励ます）",
+  "best": "最もできている点（具体的に）",
+  "focus": "今注力すべきこと（具体的に）",
+  "tip": "残り期間で達成率を上げるための具体的なアドバイス（80字以内）"
+}`;
+  return _callGemini(prompt, true);
+}
+
+// ─────────────────────────────────────────────
+// WEEKLY REPORT（週次報告書AI生成）
+// ─────────────────────────────────────────────
+
+function generateWeeklyReport() {
+  const logs = getDailyLogs(7);
+  const doneTasks = getTasks().filter(t => t.status === '完了').slice(0, 10);
+  if (!logs.length) return { error: '業務日誌がありません。日誌を記録してから実行してください。' };
+  const logText = logs.map(l => `[${l.date}] ${l.work} / 成果: ${l.achievements}`).join('\n');
+  const taskText = doneTasks.length ? doneTasks.map(t => `・${t.title}`).join('\n') : 'なし';
+  const prompt = `以下の業務日誌をもとに、上司への週次業務報告書をJSON形式で作成してください。
+
+【業務日誌（直近）】
+${logText}
+
+【完了タスク】
+${taskText}
+
+JSON形式:
+{
+  "subject": "週次報告の件名（簡潔に30字以内）",
+  "summary": "今週の業務サマリー（150字以内）",
+  "achievements": ["主な成果・完了事項（3〜5項目）"],
+  "issues": ["課題・懸念事項（あれば、なければ空配列）"],
+  "next_week": ["来週の主な予定・方針（3項目）"],
+  "message": "上司へのひと言（30字以内、前向きに）"
+}`;
+  return _callGemini(prompt, true);
+}
+
+// ─────────────────────────────────────────────
+// CHECKLIST
+// ─────────────────────────────────────────────
+
 function getChecklist(type) {
   const lists = {
     email: ['宛先（To/CC）は正しいか', '件名に顧客名・日付が入っているか', '添付ファイルを忘れていないか',
