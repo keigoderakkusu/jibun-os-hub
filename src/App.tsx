@@ -5,6 +5,7 @@ import JibunOS_Hub from './JibunOS_Hub';
 import AIAgent from './AIAgent';
 import AppLauncher from './AppLauncher';
 import Blog from './Blog';
+import Kakeibo from './Kakeibo';
 
 export default function App() {
   const [page, setPage] = useState<PageId>('dashboard');
@@ -16,6 +17,7 @@ export default function App() {
       <main className="flex-1 overflow-hidden flex flex-col min-w-0">
         {page === 'dashboard' && <IntegratedDashboard />}
         {page === 'blog'      && <Blog />}
+        {page === 'kakeibo'   && <Kakeibo />}
         {page === 'hub'       && <JibunOS_Hub />}
         {page === 'agent'     && <AIAgent />}
         {page === 'launcher'  && <AppLauncher />}
