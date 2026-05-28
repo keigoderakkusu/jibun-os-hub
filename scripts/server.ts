@@ -623,7 +623,172 @@ ${theme}
 });
 
 
-// 本番環境: Viteビルド済み静的ファイルを配信 (SPA フォールバック)
+// ════════════════════════════════════════════════════════════
+//  CoupleOS API  (/api/calendar, /api/timetree, /api/restaurants, /api/ai, /api/plans, /api/events)
+// ════════════════════════════════════════════════════════════
+
+import Anthropic from '@anthropic-ai/sdk';
+
+const COUPLE_DB_PATH = path.join(process.cwd(), 'data', 'couple-os.json');
+
+interface CoupleDB {
+  plans: any[];
+  lifeEvents: any[];
+  restaurantFavorites: any[];
+  _nextId: { plans: number; events: number };
+}
+
+const DEFAULT_DB: CoupleDB = { plans: [], lifeEvents: [], restaurantFavorites: [], _nextId: { plans: 1, events: 1 } };
+
+function readCoupleDB(): CoupleDB {
+  try {
+    if (fs.existsSync(COUPLE_DB_PATH)) return JSON.parse(fs.readFileSync(COUPLE_DB_PATH, 'utf-8'));
+  } catch {}
+  return { ...DEFAULT_DB, _nextId: { plans: 1, events: 1 } };
+}
+function writeCoupleDB(db: CoupleDB) {
+  fs.mkdirpSync(path.dirname(COUPLE_DB_PATH));
+  fs.writeFileSync(COUPLE_DB_PATH, JSON.stringify(db, null, 2));
+}
+
+// ── Google Calendar ──────────────────────────────────────
+function getCalendarAuth() {
+  const credRaw  = process.env.GOOGLE_CREDENTIALS_JSON;
+  const tokenRaw = process.env.GOOGLE_CALENDAR_TOKEN_JSON || process.env.GOOGLE_TOKEN_JSON;
+  if (!credRaw) throw new Error('GOOGLE_CREDENTIALS_JSON not set');
+  const parsed   = JSON.parse(credRaw);
+  const cred     = parsed.installed ?? parsed.web ?? parsed;
+  const oauth2   = new google.auth.OAuth2(cred.client_id, cred.client_secret, (cred.redirect_uris || ['urn:ietf:wg:oauth:2.0:oob'])[0]);
+  if (tokenRaw) oauth2.setCredentials(JSON.parse(tokenRaw));
+  return oauth2;
+}
+
+app.get('/api/calendar/events', async (req: any, res: any) => {
+  try {
+    const cal    = google.calendar({ version: 'v3', auth: getCalendarAuth() });
+    const result = await cal.events.list({ calendarId: 'primary', timeMin: req.query.from, timeMax: req.query.to, singleEvents: true, orderBy: 'startTime', maxResults: 100 });
+    res.json((result.data.items ?? []).map((e: any) => ({
+      id: e.id, title: e.summary ?? '(タイトルなし)',
+      start: e.start?.dateTime ?? e.start?.date ?? '',
+      end:   e.end?.dateTime   ?? e.end?.date   ?? '',
+      allDay: !e.start?.dateTime, location: e.location, source: 'google',
+    })));
+  } catch (e: any) { console.error('[Calendar]', e.message); res.json([]); }
+});
+
+app.post('/api/calendar/events', async (req: any, res: any) => {
+  try {
+    const cal    = google.calendar({ version: 'v3', auth: getCalendarAuth() });
+    const { title, start, end, location } = req.body;
+    const result = await cal.events.insert({ calendarId: 'primary', requestBody: { summary: title, start: { dateTime: start }, end: { dateTime: end }, location } });
+    res.json({ ...result.data, source: 'google' });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/calendar/events/:id', async (req: any, res: any) => {
+  try {
+    await google.calendar({ version: 'v3', auth: getCalendarAuth() }).events.delete({ calendarId: 'primary', eventId: req.params.id });
+    res.json({ ok: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// ── TimeTree ─────────────────────────────────────────────
+app.get('/api/timetree/events', async (req: any, res: any) => {
+  const token = process.env.TIMETREE_TOKEN;
+  if (!token) return res.json([]);
+  try {
+    const calRes = await fetch('https://timetreeapis.com/calendars', { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.timetree.v1+json' } });
+    if (!calRes.ok) throw new Error(`TimeTree calendars: ${calRes.status}`);
+    const calData = await calRes.json() as any;
+    const from = new Date(req.query.from as string);
+    const to   = new Date(req.query.to   as string);
+    const all  = await Promise.all(calData.data.map(async (c: any) => {
+      const evRes = await fetch(`https://timetreeapis.com/calendars/${c.id}/upcoming_events?timezone=Asia%2FTokyo&days=60`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.timetree.v1+json' } });
+      if (!evRes.ok) return [];
+      const evData = await evRes.json() as any;
+      return (evData.data ?? []).map((e: any) => ({
+        id: `tt-${e.id}`, title: e.attributes?.title ?? '(タイトルなし)',
+        start: e.attributes?.start_at ?? '', end: e.attributes?.end_at ?? '',
+        allDay: e.attributes?.all_day ?? false, source: 'timetree',
+      })).filter((e: any) => { const d = new Date(e.start); return d >= from && d <= to; });
+    }));
+    res.json(all.flat());
+  } catch (e: any) { console.error('[TimeTree]', e.message); res.json([]); }
+});
+
+// ── Restaurants ──────────────────────────────────────────
+app.get('/api/restaurants/search', async (req: any, res: any) => {
+  const apiKey = process.env.HOTPEPPER_API_KEY;
+  const { keyword, lat, lng, range = '3', genre, count = '20' } = req.query;
+  if (!apiKey) return res.json([
+    { id:'mock1', name:'桜亭', genre:'和食', address:'東京都渋谷区', access:'渋谷駅徒歩5分', budget:'3,000〜4,000円' },
+    { id:'mock2', name:'BISTRO ROSE', genre:'フレンチ', address:'東京都渋谷区', access:'渋谷駅徒歩3分', budget:'5,000〜8,000円' },
+    { id:'mock3', name:'月光カフェ', genre:'カフェ', address:'東京都表参道', access:'表参道駅徒歩8分', budget:'1,000〜2,000円' },
+  ]);
+  try {
+    const p = new URLSearchParams({ key: apiKey, format: 'json', count });
+    if (keyword) p.set('keyword', keyword); if (lat) p.set('lat', lat); if (lng) p.set('lng', lng);
+    if (lat && lng) p.set('range', range); if (genre) p.set('genre', genre);
+    const data = await (await fetch(`https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?${p}`)).json() as any;
+    res.json((data.results?.shop ?? []).map((s: any) => ({ id:s.id, name:s.name, genre:s.genre?.name, address:s.address, access:s.access, budget:s.budget?.average, urls:s.urls?.pc, photo:s.photo?.mobile?.l, lat:s.lat, lng:s.lng })));
+  } catch (e: any) { res.json([]); }
+});
+
+app.get ('/api/restaurants/favorites',     (req: any, res: any) => res.json(readCoupleDB().restaurantFavorites));
+app.post('/api/restaurants/favorites',     (req: any, res: any) => { const db = readCoupleDB(); db.restaurantFavorites = db.restaurantFavorites.filter((f:any) => f.id !== req.body.id); db.restaurantFavorites.push(req.body); writeCoupleDB(db); res.json(req.body); });
+app.delete('/api/restaurants/favorites/:id', (req: any, res: any) => { const db = readCoupleDB(); db.restaurantFavorites = db.restaurantFavorites.filter((f:any) => f.id !== req.params.id); writeCoupleDB(db); res.json({ ok: true }); });
+
+// ── AI Planner ───────────────────────────────────────────
+async function generatePlan(type: 'date'|'travel', params: any): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return `[ANTHROPIC_API_KEY が未設定です]\n\nパラメータ: ${JSON.stringify(params, null, 2)}`;
+  const client = new Anthropic({ apiKey });
+  let prompt = '';
+  if (type === 'date') {
+    prompt = `あなたはカップルのデートプランを考えるプロのプランナーです。以下の条件で具体的なデートプランを作成してください。\n\nエリア: ${params.area}\n予算: ${Number(params.budget).toLocaleString()}円（2人合計）\n気分: ${params.mood}\n所要時間: ${params.duration}\n\n【プランタイトル】\n（キャッチーなタイトル）\n\n【タイムライン】\nHH:MM 〜 HH:MM : スポット名 / 内容（予算目安）\n（3〜6項目）\n\n【ポイント】\n•（おすすめポイント3つ）\n\n【予算内訳】\n交通費・食費・入場料などの目安`;
+  } else {
+    const days = Number(params.nights) + 1;
+    prompt = `あなたはカップル旅行のプロのプランナーです。以下の条件で詳細な旅行プランを作成してください。\n\n目的地: ${params.destination}\n泊数: ${params.nights}泊${days}日\n予算: ${Number(params.budget).toLocaleString()}円（2人合計）\nテーマ: ${params.theme}\n\n【旅行プランタイトル】\n（キャッチーなタイトル）\n\n${Array.from({length:days},(_,i)=>`【${i+1}日目】\n午前: スポット + 説明\n昼食: お店の提案\n午後: スポット + 説明\n${i<Number(params.nights)?'夕食・宿泊: お店・宿の提案':'帰路'}`).join('\n\n')}\n\n【予算内訳】\n交通費・宿泊費・食費・観光費の目安\n\n【持ち物リスト】\n•（3〜5項目）`;
+  }
+  const msg = await client.messages.create({ model: 'claude-sonnet-4-6', max_tokens: 2048, messages: [{ role: 'user', content: prompt }] });
+  return msg.content[0].type === 'text' ? msg.content[0].text : '';
+}
+
+app.post('/api/ai/date-plan', async (req: any, res: any) => {
+  try {
+    const content = await generatePlan('date', req.body);
+    const title   = content.match(/【プランタイトル】\s*\n(.+)/)?.[1]?.trim() ?? `${req.body.area}のデートプラン`;
+    const db = readCoupleDB();
+    const plan = { id: db._nextId.plans++, type: 'date', title, content, params: JSON.stringify(req.body), createdAt: new Date().toISOString() };
+    db.plans.push(plan); writeCoupleDB(db);
+    res.json(plan);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/ai/travel-plan', async (req: any, res: any) => {
+  try {
+    const content = await generatePlan('travel', req.body);
+    const title   = content.match(/【旅行プランタイトル】\s*\n(.+)/)?.[1]?.trim() ?? `${req.body.destination} ${req.body.nights}泊の旅`;
+    const db = readCoupleDB();
+    const plan = { id: db._nextId.plans++, type: 'travel', title, content, params: JSON.stringify(req.body), createdAt: new Date().toISOString() };
+    db.plans.push(plan); writeCoupleDB(db);
+    res.json(plan);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// ── Plans CRUD ───────────────────────────────────────────
+app.get('/api/plans', (req: any, res: any) => res.json([...readCoupleDB().plans].reverse()));
+app.post('/api/plans', (req: any, res: any) => { const db = readCoupleDB(); const p = { id: db._nextId.plans++, ...req.body, createdAt: new Date().toISOString() }; db.plans.push(p); writeCoupleDB(db); res.json(p); });
+app.delete('/api/plans/:id', (req: any, res: any) => { const db = readCoupleDB(); db.plans = db.plans.filter((p:any) => p.id !== Number(req.params.id)); writeCoupleDB(db); res.json({ ok: true }); });
+
+// ── Life Events CRUD ─────────────────────────────────────
+app.get('/api/events', (req: any, res: any) => res.json(readCoupleDB().lifeEvents));
+app.post('/api/events', (req: any, res: any) => { const db = readCoupleDB(); const ev = { id: db._nextId.events++, done: false, ...req.body }; db.lifeEvents.push(ev); writeCoupleDB(db); res.json(ev); });
+app.put('/api/events/:id', (req: any, res: any) => { const db = readCoupleDB(); const idx = db.lifeEvents.findIndex((e:any) => e.id === Number(req.params.id)); if (idx === -1) return res.status(404).json({ error:'not found' }); db.lifeEvents[idx] = { ...db.lifeEvents[idx], ...req.body }; writeCoupleDB(db); res.json(db.lifeEvents[idx]); });
+app.delete('/api/events/:id', (req: any, res: any) => { const db = readCoupleDB(); db.lifeEvents = db.lifeEvents.filter((e:any) => e.id !== Number(req.params.id)); writeCoupleDB(db); res.json({ ok: true }); });
+
+// ════════════════════════════════════════════════════════════
+//  本番環境: Viteビルド済み静的ファイルを配信 (SPA フォールバック)
 const distPath = path.join(process.cwd(), 'dist');
 if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));

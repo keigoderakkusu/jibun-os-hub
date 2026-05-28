@@ -63,3 +63,21 @@ body {
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
+
+/* CoupleOS / Kakeibo shared input */
+.cinput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  font-size: 0.875rem;
+  outline: none;
+  color: hsl(var(--foreground));
+}
+.cinput:focus {
+  border-color: hsl(var(--ring));
+}
+.cinput option {
+  background: hsl(var(--card));
+}

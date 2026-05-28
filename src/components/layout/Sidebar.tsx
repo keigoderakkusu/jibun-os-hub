@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
   Cpu, Bot, Grid, ChevronLeft, ChevronRight,
-  LayoutDashboard, Zap, BookOpen, TrendingUp
+  LayoutDashboard, Zap, BookOpen, TrendingUp,
+  Wallet, Heart
 } from 'lucide-react';
 
-export type PageId = 'hub' | 'agent' | 'dashboard' | 'launcher' | 'blog';
+export type PageId = 'hub' | 'agent' | 'dashboard' | 'launcher' | 'blog' | 'kakeibo' | 'couple';
 
 interface NavItem {
   id: PageId;
@@ -15,11 +16,13 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'JIBUN-OS', icon: LayoutDashboard, section: 'メイン' },
-  { id: 'blog', label: 'ブログ', icon: BookOpen, badge: 'NEW', section: 'メイン' },
-  { id: 'hub', label: 'OSS統合ハブ', icon: Cpu, section: 'ツール' },
-  { id: 'agent', label: 'AIエージェント', icon: Bot, badge: 'AI', section: 'ツール' },
-  { id: 'launcher', label: 'マイシステム', icon: Grid, section: 'ツール' },
+  { id: 'dashboard', label: 'JIBUN-OS',    icon: LayoutDashboard, section: 'メイン' },
+  { id: 'blog',      label: 'ブログ',       icon: BookOpen, badge: 'NEW', section: 'メイン' },
+  { id: 'kakeibo',   label: '家計簿',       icon: Wallet, section: 'ライフ' },
+  { id: 'couple',    label: 'カップルOS',   icon: Heart,  badge: '♡',   section: 'ライフ' },
+  { id: 'hub',       label: 'OSS統合ハブ',  icon: Cpu,    section: 'ツール' },
+  { id: 'agent',     label: 'AIエージェント', icon: Bot, badge: 'AI', section: 'ツール' },
+  { id: 'launcher',  label: 'マイシステム', icon: Grid,   section: 'ツール' },
 ];
 
 interface SidebarProps {

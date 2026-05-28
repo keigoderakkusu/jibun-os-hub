@@ -8,12 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "server": "npx tsx scripts/server.ts",
     "audio-worker": "npx tsx scripts/audio_worker.ts > audio_worker.log 2>&1",
     "trend-agent": "npx tsx scripts/trend_agent.ts > trend_agent.log 2>&1",
     "departments": "npx tsx scripts/department_orchestrator.ts > departments.log 2>&1",
     "task-agent": "npx tsx scripts/task_agent.ts > task_agent.log 2>&1"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@google-cloud/local-auth": "^3.0.1",
     "@google/genai": "^1.44.0",
     "@google/generative-ai": "^0.24.1",
@@ -26,6 +28,7 @@
     "body-parser": "^2.2.2",
     "clsx": "^2.1.1",
     "cors": "^2.8.6",
+    "date-fns": "^4.3.0",
     "express": "^5.2.1",
     "framer-motion": "^12.35.0",
     "fs-extra": "^11.3.4",
