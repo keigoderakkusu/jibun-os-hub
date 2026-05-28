@@ -76,8 +76,8 @@ export default function AppLauncher() {
       title: '自分株式会社 (アフィリエイト特化)',
       description: 'アフィリエイト記事エンジンに特化した旧バージョンのダッシュボード。',
       icon: Terminal,
-      iconColor: 'text-emerald-500',
-      iconBg: 'bg-emerald-50',
+      iconColor: 'text-[#4A7A38]',
+      iconBg: 'bg-[#EEF5E8]',
       accentColor: '#059669',
       actionName: '画面を開く',
       type: 'html' as const,
@@ -98,8 +98,8 @@ export default function AppLauncher() {
       title: '旧 リモートパネル',
       description: 'スマートフォン操作向けに作られていた過去のインターフェース。',
       icon: Grid,
-      iconColor: 'text-violet-500',
-      iconBg: 'bg-violet-50',
+      iconColor: 'text-[#4A7A38]',
+      iconBg: 'bg-[#EEF5E8]',
       accentColor: '#7c3aed',
       actionName: '画面を開く',
       type: 'html' as const,
@@ -108,10 +108,15 @@ export default function AppLauncher() {
   ];
 
   const statusBg = status?.type === 'success'
-    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+    ? 'border'
     : status?.type === 'error'
-    ? 'bg-red-50 border-red-200 text-red-700'
-    : 'bg-blue-50 border-blue-200 text-blue-700';
+    ? 'border'
+    : 'border';
+  const statusStyle = status?.type === 'success'
+    ? { background: '#EEF5E8', borderColor: '#B8D4A8', color: '#4A7A38' }
+    : status?.type === 'error'
+    ? { background: '#FBEAEA', borderColor: 'rgba(192,57,43,0.3)', color: '#C0392B' }
+    : { background: '#E5EEF8', borderColor: 'rgba(26,95,168,0.3)', color: '#1A5FA8' };
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -125,7 +130,7 @@ export default function AppLauncher() {
         <div className="p-6 space-y-6">
 
           {status && (
-            <div className={`flex items-start gap-3 p-3 rounded-lg border text-sm ${statusBg}`}>
+            <div className={`flex items-start gap-3 p-3 rounded-lg text-sm ${statusBg}`} style={statusStyle}>
               {status.type === 'loading'
                 ? <Loader2 size={16} className="shrink-0 mt-0.5 animate-spin" />
                 : <AlertCircle size={16} className="shrink-0 mt-0.5" />

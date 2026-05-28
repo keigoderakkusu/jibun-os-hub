@@ -76,13 +76,13 @@ const ARTICLES: Article[] = [
 const CATEGORIES = ['すべて', 'AI・自動化', '副業・収益化'];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'AI・自動化': 'bg-violet-500/15 text-violet-400',
-  '副業・収益化': 'bg-emerald-500/15 text-emerald-400',
+  'AI・自動化': 'bg-[#E5EEF8] text-[#1A5FA8]',
+  '副業・収益化': 'bg-[#EEF5E8] text-[#4A7A38]',
 };
 
 function ArticleCard({ article, featured }: { article: Article; featured?: boolean }) {
   return (
-    <Card className={`group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${featured ? 'border-violet-500/30' : ''}`}>
+    <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" style={featured ? { borderColor: '#B8D4A8' } : {}}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between mb-2">
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[article.category] ?? 'bg-gray-500/15 text-gray-400'}`}>
@@ -94,7 +94,7 @@ function ArticleCard({ article, featured }: { article: Article; featured?: boole
             </span>
           )}
         </div>
-        <CardTitle className="text-base leading-snug group-hover:text-violet-400 transition-colors line-clamp-2">
+        <CardTitle className="text-base leading-snug transition-colors line-clamp-2 group-hover:text-[#4A7A38]">
           {article.title}
         </CardTitle>
       </CardHeader>
@@ -110,7 +110,7 @@ function ArticleCard({ article, featured }: { article: Article; featured?: boole
             </span>
             <span>{article.date}</span>
           </div>
-          <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-violet-400 opacity-0 group-hover:opacity-100" />
+          <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform opacity-0 group-hover:opacity-100" style={{ color: '#4A7A38' }} />
         </div>
         <div className="flex flex-wrap gap-1 mt-3">
           {article.tags.slice(0, 3).map(tag => (
@@ -149,8 +149,8 @@ export default function Blog() {
         {/* KPI バー */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: '記事数', value: `${ARTICLES.length}`, icon: PenLine, color: 'text-violet-400' },
-            { label: '月間PV目標', value: '10,000', icon: TrendingUp, color: 'text-emerald-400' },
+            { label: '記事数', value: `${ARTICLES.length}`, icon: PenLine, color: 'text-[#1A5FA8]' },
+            { label: '月間PV目標', value: '10,000', icon: TrendingUp, color: 'text-[#4A7A38]' },
             { label: '収益目標', value: '¥30,000', icon: Star, color: 'text-amber-400' },
           ].map(kpi => (
             <Card key={kpi.label}>
@@ -199,7 +199,7 @@ export default function Blog() {
         {featured.length > 0 && (
           <section>
             <h2 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'hsl(var(--muted-foreground))' }}>
-              <Zap size={13} className="text-violet-400" /> 注目記事
+              <Zap size={13} style={{ color: '#9A7418' }} /> 注目記事
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {featured.map(a => <ArticleCard key={a.id} article={a} featured />)}
@@ -227,16 +227,16 @@ export default function Blog() {
         )}
 
         {/* Hermes で記事生成CTA */}
-        <Card className="border-dashed border-violet-500/40 bg-violet-500/5">
+        <Card className="border-dashed" style={{ borderColor: '#B8D4A8', background: '#EEF5E8' }}>
           <CardContent className="pt-5 pb-4">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#4A7A38' }}>
                 <Zap size={18} className="text-white" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold mb-1">Hermes Agent で記事を自動生成</p>
                 <p className="text-xs mb-3" style={{ color: 'hsl(var(--muted-foreground))' }}>
-                  ターミナルで <code className="px-1 py-0.5 rounded text-violet-400" style={{ background: 'hsl(var(--muted))' }}>hermes</code> を起動し、
+                  ターミナルで <code className="px-1 py-0.5 rounded" style={{ background: '#D4C47A', color: '#2C2A1E' }}>hermes</code> を起動し、
                   「〇〇についてブログ記事を書いて」と話しかけるだけで記事の下書きを生成できます。
                 </p>
                 <div className="flex gap-2">

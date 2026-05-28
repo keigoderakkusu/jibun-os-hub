@@ -147,8 +147,8 @@ function CalendarTab() {
             </div>
           </div>
           <div className="flex gap-3 text-xs text-[hsl(var(--muted-foreground))]">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-400 inline-block"/>Google</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block"/>TimeTree</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{background:'#1A5FA8'}}/>Google</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{background:'#4A7A38'}}/>TimeTree</span>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
@@ -169,7 +169,7 @@ function CalendarTab() {
                   </span>
                   <div className="flex gap-0.5 h-1.5 mt-0.5">
                     {de.slice(0,3).map(e => (
-                      <span key={e.id} className={`w-1 h-1 rounded-full ${e.source==='timetree' ? 'bg-emerald-400' : 'bg-violet-400'}`}/>
+                      <span key={e.id} className="w-1 h-1 rounded-full" style={{background: e.source==='timetree' ? '#4A7A38' : '#1A5FA8'}}/>
                     ))}
                   </div>
                 </button>
@@ -198,7 +198,7 @@ function CalendarTab() {
               <div className="space-y-2">
                 {selEvs.map(ev => (
                   <div key={ev.id} className="flex items-start gap-2 p-2.5 rounded-lg border border-[hsl(var(--border))]">
-                    <span className={`mt-1 w-1.5 h-1.5 rounded-full flex-none ${ev.source==='timetree' ? 'bg-emerald-400' : 'bg-violet-400'}`}/>
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full flex-none" style={{background: ev.source==='timetree' ? '#4A7A38' : '#1A5FA8'}}/>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{ev.title}</p>
                       {ev.location && <p className="text-xs text-[hsl(var(--muted-foreground))] truncate">📍 {ev.location}</p>}
@@ -312,7 +312,11 @@ function RestaurantTab() {
                   className="flex-1 bg-transparent text-sm outline-none py-2 placeholder:text-[hsl(var(--muted-foreground))]"/>
               </div>
               <button onClick={locate} disabled={locating}
-                className={`p-2.5 rounded-lg border transition-colors ${coords ? 'border-emerald-500 text-emerald-600' : 'border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]'}`}>
+                className="p-2.5 rounded-lg border transition-colors"
+                style={coords
+                  ? { borderColor: '#B8D4A8', color: '#4A7A38', background: '#EEF5E8' }
+                  : { borderColor: 'hsl(var(--border))', color: 'hsl(var(--muted-foreground))', background: 'transparent' }
+                }>
                 {locating ? <Loader2 size={15} className="animate-spin"/> : <Navigation size={15}/>}
               </button>
               <button onClick={search} disabled={loading}
@@ -360,7 +364,8 @@ function RestaurantTab() {
                 {r.budget && <p className="text-xs text-[hsl(var(--muted-foreground))]">¥ {r.budget}</p>}
                 {r.urls && (
                   <a href={r.urls} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-violet-500 hover:underline mt-1">
+                    className="flex items-center gap-1 text-xs hover:underline mt-1"
+                    style={{ color: '#1A5FA8' }}>
                     <ExternalLink size={10}/> 詳細を見る
                   </a>
                 )}
@@ -616,8 +621,18 @@ function EventCard({ ev, onToggle, onDelete, dimmed }: { ev: LifeEvent; onToggle
       <div className="flex items-start justify-between gap-2">
         <span className="text-2xl">{ev.emoji || cat?.emoji}</span>
         <div className="flex gap-1">
-          <button onClick={()=>onToggle(ev)} className={`p-1 rounded border transition-colors ${ev.done ? 'border-emerald-500 text-emerald-500' : 'border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]'}`}><Check size={12}/></button>
-          <button onClick={()=>onDelete(ev.id)} className="p-1 rounded border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:text-rose-500 transition-colors"><Trash2 size={12}/></button>
+          <button onClick={()=>onToggle(ev)}
+            className="p-1 rounded border transition-colors"
+            style={ev.done ? {borderColor:'#B8D4A8',color:'#4A7A38',background:'#EEF5E8'} : {borderColor:'hsl(var(--border))',color:'hsl(var(--muted-foreground))'}}>
+            <Check size={12}/>
+          </button>
+          <button onClick={()=>onDelete(ev.id)}
+            className="p-1 rounded border transition-colors"
+            style={{borderColor:'hsl(var(--border))',color:'hsl(var(--muted-foreground))'}}
+            onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.color='#C0392B';(e.currentTarget as HTMLElement).style.background='#FBEAEA';}}
+            onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.color='hsl(var(--muted-foreground))';(e.currentTarget as HTMLElement).style.background='transparent';}}>
+            <Trash2 size={12}/>
+          </button>
         </div>
       </div>
       <p className={`text-sm font-semibold ${ev.done ? 'line-through text-[hsl(var(--muted-foreground))]' : ''}`}>{ev.title}</p>

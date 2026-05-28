@@ -16,8 +16,8 @@ import { PageHeader } from './components/layout/PageHeader';
 const OSS_TOOLS = [
   {
     id: 'flowise', name: 'Flowise', category: 'AI エージェント', icon: Bot,
-    accentClass: 'text-violet-600', bgClass: 'bg-violet-50',
-    gradientFrom: '#7c3aed', gradientTo: '#4f46e5',
+    accentClass: 'text-[#1A5FA8]', bgClass: 'bg-[#E5EEF8]',
+    gradientFrom: '#1A5FA8', gradientTo: '#1A7A8A',
     description: 'ノーコードでLLMエージェント・チャットボットをビジュアル構築。Geminiと即接続可能。',
     github: 'https://github.com/FlowiseAI/Flowise', stars: '35k+',
     port: 3000, installCmd: 'npx flowise start', localUrl: 'http://localhost:3000',
@@ -25,7 +25,7 @@ const OSS_TOOLS = [
   },
   {
     id: 'n8n', name: 'n8n', category: '自動化フロー', icon: Workflow,
-    accentClass: 'text-orange-600', bgClass: 'bg-orange-50',
+    accentClass: 'text-[#B8701A]', bgClass: 'bg-[#FBF6E0]',
     gradientFrom: '#ea580c', gradientTo: '#dc2626',
     description: 'ZapierのOSS版。400以上のアプリ連携で全業務を全自動化。すでに導入済み。',
     github: 'https://github.com/n8n-io/n8n', stars: '47k+',
@@ -43,8 +43,8 @@ const OSS_TOOLS = [
   },
   {
     id: 'pocketbase', name: 'PocketBase', category: 'データベース', icon: Database,
-    accentClass: 'text-emerald-600', bgClass: 'bg-emerald-50',
-    gradientFrom: '#059669', gradientTo: '#0d9488',
+    accentClass: 'text-[#4A7A38]', bgClass: 'bg-[#EEF5E8]',
+    gradientFrom: '#4A7A38', gradientTo: '#1A7A8A',
     description: 'ゼロ設定で動く超軽量データベース＋認証サーバー。単一バイナリで即起動。',
     github: 'https://github.com/pocketbase/pocketbase', stars: '43k+',
     port: 8090, installCmd: './pocketbase serve', localUrl: 'http://localhost:8090/_/',
@@ -52,7 +52,7 @@ const OSS_TOOLS = [
   },
   {
     id: 'appsmith', name: 'Appsmith', category: 'UI ビルダー', icon: LayoutDashboard,
-    accentClass: 'text-pink-600', bgClass: 'bg-pink-50',
+    accentClass: 'text-[#C0392B]', bgClass: 'bg-[#FBEAEA]',
     gradientFrom: '#db2777', gradientTo: '#e11d48',
     description: 'ドラッグ&ドロップで社内管理画面を爆速作成。',
     github: 'https://github.com/appsmithorg/appsmith', stars: '34k+',
@@ -61,8 +61,8 @@ const OSS_TOOLS = [
   },
   {
     id: 'dify', name: 'Dify', category: 'AIプラットフォーム', icon: Sparkles,
-    accentClass: 'text-indigo-600', bgClass: 'bg-indigo-50',
-    gradientFrom: '#4f46e5', gradientTo: '#2563eb',
+    accentClass: 'text-[#9A7418]', bgClass: 'bg-[#FBF6E0]',
+    gradientFrom: '#9A7418', gradientTo: '#B8701A',
     description: 'LLMアプリ開発プラットフォーム。RAG・エージェント・チャットフローをGUIで設計。',
     github: 'https://github.com/langgenius/dify', stars: '60k+',
     port: 80, installCmd: 'docker compose up -d', localUrl: 'http://localhost',
@@ -149,7 +149,7 @@ function GeminiTester() {
       {result && (
         <div className="p-4 rounded-lg border border-blue-200 bg-blue-50">
           <p className="text-xs font-semibold text-blue-600 mb-2 flex items-center gap-1"><CheckCircle size={12} /> Gemini からの応答</p>
-          <p className="text-sm text-zinc-700 leading-relaxed whitespace-pre-wrap">{result}</p>
+          <p className="text-sm text-[hsl(var(--foreground))] leading-relaxed whitespace-pre-wrap">{result}</p>
         </div>
       )}
     </div>
@@ -161,7 +161,7 @@ function ToolCard({ tool }: { tool: typeof OSS_TOOLS[0] }) {
   const isInstalled = tool.status === 'installed';
 
   return (
-    <Card className={`flex flex-col overflow-hidden hover:shadow-md transition-shadow ${isInstalled ? 'ring-1 ring-emerald-200' : ''}`}>
+    <Card className="flex flex-col overflow-hidden hover:shadow-md transition-shadow" style={isInstalled ? { outline: `1px solid #B8D4A8` } : {}}>
       {/* カラーバー */}
       <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${tool.gradientFrom}, ${tool.gradientTo})` }} />
       <CardHeader className="pb-3">
@@ -187,17 +187,16 @@ function ToolCard({ tool }: { tool: typeof OSS_TOOLS[0] }) {
         <p className="text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">{tool.description}</p>
         <div className={`${tool.bgClass} rounded-lg p-2.5`}>
           <p className={`text-[10px] font-semibold ${tool.accentClass} mb-0.5`}>活用シーン</p>
-          <p className="text-xs text-zinc-600">{tool.useCase}</p>
+          <p className="text-xs text-[hsl(var(--muted-foreground))]">{tool.useCase}</p>
         </div>
-        <div className="bg-zinc-950 rounded-lg px-3 py-2 flex items-center gap-2 overflow-x-auto">
-          <Terminal size={11} className="text-emerald-400 shrink-0" />
-          <code className="text-xs text-emerald-300 whitespace-nowrap">{tool.installCmd}</code>
+        <div className="rounded-lg px-3 py-2 flex items-center gap-2 overflow-x-auto" style={{ background: '#2C2A1E' }}>
+          <Terminal size={11} className="shrink-0" style={{ color: '#4A7A38' }} />
+          <code className="text-xs whitespace-nowrap" style={{ color: '#B8D4A8' }}>{tool.installCmd}</code>
         </div>
         <div className="flex gap-2 pt-1">
           <a href={tool.localUrl} target="_blank" rel="noopener noreferrer"
-            className={`flex-1 py-1.5 rounded-md text-xs font-medium text-center transition ${
-              isInstalled ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-[hsl(var(--secondary))] text-[hsl(var(--muted-foreground))] cursor-not-allowed'
-            }`}
+            className="flex-1 py-1.5 rounded-md text-xs font-medium text-center transition"
+            style={isInstalled ? { background: '#4A7A38', color: '#fff' } : { background: 'hsl(var(--secondary))', color: 'hsl(var(--muted-foreground))', cursor: 'not-allowed' }}
             onClick={e => !isInstalled && e.preventDefault()}
           >
             {isInstalled ? '開く' : '未起動'}
@@ -219,8 +218,8 @@ function WorkflowCard({ wf }: { wf: typeof N8N_WORKFLOWS[0] }) {
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-            <Icon size={18} className="text-orange-600" />
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#FBF6E0' }}>
+            <Icon size={18} style={{ color: '#B8701A' }} />
           </div>
           <div className="flex-1">
             <CardTitle className="text-sm leading-tight">{wf.name}</CardTitle>
@@ -238,8 +237,8 @@ function WorkflowCard({ wf }: { wf: typeof N8N_WORKFLOWS[0] }) {
         <p className="text-xs text-[hsl(var(--muted-foreground))] leading-relaxed mb-3">{wf.description}</p>
         <div className="flex flex-wrap gap-1.5">
           {wf.nodes.map((node, i) => (
-            <span key={i} className="text-[10px] bg-zinc-900 text-zinc-300 px-2 py-1 rounded font-mono flex items-center gap-1">
-              {i > 0 && <ChevronRight size={7} className="text-zinc-600" />}
+            <span key={i} className="text-[10px] px-2 py-1 rounded font-mono flex items-center gap-1" style={{ background: '#2C2A1E', color: '#B0AB94' }}>
+              {i > 0 && <ChevronRight size={7} style={{ color: '#7A7560' }} />}
               {node}
             </span>
           ))}
@@ -251,10 +250,10 @@ function WorkflowCard({ wf }: { wf: typeof N8N_WORKFLOWS[0] }) {
 
 function ArchitectureView() {
   const layers = [
-    { name: '脳層 — AI・思考', desc: 'Gemini Flash / Flowise / Dify / AnythingLLM', icon: Brain, color: 'bg-violet-50 text-violet-600', items: ['Gemini 1.5 Flash', 'Flowise エージェント', 'AnythingLLM RAG'] },
-    { name: '神経層 — 自動化', desc: 'n8n でアプリ間の自動連携フロー', icon: Workflow, color: 'bg-orange-50 text-orange-600', items: ['n8n SNSフロー', 'n8n Gemini連携', 'n8n スケジューラー'] },
-    { name: '記憶層 — データ', desc: 'PocketBase で全データを一元管理', icon: Database, color: 'bg-emerald-50 text-emerald-600', items: ['アフィリ実績DB', 'タスク管理', 'コンテンツアーカイブ'] },
-    { name: '顔層 — UI', desc: 'このダッシュボード + Appsmith', icon: LayoutDashboard, color: 'bg-blue-50 text-blue-600', items: ['JIBUN-OS Hub', 'Appsmith画面', 'モバイルアプリ'] },
+    { name: '脳層 — AI・思考', desc: 'Gemini Flash / Flowise / Dify / AnythingLLM', icon: Brain, color: 'bg-[#E5EEF8] text-[#1A5FA8]', items: ['Gemini 1.5 Flash', 'Flowise エージェント', 'AnythingLLM RAG'] },
+    { name: '神経層 — 自動化', desc: 'n8n でアプリ間の自動連携フロー', icon: Workflow, color: 'bg-[#FBF6E0] text-[#9A7418]', items: ['n8n SNSフロー', 'n8n Gemini連携', 'n8n スケジューラー'] },
+    { name: '記憶層 — データ', desc: 'PocketBase で全データを一元管理', icon: Database, color: 'bg-[#EEF5E8] text-[#4A7A38]', items: ['アフィリ実績DB', 'タスク管理', 'コンテンツアーカイブ'] },
+    { name: '顔層 — UI', desc: 'このダッシュボード + Appsmith', icon: LayoutDashboard, color: 'bg-[#E5EEF8] text-[#1A5FA8]', items: ['JIBUN-OS Hub', 'Appsmith画面', 'モバイルアプリ'] },
   ];
 
   return (
@@ -337,7 +336,7 @@ export default function JibunOS_Hub() {
           {[
             { label: '導入済みツール', value: '1 / 6', icon: Package, color: 'text-orange-500' },
             { label: '無料API枠', value: 'Gemini Flash', icon: Sparkles, color: 'text-violet-500' },
-            { label: 'n8n フロー', value: '1 稼働中', icon: Workflow, color: 'text-emerald-500' },
+            { label: 'n8n フロー', value: '1 稼働中', icon: Workflow, color: 'text-[#4A7A38]' },
             { label: 'OSSスター合計', value: '250k+', icon: Star, color: 'text-amber-500' },
           ].map((stat, i) => {
             const Icon = stat.icon;
@@ -409,7 +408,7 @@ export default function JibunOS_Hub() {
                         {step.done ? '✓' : step.step}
                       </div>
                       <div className="flex-1">
-                        <span className={`text-sm font-medium ${step.done ? 'text-emerald-600 line-through' : ''}`}>{step.tool}</span>
+                        <span className={`text-sm font-medium ${step.done ? 'text-[#4A7A38] line-through' : ''}`}>{step.tool}</span>
                         <span className="text-xs text-[hsl(var(--muted-foreground))] ml-2">{step.desc}</span>
                       </div>
                     </div>
@@ -449,7 +448,7 @@ export default function JibunOS_Hub() {
                   </ol>
                   <div className="mt-4">
                     <a href="http://localhost:5678" target="_blank" rel="noopener noreferrer">
-                      <Button className="bg-orange-600 hover:bg-orange-500 text-white border-0">
+                      <Button className="text-white border-0" style={{ background: '#9A7418' }}>
                         <ExternalLink size={13} /> n8n を開く (localhost:5678)
                       </Button>
                     </a>
@@ -486,7 +485,7 @@ export default function JibunOS_Hub() {
                     ].map((m, i) => (
                       <div key={i} className="p-3 rounded-lg border">
                         <p className="text-xs font-semibold">{m.model}</p>
-                        <p className="text-xs text-emerald-600 mt-0.5 font-medium">{m.limit}</p>
+                        <p className="text-xs text-[#4A7A38] mt-0.5 font-medium">{m.limit}</p>
                         <p className="text-[10px] text-[hsl(var(--muted-foreground))] mt-0.5">{m.rec}</p>
                       </div>
                     ))}
@@ -502,7 +501,7 @@ export default function JibunOS_Hub() {
               <Card>
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <TrendingUp size={14} className="text-emerald-500" />
+                    <TrendingUp size={14} className="text-[#4A7A38]" />
                     <CardTitle className="text-sm">月間コスト試算（完全ローカル運用）</CardTitle>
                   </div>
                 </CardHeader>
@@ -521,13 +520,13 @@ export default function JibunOS_Hub() {
                         <span className="text-sm">{row.item}</span>
                         <div className="flex items-center gap-3">
                           <span className="text-xs text-[hsl(var(--muted-foreground))]">{row.note}</span>
-                          <span className="text-sm font-semibold text-emerald-600">{row.cost}</span>
+                          <span className="text-sm font-semibold text-[#4A7A38]">{row.cost}</span>
                         </div>
                       </div>
                     ))}
                     <div className="flex items-center justify-between pt-3">
                       <span className="font-semibold">合計</span>
-                      <span className="text-xl font-black text-emerald-600">¥0 / 月</span>
+                      <span className="text-xl font-black text-[#4A7A38]">¥0 / 月</span>
                     </div>
                   </div>
                 </CardContent>

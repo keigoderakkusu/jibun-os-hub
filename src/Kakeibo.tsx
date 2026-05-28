@@ -28,10 +28,18 @@ interface Transaction {
 const EXPENSE_CATEGORIES = ['食費', '外食', '家賃', '光熱費', '交通費', '日用品', '医療', '娯楽', '衣類', 'その他'];
 const INCOME_CATEGORIES  = ['給与', '副業', '投資', 'ボーナス', 'その他'];
 
+// 温かみのある自然カラーパレット
 const COLORS = [
-  '#6366f1','#8b5cf6','#a78bfa','#c4b5fd',
-  '#818cf8','#93c5fd','#67e8f9','#6ee7b7',
-  '#fde68a','#fca5a5',
+  '#4A7A38', // グリーン
+  '#9A7418', // ゴールド
+  '#1A5FA8', // ブルー
+  '#7A3898', // パープル
+  '#B8701A', // オレンジ
+  '#1A7A8A', // ティール
+  '#C0392B', // レッド
+  '#48A860', // ライトグリーン
+  '#8A6A28', // ダークゴールド
+  '#7A7560', // ミューテッド
 ];
 
 const STORAGE_KEY = 'jibun_kakeibo_v2';
@@ -158,13 +166,13 @@ export default function Kakeibo() {
 
             {/* Summary cards */}
             <div className="grid grid-cols-3 gap-4">
-              <SummaryCard label="収入" value={totalIncome} icon={TrendingUp} color="text-emerald-500" />
-              <SummaryCard label="支出" value={totalExpense} icon={TrendingDown} color="text-rose-500" />
+              <SummaryCard label="収入" value={totalIncome} icon={TrendingUp} color="#4A7A38" />
+              <SummaryCard label="支出" value={totalExpense} icon={TrendingDown} color="#C0392B" />
               <SummaryCard
                 label="収支"
                 value={balance}
                 icon={Wallet}
-                color={balance >= 0 ? 'text-emerald-500' : 'text-rose-500'}
+                color={balance >= 0 ? '#4A7A38' : '#C0392B'}
                 badge={balance >= 0 ? '黒字' : '赤字'}
                 badgeVariant={balance >= 0 ? 'success' : 'warning'}
               />
@@ -205,8 +213,8 @@ export default function Kakeibo() {
                       <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `${(v/10000).toFixed(0)}万`} />
                       <Tooltip formatter={(v) => `¥${fmt(Number(v))}`} />
                       <Legend wrapperStyle={{ fontSize: 11 }} />
-                      <Bar dataKey="収入" fill="#6ee7b7" radius={[3,3,0,0]} />
-                      <Bar dataKey="支出" fill="#fca5a5" radius={[3,3,0,0]} />
+                      <Bar dataKey="収入" fill="#4A7A38" radius={[3,3,0,0]} />
+                      <Bar dataKey="支出" fill="#C0392B" radius={[3,3,0,0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -253,13 +261,13 @@ export default function Kakeibo() {
                     <button
                       key={t}
                       onClick={() => setForm(f => ({ ...f, type: t, category: t === 'income' ? '給与' : '食費' }))}
-                      className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                        form.type === t
-                          ? t === 'expense'
-                            ? 'bg-rose-500/10 border-rose-500/50 text-rose-600'
-                            : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-600'
-                          : 'border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]'
-                      }`}
+                      className="flex-1 py-2 rounded-lg text-sm font-medium border transition-all"
+                      style={form.type === t
+                        ? t === 'expense'
+                          ? { background: '#FBEAEA', borderColor: 'rgba(192,57,43,0.4)', color: '#C0392B' }
+                          : { background: '#EEF5E8', borderColor: '#B8D4A8', color: '#4A7A38' }
+                        : { borderColor: 'hsl(var(--border))', color: 'hsl(var(--muted-foreground))', background: 'transparent' }
+                      }
                     >
                       {t === 'income' ? '＋ 収入' : '－ 支出'}
                     </button>
@@ -329,23 +337,31 @@ export default function Kakeibo() {
             )}
 
             {[...monthTx].sort((a,b) => b.date.localeCompare(a.date)).map(tx => (
-              <div key={tx.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-none text-sm
-                  ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-500'}`}>
+              <div key={tx.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-[hsl(var(--card))]"
+                style={{ borderColor: 'hsl(var(--border))' }}>
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-none text-sm font-semibold"
+                  style={tx.type === 'income'
+                    ? { background: '#EEF5E8', color: '#4A7A38' }
+                    : { background: '#FBEAEA', color: '#C0392B' }
+                  }>
                   {tx.type === 'income' ? '+' : '−'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{tx.category}</span>
-                    {tx.note && <span className="text-xs text-[hsl(var(--muted-foreground))] truncate">{tx.note}</span>}
+                    {tx.note && <span className="text-xs truncate" style={{ color: 'hsl(var(--muted-foreground))' }}>{tx.note}</span>}
                   </div>
-                  <p className="text-xs text-[hsl(var(--muted-foreground))]">{tx.date}</p>
+                  <p className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>{tx.date}</p>
                 </div>
-                <span className={`text-sm font-semibold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-500'}`}>
+                <span className="text-sm font-semibold" style={{ color: tx.type === 'income' ? '#4A7A38' : '#C0392B' }}>
                   {tx.type === 'income' ? '+' : '−'}¥{fmt(tx.amount)}
                 </span>
                 <button onClick={() => deleteTx(tx.id)}
-                  className="p-1.5 rounded-lg text-[hsl(var(--muted-foreground))] hover:text-rose-500 hover:bg-rose-500/10 transition-colors">
+                  className="p-1.5 rounded-lg transition-colors"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#C0392B'; (e.currentTarget as HTMLElement).style.background = '#FBEAEA'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'hsl(var(--muted-foreground))'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
                   <Trash2 size={13} />
                 </button>
               </div>
@@ -361,19 +377,21 @@ function SummaryCard({ label, value, icon: Icon, color, badge, badgeVariant }: {
   label: string; value: number; icon: React.ElementType;
   color: string; badge?: string; badgeVariant?: 'success' | 'warning';
 }) {
+  // color は hex 文字列（#4A7A38 など）
+  const bgColor = color === '#4A7A38' ? '#EEF5E8' : color === '#C0392B' ? '#FBEAEA' : '#FBF6E0';
   return (
     <Card>
       <CardContent className="pt-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[hsl(var(--muted-foreground))]">{label}</span>
+          <span className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>{label}</span>
           {badge && <Badge variant={badgeVariant}>{badge}</Badge>}
         </div>
         <div className="flex items-end justify-between">
-          <div>
-            <span className={`text-xl font-bold ${color}`}>¥{(value).toLocaleString('ja-JP')}</span>
-          </div>
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[hsl(var(--muted))] ${color}`}>
-            <Icon size={15} />
+          <span className="text-xl font-bold font-mono" style={{ color }}>
+            ¥{value.toLocaleString('ja-JP')}
+          </span>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: bgColor }}>
+            <Icon size={15} style={{ color }} />
           </div>
         </div>
       </CardContent>
