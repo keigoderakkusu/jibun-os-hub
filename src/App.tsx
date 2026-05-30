@@ -6,6 +6,7 @@ import AIAgent from './AIAgent';
 import AppLauncher from './AppLauncher';
 import Blog from './Blog';
 import Kakeibo from './Kakeibo';
+import CoupleOS from './CoupleOS';
 
 export default function App() {
   const [page, setPage] = useState<PageId>('dashboard');
@@ -18,6 +19,7 @@ export default function App() {
         {page === 'dashboard' && <IntegratedDashboard />}
         {page === 'blog'      && <Blog />}
         {page === 'kakeibo'   && <Kakeibo />}
+        {page === 'couple'    && <CoupleOS />}
         {page === 'hub'       && <JibunOS_Hub />}
         {page === 'agent'     && <AIAgent />}
         {page === 'launcher'  && <AppLauncher />}

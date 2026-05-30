@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import {
   Cpu, Bot, Grid, ChevronLeft, ChevronRight,
-  LayoutDashboard, BookOpen, Leaf, Wallet
+  LayoutDashboard, BookOpen, Leaf, Wallet, Heart
 } from 'lucide-react';
 
-export type PageId = 'hub' | 'agent' | 'dashboard' | 'launcher' | 'blog' | 'kakeibo';
+export type PageId = 'hub' | 'agent' | 'dashboard' | 'launcher' | 'blog' | 'kakeibo' | 'couple';
 
 interface NavItem {
   id: PageId;
@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', label: 'JIBUN-OS',      icon: LayoutDashboard, section: 'メイン' },
   { id: 'blog',      label: 'ブログ',         icon: BookOpen, badge: 'NEW', section: 'メイン' },
   { id: 'kakeibo',   label: '家計簿',         icon: Wallet, section: 'ライフ' },
+  { id: 'couple',    label: 'カップルOS',     icon: Heart,  badge: '♡',   section: 'ライフ' },
   { id: 'hub',       label: 'OSS統合ハブ',    icon: Cpu,    section: 'ツール' },
   { id: 'agent',     label: 'AIエージェント', icon: Bot, badge: 'AI', section: 'ツール' },
   { id: 'launcher',  label: 'マイシステム',   icon: Grid,   section: 'ツール' },
@@ -52,6 +53,7 @@ export function Sidebar({ current, onChange }: SidebarProps) {
 
   const getBadgeStyle = (badge: string) => {
     if (badge === 'NEW') return { background: C.greenBg, color: C.green, border: `1px solid ${C.greenBd}` };
+    if (badge === '♡')   return { background: C.redBg,   color: C.red };
     if (badge === 'AI')  return { background: C.blueBg,  color: C.blue };
     return { background: C.greenBg, color: C.green };
   };
