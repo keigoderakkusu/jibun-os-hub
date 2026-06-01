@@ -1,26 +1,10 @@
 /**
  * generate_report.js
- * Claude API でレポート内容を生成し、Word（.docx）ファイルに書き出す
- * jibun-os-hub/reports/ に配置して使用する
+ * Claude API でレポート内容を生成し、puppeteer で PDF に書き出す
  */
 
 import Anthropic from "@anthropic-ai/sdk";
-import {
-  Document,
-  Packer,
-  Paragraph,
-  Table,
-  TableRow,
-  TableCell,
-  TextRun,
-  HeadingLevel,
-  AlignmentType,
-  BorderStyle,
-  ShadingType,
-  WidthType,
-  PageOrientation,
-  convertInchesToTwip,
-} from "docx";
+import puppeteer from "puppeteer";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -134,363 +118,277 @@ JSON形式で出力してください。構造は以下の通り：
   return JSON.parse(text);
 }
 
-// ── ヘルパー：カラーテーブルセル ─────────────────────────────
-function colorCell(text, bgColor, textColor = "FFFFFF", bold = false) {
-  return new TableCell({
-    shading: { type: ShadingType.CLEAR, fill: bgColor },
-    children: [
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        children: [
-          new TextRun({
-            text,
-            color: textColor,
-            bold,
-            font: "Arial",
-            size: 18,
-          }),
-        ],
-      }),
-    ],
-  });
-}
-
-function dataCell(text, align = AlignmentType.LEFT, bold = false) {
-  return new TableCell({
-    children: [
-      new Paragraph({
-        alignment: align,
-        children: [
-          new TextRun({ text, bold, font: "Arial", size: 18 }),
-        ],
-      }),
-    ],
-  });
-}
-
-// ── 市場指数テーブル ─────────────────────────────────────────
-function buildMarketTable(indices) {
-  const rows = [
-    new TableRow({
-      children: [
-        colorCell("指標", "1B3A5C", "FFFFFF", true),
-        colorCell("直近値", "1B3A5C", "FFFFFF", true),
-        colorCell("前日比", "1B3A5C", "FFFFFF", true),
-        colorCell("前日比(%)", "1B3A5C", "FFFFFF", true),
-        colorCell("評価", "1B3A5C", "FFFFFF", true),
-      ],
-    }),
-    ...Object.entries({
-      "日経平均": indices.nikkei,
-      "NYダウ": indices.dow,
-      "ナスダック": indices.nasdaq,
-      "SOX指数": indices.sox,
-    }).map(([label, data]) =>
-      new TableRow({
-        children: [
-          dataCell(label, AlignmentType.LEFT, true),
-          dataCell(data.value, AlignmentType.RIGHT),
-          dataCell(data.change, AlignmentType.RIGHT),
-          dataCell(data.change_pct, AlignmentType.RIGHT),
-          dataCell(data.comment, AlignmentType.LEFT),
-        ],
-      })
-    ),
-  ];
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    rows,
-  });
-}
-
-// ── 個別銘柄テーブル ─────────────────────────────────────────
-function buildStockTable(stocks) {
-  const headerRow = new TableRow({
-    children: [
-      colorCell("銘柄", "0D1B2A", "FFFFFF", true),
-      colorCell("終値", "0D1B2A", "FFFFFF", true),
-      colorCell("前日比", "0D1B2A", "FFFFFF", true),
-      colorCell("騰落率", "0D1B2A", "FFFFFF", true),
-      colorCell("評価", "0D1B2A", "FFFFFF", true),
-    ],
-  });
-
-  const dataRows = stocks.map((s) =>
-    new TableRow({
-      children: [
-        dataCell(`${s.name}（${s.code}）`, AlignmentType.LEFT, true),
-        dataCell(s.price, AlignmentType.RIGHT),
-        dataCell(s.change, AlignmentType.RIGHT),
-        dataCell(s.change_pct, AlignmentType.RIGHT),
-        dataCell(s.rating, AlignmentType.CENTER),
-      ],
-    })
-  );
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: [headerRow, ...dataRows],
-  });
-}
-
-// ── スケジュールテーブル ──────────────────────────────────────
-function buildScheduleTable(schedule) {
-  const headerRow = new TableRow({
-    children: [
-      colorCell("日付", "C9A84C", "1A1A1A", true),
-      colorCell("イベント", "C9A84C", "1A1A1A", true),
-      colorCell("注目度", "C9A84C", "1A1A1A", true),
-    ],
-  });
-
-  const dataRows = schedule.map((s) =>
-    new TableRow({
-      children: [
-        dataCell(s.date, AlignmentType.LEFT, true),
-        dataCell(s.event),
-        dataCell(s.importance, AlignmentType.CENTER),
-      ],
-    })
-  );
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: [headerRow, ...dataRows],
-  });
-}
-
-// ── Wordドキュメント組み立て ─────────────────────────────────
-function buildDocument(data) {
+// ── HTML テンプレート生成 ─────────────────────────────────────
+function buildHtml(data) {
   const siteUrl = "ai-jidoka-keigo.com";
 
-  const children = [
-    // ── ヘッダータイトルブロック ──
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: `マーケット デイリー レポート`,
-          bold: true,
-          size: 36,
-          color: "0D1B2A",
-          font: "Arial",
-        }),
-      ],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: `${data.report_date}　　${siteUrl}`,
-          size: 20,
-          color: "888888",
-          font: "Arial",
-        }),
-      ],
-      spacing: { after: 200 },
-    }),
+  const marketRows = Object.entries({
+    "日経平均": data.market_indices.nikkei,
+    "NYダウ": data.market_indices.dow,
+    "ナスダック": data.market_indices.nasdaq,
+    "SOX指数": data.market_indices.sox,
+  })
+    .map(
+      ([label, d]) => `
+      <tr>
+        <td class="label">${label}</td>
+        <td class="num">${d.value}</td>
+        <td class="num">${d.change}</td>
+        <td class="num">${d.change_pct}</td>
+        <td>${d.comment}</td>
+      </tr>`
+    )
+    .join("");
 
-    // メタ情報テーブル
-    new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: [
-        new TableRow({
-          children: [
-            colorCell("レポート種別", "F5E6C8", "1A1A1A", true),
-            dataCell("株式市場概況レポート（参考情報）"),
-            colorCell("作成日", "F5E6C8", "1A1A1A", true),
-            dataCell(data.report_date),
-          ],
-        }),
-        new TableRow({
-          children: [
-            colorCell("対象市場", "F5E6C8", "1A1A1A", true),
-            dataCell("東京証券取引所・NYSE・NASDAQ"),
-            colorCell("作成者", "F5E6C8", "1A1A1A", true),
-            dataCell(`Claude AI / ${siteUrl}`),
-          ],
-        }),
-      ],
-    }),
+  const stockSummaryRows = data.stocks
+    .map(
+      (s) => `
+      <tr>
+        <td class="label">${s.name}（${s.code}）</td>
+        <td class="num">${s.price}</td>
+        <td class="num">${s.change}</td>
+        <td class="num">${s.change_pct}</td>
+        <td class="center">${s.rating}</td>
+      </tr>`
+    )
+    .join("");
 
-    new Paragraph({ text: "", spacing: { after: 200 } }),
+  const stockDetails = data.stocks
+    .map(
+      (s) => `
+      <div class="stock-block">
+        <h3 class="stock-name">◆ ${s.name}（${s.code}・${s.market}）</h3>
+        <p>${s.analysis}</p>
+        <p class="sub-title blue">【カタリスト】</p>
+        <ul>${s.catalysts.map((c) => `<li>${c}</li>`).join("")}</ul>
+        <p class="sub-title red">【リスク】</p>
+        <ul>${s.risks.map((r) => `<li>${r}</li>`).join("")}</ul>
+      </div>`
+    )
+    .join("");
 
-    // ── 1. エグゼクティブサマリー ──
-    new Paragraph({
-      text: "1. エグゼクティブ・サマリー",
-      heading: HeadingLevel.HEADING_2,
-      spacing: { before: 300, after: 100 },
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: data.executive_summary, font: "Arial", size: 20 })],
-      spacing: { after: 200 },
-    }),
+  const scheduleRows = data.schedule
+    .map(
+      (s) => `
+      <tr>
+        <td class="label">${s.date}</td>
+        <td>${s.event}</td>
+        <td class="center">${s.importance}</td>
+      </tr>`
+    )
+    .join("");
 
-    // ── 2. 主要市場指数 ──
-    new Paragraph({
-      text: "2. 主要市場指数",
-      heading: HeadingLevel.HEADING_2,
-      spacing: { before: 300, after: 100 },
-    }),
-    buildMarketTable(data.market_indices),
+  const riskItems = data.risk_factors
+    .map((r) => `<li>${r}</li>`)
+    .join("");
 
-    new Paragraph({ text: "", spacing: { after: 200 } }),
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Meiryo", sans-serif;
+    font-size: 11px;
+    color: #1A1A1A;
+    background: #fff;
+    padding: 0;
+  }
 
-    // ── 3. 注目銘柄サマリー ──
-    new Paragraph({
-      text: "3. 注目銘柄サマリー",
-      heading: HeadingLevel.HEADING_2,
-      spacing: { before: 300, after: 100 },
-    }),
-    buildStockTable(data.stocks),
+  /* ── カバーヘッダー ── */
+  .cover {
+    background: #0D1B2A;
+    border-bottom: 4px solid #C9A84C;
+    padding: 28px 36px 24px;
+    margin-bottom: 20px;
+  }
+  .cover .sub { color: #F5E6C8; font-size: 10px; letter-spacing: 1px; margin-bottom: 6px; }
+  .cover h1 { color: #FFFFFF; font-size: 22px; margin-bottom: 6px; }
+  .cover .date { color: #C9A84C; font-size: 12px; }
 
-    new Paragraph({ text: "", spacing: { after: 200 } }),
+  /* ── メタ情報 ── */
+  .meta-table { width: 100%; border-collapse: collapse; margin: 0 36px 20px; width: calc(100% - 72px); }
+  .meta-table td { padding: 6px 10px; border: 1px solid #DDD; font-size: 10px; }
+  .meta-table .key { background: #F5E6C8; font-weight: bold; width: 100px; }
 
-    // ── 4. 個別銘柄詳細分析 ──
-    new Paragraph({
-      text: "4. 個別銘柄 詳細分析",
-      heading: HeadingLevel.HEADING_2,
-      spacing: { before: 300, after: 100 },
-    }),
+  /* ── コンテンツ本体 ── */
+  .body { padding: 0 36px; }
 
-    ...data.stocks.flatMap((s) => [
-      new Paragraph({
-        text: `◆ ${s.name}（${s.code}・${s.market}）`,
-        heading: HeadingLevel.HEADING_3,
-        spacing: { before: 200, after: 80 },
-      }),
-      new Paragraph({
-        children: [new TextRun({ text: s.analysis, font: "Arial", size: 20 })],
-        spacing: { after: 100 },
-      }),
-      new Paragraph({
-        children: [new TextRun({ text: "【カタリスト】", bold: true, font: "Arial", size: 20, color: "1B3A5C" })],
-      }),
-      ...s.catalysts.map(
-        (c) =>
-          new Paragraph({
-            children: [new TextRun({ text: `・${c}`, font: "Arial", size: 20 })],
-            indent: { left: convertInchesToTwip(0.3) },
-          })
-      ),
-      new Paragraph({
-        children: [new TextRun({ text: "【リスク】", bold: true, font: "Arial", size: 20, color: "B22222" })],
-        spacing: { before: 80 },
-      }),
-      ...s.risks.map(
-        (r) =>
-          new Paragraph({
-            children: [new TextRun({ text: `・${r}`, font: "Arial", size: 20 })],
-            indent: { left: convertInchesToTwip(0.3) },
-          })
-      ),
-      new Paragraph({ text: "", spacing: { after: 150 } }),
-    ]),
+  /* ── セクションバー ── */
+  .section-bar {
+    background: #1B3A5C;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 7px 14px;
+    margin: 20px 0 10px;
+    border-bottom: 3px solid #C9A84C;
+  }
 
-    // ── 5. リスク要因 ──
-    new Paragraph({
-      text: "5. 共通リスク要因",
-      heading: HeadingLevel.HEADING_2,
-      spacing: { before: 300, after: 100 },
-    }),
-    ...data.risk_factors.map(
-      (r) =>
-        new Paragraph({
-          children: [new TextRun({ text: `● ${r}`, font: "Arial", size: 20 })],
-          spacing: { after: 80 },
-          indent: { left: convertInchesToTwip(0.2) },
-        })
-    ),
+  /* ── 汎用テーブル ── */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th {
+    background: #1B3A5C;
+    color: #FFF;
+    padding: 6px 8px;
+    font-size: 10px;
+    text-align: center;
+  }
+  td { padding: 5px 8px; border: 1px solid #DDD; font-size: 10px; vertical-align: middle; }
+  tr:nth-child(even) td { background: #F7F9FC; }
+  .label { font-weight: bold; }
+  .num { text-align: right; white-space: nowrap; }
+  .center { text-align: center; }
 
-    new Paragraph({ text: "", spacing: { after: 200 } }),
+  /* ── スケジュールテーブルヘッダー ── */
+  .schedule th { background: #C9A84C; color: #1A1A1A; }
 
-    // ── 6. 来週の見通し ──
-    new Paragraph({
-      text: "6. 来週の見通し・注目スケジュール",
-      heading: HeadingLevel.HEADING_2,
-      spacing: { before: 300, after: 100 },
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: data.weekly_outlook, font: "Arial", size: 20 })],
-      spacing: { after: 200 },
-    }),
-    buildScheduleTable(data.schedule),
+  /* ── 個別銘柄 ── */
+  .stock-block { margin-bottom: 16px; }
+  .stock-name {
+    font-size: 12px;
+    color: #0D1B2A;
+    border-bottom: 2px solid #C9A84C;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+  .stock-block p { margin-bottom: 5px; line-height: 1.6; }
+  .stock-block ul { padding-left: 18px; margin-bottom: 5px; }
+  .stock-block li { margin-bottom: 2px; line-height: 1.6; }
+  .sub-title { font-weight: bold; margin-top: 6px; }
+  .blue { color: #1B3A5C; }
+  .red { color: #B22222; }
 
-    new Paragraph({ text: "", spacing: { after: 300 } }),
+  /* ── 免責 ── */
+  .disclaimer {
+    border-top: 1px solid #CCC;
+    margin-top: 20px;
+    padding-top: 10px;
+    font-size: 9px;
+    color: #888;
+    line-height: 1.7;
+  }
 
-    // ── 免責事項 ──
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: "■ 免責事項：本レポートはすべて情報提供のみを目的とした参考資料であり、特定の有価証券の売買を推奨・勧誘するものではありません。記載された情報は作成時点のものであり、その後の変更を反映しない場合があります。株式投資はリスクを伴い、投資元本が保証されるものではありません。投資判断はご自身の責任において行ってください。本レポートは金融商品取引法に基づく投資助言ではありません。",
-          font: "Arial",
-          size: 16,
-          color: "888888",
-          italics: true,
-        }),
-      ],
-      spacing: { before: 200 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: `Generated by Claude AI / ${siteUrl}`,
-          font: "Arial",
-          size: 16,
-          color: "888888",
-        }),
-      ],
-    }),
-  ];
+  /* ── フッター ── */
+  .footer {
+    font-size: 9px;
+    color: #AAA;
+    text-align: right;
+    margin-top: 6px;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
 
-  return new Document({
-    sections: [
-      {
-        properties: {
-          page: {
-            margin: {
-              top: convertInchesToTwip(0.9),
-              right: convertInchesToTwip(0.9),
-              bottom: convertInchesToTwip(0.9),
-              left: convertInchesToTwip(0.9),
-            },
-          },
-        },
-        children,
-      },
-    ],
-  });
+<!-- カバー -->
+<div class="cover">
+  <p class="sub">MARKET DAILY REPORT — ${siteUrl}</p>
+  <h1>マーケット デイリー レポート</h1>
+  <p class="date">${data.report_date}　発行</p>
+</div>
+
+<table class="meta-table">
+  <tr>
+    <td class="key">レポート種別</td><td>株式市場概況レポート（参考情報）</td>
+    <td class="key">作成日</td><td>${data.report_date}</td>
+  </tr>
+  <tr>
+    <td class="key">対象市場</td><td>東京証券取引所・NYSE・NASDAQ</td>
+    <td class="key">作成者</td><td>Claude AI / ${siteUrl}</td>
+  </tr>
+</table>
+
+<div class="body">
+
+  <!-- 1. エグゼクティブサマリー -->
+  <div class="section-bar">1. エグゼクティブ・サマリー</div>
+  <p style="line-height:1.8; margin-bottom:14px;">${data.executive_summary}</p>
+
+  <!-- 2. 主要市場指数 -->
+  <div class="section-bar">2. 主要市場指数</div>
+  <table>
+    <tr>
+      <th>指標</th><th>直近値</th><th>前日比</th><th>前日比(%)</th><th>評価</th>
+    </tr>
+    ${marketRows}
+  </table>
+
+  <!-- 3. 注目銘柄サマリー -->
+  <div class="section-bar">3. 注目銘柄サマリー</div>
+  <table>
+    <tr>
+      <th>銘柄</th><th>終値</th><th>前日比</th><th>騰落率</th><th>評価</th>
+    </tr>
+    ${stockSummaryRows}
+  </table>
+
+  <!-- 4. 個別銘柄詳細分析 -->
+  <div class="section-bar">4. 個別銘柄 詳細分析</div>
+  ${stockDetails}
+
+  <!-- 5. 共通リスク要因 -->
+  <div class="section-bar">5. 共通リスク要因</div>
+  <ul style="padding-left:18px; margin-bottom:14px; line-height:1.8;">
+    ${riskItems}
+  </ul>
+
+  <!-- 6. 来週の見通し -->
+  <div class="section-bar">6. 来週の見通し・注目スケジュール</div>
+  <p style="line-height:1.8; margin-bottom:10px;">${data.weekly_outlook}</p>
+  <table class="schedule">
+    <tr><th>日付</th><th>イベント</th><th>注目度</th></tr>
+    ${scheduleRows}
+  </table>
+
+  <!-- 免責事項 -->
+  <div class="disclaimer">
+    ■ 免責事項：本レポートはすべて情報提供のみを目的とした参考資料であり、特定の有価証券の売買を推奨・勧誘するものではありません。記載された情報は作成時点のものであり、その後の変更を反映しない場合があります。株式投資はリスクを伴い、投資元本が保証されるものではありません。投資判断はご自身の責任において行ってください。本レポートは金融商品取引法に基づく投資助言ではありません。
+  </div>
+  <div class="footer">Generated by Claude AI / ${siteUrl}</div>
+
+</div>
+</body>
+</html>`;
 }
 
 // ── メイン処理 ────────────────────────────────────────────────
 async function main() {
   console.log("📊 レポート生成開始...");
 
-  // output ディレクトリ作成
   const outputDir = path.join(__dirname, "output");
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-  // Claude API でコンテンツ生成
   console.log("🤖 Claude API にてレポート内容を生成中...");
   const data = await generateReportContent();
   console.log(`✅ コンテンツ生成完了: ${data.report_date}`);
 
-  // ドキュメント組み立て
-  const doc = buildDocument(data);
+  const html = buildHtml(data);
+  const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const pdfPath = path.join(outputDir, `マーケットレポート_${dateStr}.pdf`);
 
-  // ファイル名（日付付き）
-  const dateStr = new Date()
-    .toISOString()
-    .slice(0, 10)
-    .replace(/-/g, "");
-  const filename = `マーケットレポート_${dateStr}.docx`;
-  const filepath = path.join(outputDir, filename);
+  console.log("🖨️  PDF を生成中...");
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+  const page = await browser.newPage();
+  await page.setContent(html, { waitUntil: "networkidle0" });
+  await page.pdf({
+    path: pdfPath,
+    format: "A4",
+    printBackground: true,
+    margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
+  });
+  await browser.close();
 
-  // 書き出し
-  const buffer = await Packer.toBuffer(doc);
-  fs.writeFileSync(filepath, buffer);
+  console.log(`✅ PDF 生成完了: ${pdfPath}`);
 
-  console.log(`✅ Wordファイル生成完了: ${filepath}`);
+  // 後続スクリプト用にパスを保存
+  fs.writeFileSync(
+    path.join(__dirname, "report_meta.env"),
+    `REPORT_DATE=${dateStr}\nREPORT_FILE=${pdfPath}\n`
+  );
 }
 
 main().catch((err) => {

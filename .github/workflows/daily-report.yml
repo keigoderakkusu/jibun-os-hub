@@ -1,0 +1,75 @@
+name: 毎日レポート自動生成
+
+on:
+  schedule:
+    # 毎日 23:00 UTC = 翌朝 8:00 JST
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-and-distribute:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      # puppeteer が使う Chromium に必要なライブラリ
+      - name: Install Chromium dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            libgbm-dev libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libcups2 libxcomposite1 libxdamage1 libxrandr2 \
+            libpango-1.0-0 libcairo2 libasound2t64 libxss1 libxtst6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --quiet \
+            google-api-python-client \
+            google-auth-httplib2 \
+            google-auth-oauthlib
+
+      # ── Step 1: Claude API でコンテンツ生成 → PDF出力 ──────
+      - name: Generate PDF report
+        run: node generate_report.js
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      # ── Step 2: Google Drive にアップロード ─────────────────
+      - name: Upload to Google Drive
+        run: python upload_drive.py
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+
+      # ── Step 3: Gmail でメール送信 ─────────────────────────
+      - name: Send email
+        run: python send_email.py
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REPORT_RECIPIENT: ${{ secrets.REPORT_RECIPIENT }}
+
+      # ── Step 4: WordPress にブログ投稿（Secret が設定済みの場合のみ）
+      - name: Post to WordPress blog
+        if: ${{ secrets.WP_URL != '' }}
+        run: python post_blog.py
+        env:
+          WP_URL: ${{ secrets.WP_URL }}
+          WP_USER: ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
