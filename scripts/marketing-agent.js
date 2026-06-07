@@ -5,20 +5,65 @@
  */
 
 import https from 'https';
+import http from 'http';
 import { URL } from 'url';
+
+// URLに応じてhttps/httpを選択
+function getClient(urlStr) {
+  return urlStr.startsWith('https') ? https : http;
+}
 
 // 1. WordPressから最新記事を取得
 function getLatestPost() {
+  const apiUrl = 'https://ai-jidoka-keigo.com/wp-json/wp/v2/posts?per_page=1&_fields=title,excerpt,link,date';
   return new Promise((resolve, reject) => {
-    https.get('https://ai-jidoka-keigo.com/wp-json/wp/v2/posts?per_page=1&_fields=title,excerpt,link,date', (res) => {
+    const client = getClient(apiUrl);
+    const req = client.get(apiUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; MarketingAgent/1.0)',
+        'Accept': 'application/json'
+      }
+    }, (res) => {
+      console.log('WordPress API status:', res.statusCode);
+
+      // リダイレクト追従（最大3回）
+      if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
+        console.log('リダイレクト先:', res.headers.location);
+        res.resume();
+        reject(new Error(`リダイレクト未対応: ${res.headers.location} (手動でURLを更新してください)`));
+        return;
+      }
+
+      if (res.statusCode !== 200) {
+        res.resume();
+        reject(new Error(`WordPress API エラー: HTTP ${res.statusCode}`));
+        return;
+      }
+
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        const posts = JSON.parse(data);
-        if (!posts.length) reject(new Error('記事が見つかりません'));
-        resolve(posts[0]);
+        if (!data.trim()) {
+          reject(new Error('WordPress API が空のレスポンスを返しました'));
+          return;
+        }
+        try {
+          const posts = JSON.parse(data);
+          if (!Array.isArray(posts) || posts.length === 0) {
+            reject(new Error('記事が見つかりません（空配列）'));
+            return;
+          }
+          resolve(posts[0]);
+        } catch (e) {
+          console.error('レスポンス内容 (先頭200文字):', data.substring(0, 200));
+          reject(new Error(`JSON パース失敗: ${e.message}`));
+        }
       });
-    }).on('error', reject);
+    });
+    req.on('error', reject);
+    req.setTimeout(15000, () => {
+      req.destroy(new Error('WordPress API タイムアウト（15秒）'));
+    });
   });
 }
 
@@ -49,15 +94,30 @@ function generateSNSPosts(post) {
         'content-length': Buffer.byteLength(body)
       }
     }, (res) => {
+      console.log('Claude API status:', res.statusCode);
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        const result = JSON.parse(data);
-        if (result.error) reject(new Error(result.error.message));
-        resolve(result.content[0].text);
+        try {
+          const result = JSON.parse(data);
+          if (result.error) {
+            reject(new Error(`Claude API エラー: ${result.error.message}`));
+            return;
+          }
+          if (!result.content || !result.content[0]) {
+            reject(new Error(`Claude API 予期しないレスポンス: ${data.substring(0, 200)}`));
+            return;
+          }
+          resolve(result.content[0].text);
+        } catch (e) {
+          reject(new Error(`Claude API レスポンスパース失敗: ${e.message}\n内容: ${data.substring(0, 200)}`));
+        }
       });
     });
     req.on('error', reject);
+    req.setTimeout(30000, () => {
+      req.destroy(new Error('Claude API タイムアウト（30秒）'));
+    });
     req.write(body);
     req.end();
   });
