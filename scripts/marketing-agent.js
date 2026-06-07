@@ -1,9 +1,11 @@
 /**
  * Marketing Agent - Jibun Co., Ltd.
- * Claude APIを使ってWordPressの最新記事からSNS投稿文を生成し、LINEに通知する
+ * Claude APIを使ってWordPressの最新記事からSNS投稿文を生成
+ * 通知: Discord Webhook (LINE Notifyは2025年3月終了)
  */
 
 const https = require('https');
+const { URL } = require('url');
 
 // 1. WordPressから最新記事を取得
 function getLatestPost() {
@@ -28,24 +30,10 @@ function generateSNSPosts(post) {
   const body = JSON.stringify({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
-    system: 'あなたはJibun Co., Ltd.のマーケティング部長AIです。投資・AI・副業に興味のある20〜35歳向けのX(Twitter)投稿文を生成します。各投稿は150字以内にし、ハッシュタグを必ず付けてください。',
+    system: 'あなたはJibun Co., Ltd.のマーケティング部長AIです。投資・AI・副業に興味のある20〜35歳向けのX(Twitter)投稿文を生成します。各投稿は150字以内でハッシュタグ必須。',
     messages: [{
       role: 'user',
-      content: `以下の記事に基づいてX(Twitter)投稿を3パターン生成してください。
-
-記事タイトル: ${title}
-記事概要: ${excerpt}
-記事URL: ${post.link}
-
-【出力形式】
-Variant A（データ・数字で引き付ける）:
-[投稿文]
-
-Variant B（教育・知識系「知らないと損」）:
-[投稿文]
-
-Variant C（エンゲージメント・質問型）:
-[投稿文]`
+      content: `記事タイトル: ${title}\n概要: ${excerpt}\nURL: ${post.link}\n\nX投稿を3パターン生成（各150字以内+ハッシュタグ）:\nVariant A（データ・数字系）:\nVariant B（教育・知識系）:\nVariant C（質問・エンゲージメント系）:`
     }]
   });
 
@@ -75,28 +63,41 @@ Variant C（エンゲージメント・質問型）:
   });
 }
 
-// 3. LINE Notifyで通知を送信
-function sendLineNotify(message) {
-  if (!process.env.LINE_NOTIFY_TOKEN) {
-    console.log('⚠️ LINE_NOTIFY_TOKEN未設定 - スキップします');
+// 3. Discord Webhookで通知
+function sendDiscordNotify(snsPosts, title) {
+  if (!process.env.DISCORD_WEBHOOK_URL) {
+    console.log('⚠️ DISCORD_WEBHOOK_URL未設定 - Actionsログで結果を確認してください');
     return Promise.resolve();
   }
 
-  const body = 'message=' + encodeURIComponent(message);
+  const webhookUrl = new URL(process.env.DISCORD_WEBHOOK_URL);
+  const body = JSON.stringify({
+    username: 'Marketing Agent 🤖',
+    embeds: [{
+      title: '✅ 本日のSNS投稿案が生成されました',
+      description: `📰 **${title.substring(0, 60)}**\n\n${snsPosts.substring(0, 1000)}`,
+      color: 0x5865F2,
+      footer: { text: 'Jibun Co., Ltd. Marketing Agent' },
+      timestamp: new Date().toISOString()
+    }]
+  });
+
   return new Promise((resolve, reject) => {
     const req = https.request({
-      hostname: 'notify-api.line.me',
-      path: '/api/notify',
+      hostname: webhookUrl.hostname,
+      path: webhookUrl.pathname + webhookUrl.search,
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + process.env.LINE_NOTIFY_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body)
       }
     }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(JSON.parse(data)));
+      res.on('end', () => {
+        console.log('✅ Discord通知送信完了 (status:', res.statusCode, ')');
+        resolve();
+      });
     });
     req.on('error', reject);
     req.write(body);
@@ -108,9 +109,8 @@ function sendLineNotify(message) {
 async function main() {
   console.log('🚀 Marketing Agent 開始...');
 
-  // APIキーチェック
   if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEYが設定されていません。GitHub Secretsに追加してください。');
+    throw new Error('ANTHROPIC_API_KEYが設定されていません。GitHub Secrets に追加してください。');
   }
 
   console.log('📰 WordPressから最新記事を取得中...');
@@ -121,21 +121,14 @@ async function main() {
   console.log('🤖 Claudeでコンテンツを生成中...');
   const snsPosts = await generateSNSPosts(post);
 
-  console.log('\n=== 生成されたSNS投稿 ===');
+  console.log('\n========== 生成されたSNS投稿 ==========');
   console.log(snsPosts);
-  console.log('========================\n');
+  console.log('==========================================\n');
 
-  const lineMessage = `✅ Marketing Agent実行完了
+  console.log('📨 Discord通知を送信中...');
+  await sendDiscordNotify(snsPosts, title);
 
-📰 ${title.substring(0, 40)}...
-
-${snsPosts.substring(0, 400)}
-
-👉 GitHubのActionsログで全文確認`;
-
-  console.log('📱 LINE通知を送信中...');
-  await sendLineNotify(lineMessage);
-  console.log('✅ Marketing Agent 完了！');
+  console.log('✅ Marketing Agent 完了！GitHubのActionsタブで結果を確認できます。');
 }
 
 main().catch(err => {
