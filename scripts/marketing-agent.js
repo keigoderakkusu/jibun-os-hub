@@ -1,11 +1,11 @@
 /**
  * Marketing Agent - Jibun Co., Ltd.
- * Claude APIを使ってWordPressの最新記事からSNS投稿文を生成
- * 通知: Discord Webhook (LINE Notifyは2025年3月終了)
+ * ES Module版 (package.json "type":"module" 対応)
+ * Claude APIでWordPress最新記事からSNS投稿文を生成
  */
 
-const https = require('https');
-const { URL } = require('url');
+import https from 'https';
+import { URL } from 'url';
 
 // 1. WordPressから最新記事を取得
 function getLatestPost() {
@@ -63,10 +63,10 @@ function generateSNSPosts(post) {
   });
 }
 
-// 3. Discord Webhookで通知
+// 3. Discord Webhookで通知（オプション）
 function sendDiscordNotify(snsPosts, title) {
   if (!process.env.DISCORD_WEBHOOK_URL) {
-    console.log('⚠️ DISCORD_WEBHOOK_URL未設定 - Actionsログで結果を確認してください');
+    console.log('ℹ️ DISCORD_WEBHOOK_URL未設定 - Actionsログで結果を確認してください');
     return Promise.resolve();
   }
 
@@ -82,7 +82,7 @@ function sendDiscordNotify(snsPosts, title) {
     }]
   });
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const req = https.request({
       hostname: webhookUrl.hostname,
       path: webhookUrl.pathname + webhookUrl.search,
@@ -92,14 +92,10 @@ function sendDiscordNotify(snsPosts, title) {
         'Content-Length': Buffer.byteLength(body)
       }
     }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        console.log('✅ Discord通知送信完了 (status:', res.statusCode, ')');
-        resolve();
-      });
+      console.log('✅ Discord通知送信完了 (status:', res.statusCode, ')');
+      resolve();
     });
-    req.on('error', reject);
+    req.on('error', (err) => { console.log('Discord通知失敗:', err.message); resolve(); });
     req.write(body);
     req.end();
   });
@@ -125,10 +121,8 @@ async function main() {
   console.log(snsPosts);
   console.log('==========================================\n');
 
-  console.log('📨 Discord通知を送信中...');
   await sendDiscordNotify(snsPosts, title);
-
-  console.log('✅ Marketing Agent 完了！GitHubのActionsタブで結果を確認できます。');
+  console.log('✅ Marketing Agent 完了！');
 }
 
 main().catch(err => {
