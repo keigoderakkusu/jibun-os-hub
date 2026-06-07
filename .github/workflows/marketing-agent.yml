@@ -16,5 +16,6 @@ jobs:
       - name: Generate SNS posts with Claude
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          LINE_NOTIFY_TOKEN: ${{ secrets.LINE_NOTIFY_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
         run: node scripts/marketing-agent.js
