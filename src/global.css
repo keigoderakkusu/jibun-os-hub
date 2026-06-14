@@ -3,34 +3,59 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    /* ── 温かみのある自然カラーパレット ── */
+    /* #FDFBF0 クリーム地 */
+    --background:              51 76% 97%;
+    /* #2C2A1E 温かみのある濃いブラウン */
+    --foreground:              51 19% 15%;
+
+    /* #FFFFFF */
+    --card:                    0 0% 100%;
+    --card-foreground:         51 19% 15%;
+
+    --popover:                 0 0% 100%;
+    --popover-foreground:      51 19% 15%;
+
+    /* #4A7A38 グリーン（プライマリ） */
+    --primary:                 104 37% 35%;
+    --primary-foreground:      0 0% 100%;
+
+    /* #E8E4CC ウォームベージュ */
+    --secondary:               51 38% 85%;
+    --secondary-foreground:    51 19% 15%;
+
+    /* #EEF5E8 薄グリーン */
+    --muted:                   93 40% 94%;
+    /* #7A7560 ウォームグレー */
+    --muted-foreground:        49 12% 43%;
+
+    /* #EEF5E8 薄グリーン（アクセント） */
+    --accent:                  93 40% 94%;
+    /* #4A7A38 グリーン */
+    --accent-foreground:       104 37% 35%;
+
+    /* #C0392B レッド */
+    --destructive:             6 63% 46%;
+    --destructive-foreground:  0 0% 100%;
+
+    /* #E8E4CC ウォームベージュ */
+    --border:                  51 38% 85%;
+    /* #CCC9A8 やや濃いめベージュ */
+    --input:                   55 26% 73%;
+    /* #4A7A38 グリーン */
+    --ring:                    104 37% 35%;
+
     --radius: 0.5rem;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* ── サイドバー（温かみのある明るいデザイン）── */
+    --sidebar-background:          51 76% 97%;
+    --sidebar-foreground:          51 19% 15%;
+    --sidebar-primary:             104 37% 35%;
+    --sidebar-primary-foreground:  0 0% 100%;
+    --sidebar-accent:              93 40% 94%;
+    --sidebar-accent-foreground:   104 37% 35%;
+    --sidebar-border:              51 38% 85%;
+    --sidebar-ring:                104 37% 35%;
   }
 }
 
@@ -62,4 +87,25 @@ body {
 }
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* CoupleOS / Kakeibo 共通インプット */
+.cinput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  font-size: 0.875rem;
+  outline: none;
+  color: hsl(var(--foreground));
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: border-color 0.15s;
+}
+.cinput:focus {
+  border-color: hsl(var(--ring));
+}
+.cinput option {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
 }

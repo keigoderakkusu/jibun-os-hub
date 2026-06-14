@@ -1,0 +1,495 @@
+/* ============================================================
+   自分株式会社 — WordPress (Cocoon) カスタムCSS
+   貼り付け先: WordPress管理画面 > 外観 > カスタマイズ > 追加CSS
+   ============================================================ */
+
+/* ── 1. CSS変数（カラーシステム） ───────────────────── */
+:root {
+  --brand-primary:   #7c3aed;   /* バイオレット */
+  --brand-secondary: #4f46e5;   /* インディゴ */
+  --brand-accent:    #10b981;   /* エメラルド（収益・成功色） */
+  --brand-gold:      #f59e0b;   /* アンバー（アフィリエイト強調） */
+  --brand-dark:      #0f172a;   /* ダーク背景 */
+  --brand-surface:   #1e293b;   /* カード背景 */
+  --brand-text:      #f1f5f9;   /* メインテキスト */
+  --brand-muted:     #94a3b8;   /* サブテキスト */
+  --radius:          12px;
+}
+
+/* ── 2. 全体ベース ────────────────────────────────── */
+body {
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* ── 3. ヘッダー — プロフェッショナルグラデーション ── */
+#header,
+.site-header {
+  background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-surface) 100%) !important;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.3) !important;
+  padding: 0 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3) !important;
+}
+
+.site-name-text,
+#site-name a,
+.logo-text {
+  color: #fff !important;
+  font-weight: 800 !important;
+  font-size: 1.4rem !important;
+  letter-spacing: -0.02em;
+}
+
+.tagline,
+.site-description {
+  color: var(--brand-muted) !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── 4. ナビゲーション ───────────────────────────── */
+#nav,
+.navi-in,
+.global-nav,
+nav.navi {
+  background: rgba(15,23,42,0.95) !important;
+  border-top: 1px solid rgba(124,58,237,0.2) !important;
+}
+
+.navi-in > ul > li > a,
+.global-nav a {
+  color: #cbd5e1 !important;
+  font-size: 0.85rem !important;
+  font-weight: 500;
+  padding: 12px 16px !important;
+  transition: color 0.2s, background 0.2s !important;
+}
+
+.navi-in > ul > li > a:hover,
+.global-nav a:hover {
+  color: #fff !important;
+  background: rgba(124,58,237,0.2) !important;
+}
+
+/* おすすめメニューをゴールドで強調 */
+.navi-in > ul > li.menu-item a[href*="osusume"],
+.navi-in > ul > li.menu-item:nth-child(3) > a {
+  color: var(--brand-gold) !important;
+  font-weight: 700;
+}
+
+/* ── 5. ヒーローバナー（固定ページ用） ─────────────── */
+.hero-banner {
+  background: linear-gradient(135deg, var(--brand-dark) 0%, #1e1b4b 50%, var(--brand-surface) 100%);
+  color: #fff;
+  padding: 80px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(124,58,237,0.25) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(79,70,229,0.15) 0%, transparent 60%);
+}
+
+.hero-banner h1 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.hero-banner p {
+  font-size: 1rem;
+  color: #94a3b8;
+  max-width: 540px;
+  margin: 0 auto 32px;
+  position: relative;
+}
+
+/* ── 6. 収益バッジ（ヒーロー内） ───────────────────── */
+.revenue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.4);
+  color: #10b981;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* ── 7. CTAボタン ────────────────────────────────── */
+.btn-primary,
+.cta-button,
+.wp-block-button__link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 14px 28px !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 15px rgba(124,58,237,0.4) !important;
+}
+
+.btn-primary:hover,
+.cta-button:hover,
+.wp-block-button__link:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(124,58,237,0.5) !important;
+  color: #fff !important;
+}
+
+.btn-affiliate {
+  background: linear-gradient(135deg, var(--brand-gold), #d97706) !important;
+  box-shadow: 0 4px 15px rgba(245,158,11,0.4) !important;
+}
+
+.btn-affiliate:hover {
+  box-shadow: 0 8px 25px rgba(245,158,11,0.5) !important;
+}
+
+/* ── 8. 記事カード ───────────────────────────────── */
+.card,
+.post-list .post,
+article.post,
+.entry-card {
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+  overflow: hidden;
+}
+
+.card:hover,
+.post-list .post:hover,
+article.post:hover,
+.entry-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12) !important;
+}
+
+/* 記事タイトル */
+.entry-title a,
+.post-title a,
+h1.post-title a,
+h2.entry-title a {
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  transition: color 0.2s !important;
+}
+
+.entry-title a:hover,
+.post-title a:hover {
+  color: var(--brand-primary) !important;
+}
+
+/* カテゴリバッジ */
+.cat-label,
+.category-label,
+.term-badge {
+  background: var(--brand-primary) !important;
+  color: #fff !important;
+  font-size: 0.7rem !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+}
+
+/* ── 9. アフィリエイト商品カード ─────────────────── */
+.affiliate-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 2px solid var(--brand-gold);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin: 24px 0;
+}
+
+.affiliate-card .affiliate-badge {
+  background: var(--brand-gold);
+  color: #78350f;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.affiliate-card .product-info h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.affiliate-card .product-info p {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+/* ── 10. サイドバー ──────────────────────────────── */
+#sidebar,
+.sidebar {
+  background: transparent !important;
+}
+
+/* サイドバーウィジェット */
+.widget,
+.sidebar .widget {
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: var(--radius) !important;
+  padding: 20px !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+.widget-title,
+.widgettitle {
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--brand-muted) !important;
+  margin-bottom: 12px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+/* おすすめサイドバーウィジェット（アフィリエイト） */
+.widget-affiliate {
+  background: linear-gradient(135deg, #1e1b4b, #2e1065) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  color: #fff !important;
+}
+
+.widget-affiliate .widgettitle {
+  color: #a78bfa !important;
+  border-color: rgba(124,58,237,0.3) !important;
+}
+
+.widget-affiliate a {
+  color: #c4b5fd !important;
+}
+
+/* ── 11. プロフィールカード ──────────────────────── */
+.author-box,
+.author-card,
+.profile-box {
+  background: linear-gradient(135deg, var(--brand-dark), var(--brand-surface)) !important;
+  color: #fff !important;
+  border-radius: var(--radius) !important;
+  border: 1px solid rgba(124,58,237,0.3) !important;
+  padding: 24px !important;
+}
+
+.author-box .author-name,
+.author-card .author-name {
+  color: #fff !important;
+  font-weight: 800 !important;
+}
+
+.author-box .author-description,
+.author-card .author-bio {
+  color: var(--brand-muted) !important;
+  font-size: 0.85rem !important;
+}
+
+/* ── 12. フッター ────────────────────────────────── */
+#footer,
+.site-footer {
+  background: var(--brand-dark) !important;
+  color: var(--brand-muted) !important;
+  border-top: 1px solid rgba(124,58,237,0.2) !important;
+  padding: 40px 24px 24px !important;
+}
+
+.footer-copyright {
+  color: #475569 !important;
+  font-size: 0.78rem !important;
+}
+
+/* ── 13. スティッキーCTAバナー（画面下部固定） ─────── */
+.sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, var(--brand-dark), var(--brand-surface));
+  border-top: 1px solid rgba(124,58,237,0.4);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+}
+
+.sticky-cta p {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.sticky-cta strong {
+  color: #fff;
+  display: block;
+  font-size: 0.95rem;
+}
+
+/* ── 14. 収益シミュレーターウィジェット ─────────── */
+.revenue-widget {
+  background: linear-gradient(135deg, #022c22, #064e3b);
+  border: 1px solid rgba(16,185,129,0.4);
+  border-radius: var(--radius);
+  padding: 20px;
+  color: #fff;
+  text-align: center;
+}
+
+.revenue-widget .amount {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #10b981;
+  display: block;
+  margin: 8px 0 4px;
+}
+
+.revenue-widget .label {
+  font-size: 0.75rem;
+  color: #6ee7b7;
+}
+
+/* ── 15. 信頼バッジ行 ────────────────────────────── */
+.trust-bar {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 20px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.trust-item .icon {
+  font-size: 1rem;
+}
+
+/* ── 16. モバイル最適化 ──────────────────────────── */
+@media (max-width: 768px) {
+  .hero-banner {
+    padding: 48px 16px;
+  }
+
+  .affiliate-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sticky-cta {
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .trust-bar {
+    gap: 12px;
+  }
+
+  #header,
+  .site-header {
+    padding: 0 !important;
+  }
+}
+
+/* ── 17. テーブル（比較表）スタイル ─────────────── */
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  margin: 24px 0;
+}
+
+.comparison-table th {
+  background: var(--brand-dark);
+  color: #fff;
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.comparison-table th.highlight {
+  background: var(--brand-primary);
+}
+
+.comparison-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.88rem;
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison-table tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+/* ── 18. アンカーリンク（記事内） ───────────────── */
+.article-anchor {
+  display: block;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-left: 4px solid var(--brand-secondary);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 20px 0;
+  text-decoration: none !important;
+  color: var(--brand-secondary) !important;
+  font-weight: 600;
+  font-size: 0.92rem;
+  transition: background 0.2s;
+}
+
+.article-anchor:hover {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+}
