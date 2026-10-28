@@ -10,6 +10,25 @@ import {
 // Bonsai 8B + Gemini ハイブリッド AIエージェント設定
 // ============================================================
 
+const C = {
+  bg:        '#FDFBF0',
+  card:      '#FFFFFF',
+  border:    '#E8E4CC',
+  text:      '#2C2A1E',
+  muted:     '#7A7560',
+  green:     '#4A7A38',
+  greenBg:   '#EEF5E8',
+  greenBd:   '#B8D4A8',
+  gold:      '#9A7418',
+  goldBg:    '#FBF6E0',
+  goldBd:    '#D4C47A',
+  blue:      '#1A5FA8',
+  blueBg:    '#E5EEF8',
+  red:       '#C0392B',
+  redBg:     '#FBEAEA',
+  inputBg:   '#F5F4EF',
+} as const;
+
 const MODELS = [
   {
     id: 'gemini-2.5-flash',
@@ -265,7 +284,8 @@ function ModelSelector({ selected, onSelect, ollamaModels }: {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/15 border border-white/20 rounded-xl text-sm font-bold text-white transition"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold transition border"
+        style={{ background: C.greenBg, borderColor: C.greenBd, color: C.green }}
       >
         <span>{selected.icon}</span>
         <span>{selected.name}</span>
@@ -273,7 +293,8 @@ function ModelSelector({ selected, onSelect, ollamaModels }: {
         <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute top-full mt-2 right-0 w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute top-full mt-2 right-0 w-80 rounded-2xl shadow-2xl overflow-hidden z-50 border"
+          style={{ background: C.card, borderColor: C.border }}>
           <div className="p-2">
             {MODELS.map(model => {
               const installed = model.endpoint === 'ollama' && ollamaModels.some(m => m.startsWith(model.id.split(':')[0]));
@@ -282,31 +303,38 @@ function ModelSelector({ selected, onSelect, ollamaModels }: {
                 <button
                   key={model.id}
                   onClick={() => { onSelect(model); setOpen(false); }}
-                  className={`w-full flex items-start gap-3 p-3 rounded-xl text-left transition ${selected.id === model.id ? 'bg-white/15' : 'hover:bg-white/5'} ${!isAvailable ? 'opacity-60' : ''}`}
+                  className={`w-full flex items-start gap-3 p-3 rounded-xl text-left transition ${!isAvailable ? 'opacity-60' : ''}`}
+                  style={{
+                    background: selected.id === model.id ? C.greenBg : 'transparent',
+                    borderLeft: selected.id === model.id ? `2px solid ${C.green}` : '2px solid transparent',
+                  }}
+                  onMouseEnter={e => { if (selected.id !== model.id) (e.currentTarget as HTMLElement).style.background = C.inputBg; }}
+                  onMouseLeave={e => { if (selected.id !== model.id) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                 >
                   <span className="text-xl">{model.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-sm">{model.name}</span>
+                      <span className="font-bold text-sm" style={{ color: C.text }}>{model.name}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${model.badgeColor} text-white`}>{model.badge}</span>
-                      {!isAvailable && <span className="text-[10px] text-yellow-400">要セットアップ</span>}
-                      {installed && <span className="text-[10px] text-emerald-400">✓ 導入済み</span>}
+                      {!isAvailable && <span className="text-[10px]" style={{ color: C.gold }}>要セットアップ</span>}
+                      {installed && <span className="text-[10px]" style={{ color: C.green }}>✓ 導入済み</span>}
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5 leading-snug">{model.description}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">{model.provider}</p>
+                    <p className="text-xs mt-0.5 leading-snug" style={{ color: C.muted }}>{model.description}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: C.muted }}>{model.provider}</p>
                   </div>
                 </button>
               );
             })}
           </div>
           {/* Bonsai 8B セットアップバナー */}
-          <div className="border-t border-white/10 p-3 bg-violet-900/30">
-            <p className="text-xs text-violet-300 font-bold flex items-center gap-1.5 mb-1">
+          <div className="border-t p-3" style={{ borderColor: C.border, background: C.goldBg }}>
+            <p className="text-xs font-bold flex items-center gap-1.5 mb-1" style={{ color: C.gold }}>
               <Info size={12} /> Bonsai 8B について
             </p>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
+            <p className="text-[11px] leading-relaxed" style={{ color: C.muted }}>
               PrismML製の1-bit LLM（2026年4月公開）。まだOllamaに非対応のため、MLXまたは専用フォーク経由での実行が必要です。
-              <a href="https://huggingface.co/prism-ml/Bonsai-8B-gguf" target="_blank" rel="noopener noreferrer" className="text-violet-400 underline ml-1">HuggingFaceで確認↗</a>
+              <a href="https://huggingface.co/prism-ml/Bonsai-8B-gguf" target="_blank" rel="noopener noreferrer"
+                className="underline ml-1" style={{ color: C.blue }}>HuggingFaceで確認↗</a>
             </p>
           </div>
         </div>
@@ -412,29 +440,35 @@ export default function AIAgent() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}>
+    <div className="h-full flex flex-col" style={{ background: C.bg, fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}>
 
       {/* ヘッダー */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-slate-950/50 backdrop-blur-md shrink-0">
+      <header className="flex items-center justify-between px-4 py-3 border-b shrink-0"
+        style={{ background: C.card, borderColor: C.border }}>
         <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${selectedPersona.color} flex items-center justify-center text-lg shadow-lg`}>
+          <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${selectedPersona.color} flex items-center justify-center text-lg shadow-md`}>
             {selectedPersona.emoji}
           </div>
           <div>
-            <h2 className="font-bold text-white text-sm leading-tight">{selectedPersona.name}</h2>
-            <p className="text-[11px] text-slate-400">{selectedPersona.description}</p>
+            <h2 className="font-bold text-sm leading-tight" style={{ color: C.text }}>{selectedPersona.name}</h2>
+            <p className="text-[11px]" style={{ color: C.muted }}>{selectedPersona.description}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* ペルソナ選択 */}
-          <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-xl p-1">
+          <div className="hidden md:flex items-center gap-1 rounded-xl p-1 border"
+            style={{ background: C.inputBg, borderColor: C.border }}>
             {AGENT_PERSONAS.map(p => (
               <button
                 key={p.id}
                 onClick={() => setSelectedPersona(p)}
                 title={p.name}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition ${selectedPersona.id === p.id ? 'bg-white/20' : 'hover:bg-white/10'}`}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-sm transition"
+                style={{
+                  background: selectedPersona.id === p.id ? C.greenBg : 'transparent',
+                  outline: selectedPersona.id === p.id ? `1px solid ${C.greenBd}` : 'none',
+                }}
               >
                 {p.emoji}
               </button>
@@ -445,10 +479,11 @@ export default function AIAgent() {
           <ModelSelector selected={selectedModel} onSelect={setSelectedModel} ollamaModels={ollamaStatus.models} />
 
           {/* Ollama ステータス */}
-          <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-bold ${ollamaStatus.running
-            ? 'bg-emerald-900/30 border-emerald-500/30 text-emerald-400'
-            : 'bg-slate-800 border-white/10 text-slate-500'
-          }`}>
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-bold"
+            style={ollamaStatus.running
+              ? { background: C.greenBg, borderColor: C.greenBd, color: C.green }
+              : { background: C.inputBg, borderColor: C.border, color: C.muted }
+            }>
             <Wifi size={11} />
             {ollamaStatus.running ? `Ollama: ${ollamaStatus.models.length}モデル` : 'Ollama: オフライン'}
           </div>
@@ -456,30 +491,41 @@ export default function AIAgent() {
           {/* 設定 */}
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/15 flex items-center justify-center transition"
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition border"
+            style={{
+              background: showSettings ? C.greenBg : C.inputBg,
+              borderColor: showSettings ? C.greenBd : C.border,
+              color: showSettings ? C.green : C.muted,
+            }}
           >
-            <Settings size={15} className="text-white" />
+            <Settings size={15} />
           </button>
         </div>
       </header>
 
       {/* 設定パネル */}
       {showSettings && (
-        <div className="px-4 py-3 bg-slate-900/80 border-b border-white/10 shrink-0">
+        <div className="px-4 py-3 border-b shrink-0" style={{ background: C.goldBg, borderColor: C.border }}>
           <div className="max-w-2xl flex items-center gap-3">
-            <label className="text-xs font-bold text-slate-400 whitespace-nowrap">Gemini API Key</label>
+            <label className="text-xs font-bold whitespace-nowrap" style={{ color: C.gold }}>Gemini API Key</label>
             <input
               type="password"
               value={apiKey}
               onChange={e => setApiKey(e.target.value)}
               placeholder="AIzaSy..."
-              className="flex-1 px-3 py-1.5 bg-slate-800 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-3 py-1.5 rounded-xl text-sm focus:outline-none"
+              style={{
+                background: C.card,
+                border: `1px solid ${C.border}`,
+                color: C.text,
+              }}
             />
             <a
               href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-400 hover:text-blue-300 underline whitespace-nowrap flex items-center gap-1"
+              className="text-xs underline whitespace-nowrap flex items-center gap-1"
+              style={{ color: C.blue }}
             >
               無料取得 <ExternalLink size={11} />
             </a>
@@ -488,7 +534,7 @@ export default function AIAgent() {
       )}
 
       {/* メッセージエリア */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div className="flex-1 overflow-y-auto px-4 py-6 custom-scroll">
         {messages.length === 0 && (
           <div className="max-w-3xl mx-auto">
             {/* ウェルカム */}
@@ -496,11 +542,12 @@ export default function AIAgent() {
               <div className={`w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br ${selectedPersona.color} flex items-center justify-center text-4xl mb-4 shadow-xl`}>
                 {selectedPersona.emoji}
               </div>
-              <h1 className="text-2xl font-black text-white mb-2">{selectedPersona.name}</h1>
-              <p className="text-slate-400 text-sm">{selectedPersona.description}</p>
+              <h1 className="text-2xl font-black mb-2" style={{ color: C.text }}>{selectedPersona.name}</h1>
+              <p className="text-sm" style={{ color: C.muted }}>{selectedPersona.description}</p>
               {selectedPersona.requiresBonsai && (
-                <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-violet-900/40 border border-violet-500/30 rounded-full">
-                  <span className="text-xs text-violet-300">🌿 Bonsai 8B MLXセットアップ後に利用可能</span>
+                <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full border"
+                  style={{ background: C.goldBg, borderColor: C.goldBd }}>
+                  <span className="text-xs" style={{ color: C.gold }}>🌿 Bonsai 8B MLXセットアップ後に利用可能</span>
                 </div>
               )}
             </div>
@@ -511,39 +558,44 @@ export default function AIAgent() {
                 <button
                   key={i}
                   onClick={() => sendMessage(qp.prompt)}
-                  className="flex items-center gap-3 p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition group"
+                  className="flex items-center gap-3 p-4 rounded-2xl text-left transition group border"
+                  style={{ background: C.card, borderColor: C.border }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.greenBg; (e.currentTarget as HTMLElement).style.borderColor = C.greenBd; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = C.card; (e.currentTarget as HTMLElement).style.borderColor = C.border; }}
                 >
                   <span className="text-2xl">{qp.emoji}</span>
                   <div>
-                    <p className="text-sm font-bold text-white group-hover:text-blue-300 transition">{qp.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{qp.prompt}</p>
+                    <p className="text-sm font-bold" style={{ color: C.text }}>{qp.label}</p>
+                    <p className="text-xs mt-0.5 line-clamp-1" style={{ color: C.muted }}>{qp.prompt}</p>
                   </div>
                 </button>
               ))}
             </div>
 
             {/* Bonsai 8B インフォバナー */}
-            <div className="mt-6 p-5 bg-gradient-to-r from-violet-900/40 to-indigo-900/40 border border-violet-500/30 rounded-2xl">
+            <div className="mt-6 p-5 rounded-2xl border" style={{ background: C.goldBg, borderColor: C.goldBd }}>
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🌿</span>
                 <div>
-                  <h3 className="font-bold text-violet-300 mb-1">Bonsai 8B — 世界最先端の1-bit LLM</h3>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    PrismML社が2026年4月に公開した真の1-bitモデル。<strong className="text-white">わずか1.15GBのRAM</strong>で8Bパラメータの推論が可能。
-                    現在Ollamaには未対応のため、<strong className="text-violet-300">MLXフレームワーク</strong>（Apple Silicon必須）経由でのセットアップが必要です。
+                  <h3 className="font-bold mb-1" style={{ color: C.gold }}>Bonsai 8B — 世界最先端の1-bit LLM</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: C.text }}>
+                    PrismML社が2026年4月に公開した真の1-bitモデル。<strong style={{ color: C.text }}>わずか1.15GBのRAM</strong>で8Bパラメータの推論が可能。
+                    現在Ollamaには未対応のため、<strong style={{ color: C.gold }}>MLXフレームワーク</strong>（Apple Silicon必須）経由でのセットアップが必要です。
                   </p>
                   <div className="flex items-center gap-3 mt-3">
                     <a
                       href="https://huggingface.co/prism-ml/Bonsai-8B-gguf"
                       target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 underline"
+                      className="inline-flex items-center gap-1 text-xs underline"
+                      style={{ color: C.blue }}
                     >
                       <ExternalLink size={11} /> HuggingFaceでダウンロード
                     </a>
-                    <span className="text-slate-600">|</span>
+                    <span style={{ color: C.border }}>|</span>
                     <button
                       onClick={() => sendMessage('Bonsai 8Bのセットアップ方法をMacで教えて')}
-                      className="text-xs text-violet-400 hover:text-violet-300 underline"
+                      className="text-xs underline"
+                      style={{ color: C.green }}
                     >
                       → AIにセットアップを聞く
                     </button>
@@ -569,27 +621,30 @@ export default function AIAgent() {
                   <div className="w-full">
                     <button
                       onClick={() => setShowThinking(showThinking === idx ? null : idx)}
-                      className="text-[11px] text-slate-500 hover:text-slate-400 flex items-center gap-1 mb-1 transition"
+                      className="text-[11px] flex items-center gap-1 mb-1 transition"
+                      style={{ color: C.muted }}
                     >
                       <Brain size={10} />
                       思考プロセス {showThinking === idx ? '▲' : '▼'}
                     </button>
                     {showThinking === idx && (
-                      <div className="bg-slate-900/60 border border-white/5 rounded-xl p-3 mb-2 text-xs text-slate-400 leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
+                      <div className="rounded-xl p-3 mb-2 text-xs leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto border"
+                        style={{ background: C.inputBg, borderColor: C.border, color: C.muted }}>
                         {msg.thinking}
                       </div>
                     )}
                   </div>
                 )}
 
-                <div className={`rounded-2xl px-4 py-3 ${msg.role === 'user'
-                  ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white'
-                  : 'bg-white/5 border border-white/10 text-slate-100'
-                }`}>
+                <div className={`rounded-2xl px-4 py-3`} style={
+                  msg.role === 'user'
+                    ? { background: C.green, color: '#FFFFFF' }
+                    : { background: C.card, border: `1px solid ${C.border}`, color: C.text }
+                }>
                   {msg.content ? (
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   ) : (
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2" style={{ color: C.muted }}>
                       <RefreshCw size={14} className="animate-spin" />
                       <span className="text-xs">生成中...</span>
                     </div>
@@ -597,18 +652,23 @@ export default function AIAgent() {
                 </div>
 
                 <div className="flex items-center gap-2 px-1">
-                  <span className="text-[10px] text-slate-600">
+                  <span className="text-[10px]" style={{ color: C.muted }}>
                     {msg.timestamp.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                   {msg.model && (
-                    <span className="text-[10px] text-slate-600">{msg.model}</span>
+                    <span className="text-[10px]" style={{ color: C.muted }}>{msg.model}</span>
                   )}
                   {msg.role === 'assistant' && msg.content && (
                     <button
                       onClick={() => copyMessage(idx, msg.content)}
-                      className="text-slate-600 hover:text-slate-400 transition"
+                      className="transition"
+                      style={{ color: C.muted }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = C.green}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = C.muted}
                     >
-                      {copied === idx ? <CheckCircle size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                      {copied === idx
+                        ? <CheckCircle size={11} style={{ color: C.green }} />
+                        : <Copy size={11} />}
                     </button>
                   )}
                 </div>
@@ -620,9 +680,10 @@ export default function AIAgent() {
       </div>
 
       {/* 入力エリア */}
-      <div className="px-4 pb-4 pt-2 border-t border-white/10 bg-slate-950/50 backdrop-blur-md shrink-0">
+      <div className="px-4 pb-4 pt-2 border-t shrink-0" style={{ background: C.card, borderColor: C.border }}>
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-end gap-3 bg-white/5 border border-white/10 rounded-2xl p-3">
+          <div className="flex items-end gap-3 rounded-2xl p-3 border"
+            style={{ background: C.inputBg, borderColor: C.border }}>
             <textarea
               ref={textareaRef}
               value={input}
@@ -640,21 +701,22 @@ export default function AIAgent() {
               placeholder={`${selectedPersona.name}に質問する... (Enter で送信, Shift+Enter で改行)`}
               rows={1}
               disabled={loading}
-              className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 resize-none focus:outline-none leading-relaxed max-h-40 disabled:opacity-50"
-              style={{ minHeight: '24px' }}
+              className="flex-1 bg-transparent text-sm resize-none focus:outline-none leading-relaxed max-h-40 disabled:opacity-50"
+              style={{ minHeight: '24px', color: C.text }}
             />
             <button
               onClick={() => sendMessage()}
               disabled={loading || !input.trim()}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition shrink-0 ${loading || !input.trim()
-                ? 'bg-white/10 text-slate-600 cursor-not-allowed'
-                : `bg-gradient-to-br ${selectedPersona.color} text-white shadow-lg hover:opacity-90`
-              }`}
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition shrink-0"
+              style={loading || !input.trim()
+                ? { background: C.border, color: C.muted, cursor: 'not-allowed' }
+                : { background: C.green, color: '#FFFFFF' }
+              }
             >
               {loading ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
             </button>
           </div>
-          <p className="text-center text-[10px] text-slate-600 mt-2">
+          <p className="text-center text-[10px] mt-2" style={{ color: C.muted }}>
             {selectedModel.name} でチャット中 · {messages.length > 0 ? `${messages.length}ターン` : '新規会話'}
           </p>
         </div>

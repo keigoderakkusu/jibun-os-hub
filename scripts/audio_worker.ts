@@ -9,7 +9,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
  */
 
 const CONFIG = {
-    GEMINI_API_KEY: 'AIzaSyCmEd3SGm3LqrlblJJQX9agDL0pOy9Nq6w',
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? '',
     DRIVE_FOLDER_NAME: 'VRS_Audio_Input',
     ROADMAP_SHEET_ID: '1AKQuY8swWLQjSjV-5A5o0cejtI7WBQ-j6K4GIoj9W7M',
     CREDENTIALS_PATH: path.resolve('/Users/nagahamakeigo/.gemini/antigravity/playground/chrono-intergalactic/worker/credentials.json'),

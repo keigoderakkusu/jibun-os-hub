@@ -8,7 +8,7 @@ import * as path from 'path';
  */
 
 const CONFIG = {
-    GEMINI_API_KEY: 'AIzaSyCmEd3SGm3LqrlblJJQX9agDL0pOy9Nq6w',
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? '',
     CREDENTIALS_PATH: '/Users/nagahamakeigo/.gemini/antigravity/playground/chrono-intergalactic/worker/credentials.json',
     SPREADSHEET_ID: '1AKQuY8swWLQjSjV-5A5o0cejtI7WBQ-j6K4GIoj9W7M', // 統合データ基盤
     SHEET_NAME: 'AIホットライン',

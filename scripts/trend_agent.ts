@@ -13,7 +13,7 @@ const sheets = google.sheets({ version: 'v4', auth });
 
 const SPREADSHEET_ID = '1AKQuY8swWLQjSjV-5A5o0cejtI7WBQ-j6K4GIoj9W7M'; // User's main spreadsheet
 const SHEET_NAME = 'インプット'; // Target sheet name as requested
-const GEMINI_API_KEY = 'AIzaSyCmEd3SGm3LqrlblJJQX9agDL0pOy9Nq6w';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? '';
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 

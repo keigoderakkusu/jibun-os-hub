@@ -42,7 +42,7 @@ function StatCard({
           </div>
         </div>
         {trend && (
-          <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend === 'up' ? 'text-emerald-600' : 'text-red-500'}`}>
+          <div className="flex items-center gap-1 mt-2 text-xs font-medium" style={{ color: trend === 'up' ? '#4A7A38' : '#C0392B' }}>
             {trend === 'up' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
             {trend === 'up' ? '好調' : '要確認'}
           </div>
@@ -139,7 +139,7 @@ export default function IntegratedDashboard() {
               <Settings size={13} /> 接続設定
             </Button>
             <Badge variant={isOnline ? 'success' : 'destructive'}>
-              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isOnline ? 'animate-pulse' : ''}`} style={{ background: isOnline ? '#4A7A38' : '#C0392B' }} />
               {isOnline ? '正常稼働' : 'オフライン'}
             </Badge>
           </div>
@@ -181,7 +181,7 @@ export default function IntegratedDashboard() {
               badge="+12.4%"
               badgeVariant="success"
               icon={Coins}
-              iconColor="bg-violet-50 text-violet-600"
+              iconColor="bg-[#FBF6E0] text-[#9A7418]"
               trend="up"
             />
             <StatCard
@@ -223,7 +223,7 @@ export default function IntegratedDashboard() {
                       <CardTitle className="text-sm">Auto-CEO Terminal</CardTitle>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-400'}`} />
+                      <span className={`w-2 h-2 rounded-full ${isOnline ? 'animate-pulse' : ''}`} style={{ background: isOnline ? '#4A7A38' : '#C0392B' }} />
                       <span className="text-xs text-[hsl(var(--muted-foreground))]">{agentStatus}</span>
                     </div>
                   </div>
@@ -243,11 +243,11 @@ export default function IntegratedDashboard() {
                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
                         msg.role === 'user'
-                          ? 'bg-violet-600 text-white'
+                          ? 'text-white'
                           : msg.role === 'system'
-                          ? 'bg-transparent text-emerald-400 text-xs font-mono border border-zinc-800'
+                          ? 'bg-transparent text-xs font-mono border border-zinc-800'
                           : 'bg-zinc-800 text-zinc-100 border border-zinc-700'
-                      }`}>
+                      }`} style={msg.role === 'user' ? { background: '#4A7A38' } : msg.role === 'system' ? { color: '#4A7A38' } : {}}>
                         <pre className="whitespace-pre-wrap font-sans leading-relaxed">{msg.text}</pre>
                       </div>
                     </div>
@@ -261,12 +261,13 @@ export default function IntegratedDashboard() {
                     value={instruction}
                     onChange={e => setInstruction(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') sendCommand(); }}
-                    className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-violet-500"
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-[#4A7A38]"
                   />
                   <Button
                     onClick={sendCommand}
                     disabled={sending || !instruction || !isOnline}
-                    className="bg-violet-600 hover:bg-violet-500 text-white border-0 shrink-0"
+                    className="text-white border-0 shrink-0"
+                    style={{ background: '#4A7A38' }}
                   >
                     {sending ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
                   </Button>
@@ -279,7 +280,7 @@ export default function IntegratedDashboard() {
               <Card className="h-[420px] flex flex-col">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
-                    <Cpu size={15} className="text-violet-500" />
+                    <Cpu size={15} style={{ color: '#4A7A38' }} />
                     <CardTitle className="text-sm">AIエージェント</CardTitle>
                   </div>
                 </CardHeader>
