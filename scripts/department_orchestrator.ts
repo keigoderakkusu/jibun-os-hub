@@ -11,7 +11,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
  */
 
 const CONFIG = {
-    GEMINI_API_KEY: 'AIzaSyCmEd3SGm3LqrlblJJQX9agDL0pOy9Nq6w',
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? '',
     CREDENTIALS_PATH: '/Users/nagahamakeigo/.gemini/antigravity/playground/chrono-intergalactic/worker/credentials.json',
     JOURNAL_SHEET_ID: '1AKQuY8swWLQjSjV-5A5o0cejtI7WBQ-j6K4GIoj9W7M', // Use main spreadsheet
     JOURNAL_TAB_NAME: '自分株式会社・経営日誌',
